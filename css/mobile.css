@@ -1,0 +1,1000 @@
+/* ═══════════════════════════════════════════════════════════════
+   QURO — Mobile-First Responsive Design (Production)
+   Mobile is the PRIMARY device. Every pixel counts.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══ BOTTOM NAV BAR ═══
+   The primary navigation for mobile — always visible at bottom
+   ──────────────────────────────────────────────────────────── */
+#mobileNav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);
+  border-top:none;
+  box-shadow:0 -6px 16px rgba(0,0,0,.2);
+  padding:4px 0 calc(4px + var(--sb));
+  z-index:790;
+  justify-content:space-around;align-items:center;
+}
+.mob-nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--muted);
+  cursor:pointer;padding:6px 10px;
+  border-radius:var(--r-md);
+  transition:color .15s var(--ease-out);
+  min-width:52px;position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-nav-btn.active{color:var(--text)}
+.mob-nav-btn.active::after{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:24px;height:2.5px;border-radius:2px;background:var(--primary);
+}
+.mob-nav-svg{width:22px;height:22px;opacity:.45;transition:opacity .15s}
+.mob-nav-btn.active .mob-nav-svg{opacity:1}
+.mob-nav-label{font-size:9px;font-weight:var(--weight-bold);letter-spacing:.3px;opacity:.7}
+.mob-nav-btn.active .mob-nav-label{opacity:1}
+
+/* ═══ MOBILE MEMBERS PANEL ═══
+   Full-screen slide-in from right
+   ──────────────────────────── */
+#mobileMembersPanel{
+  position:fixed;inset:0;
+  background:var(--bg);
+  z-index:var(--z-modal);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  padding-top:var(--st);
+}
+#mobileMembersPanel.open{transform:translateX(0)}
+.mm-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 16px;
+  font-weight:var(--weight-bold);font-size:16px;color:var(--text);
+  border-bottom:1px solid var(--border2);flex-shrink:0;
+}
+.mm-close{
+  background:var(--surface-1);border:1px solid var(--border);
+  color:var(--muted);width:34px;height:34px;
+  border-radius:var(--r-md);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+#mobileMembersList{padding:8px 12px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ═══ MOBILE DRAWER (sidebar) ═══
+   On desktop: small slide-over with overlay
+   On mobile (<767px): FULL-SCREEN primary view (no overlay, no blur)
+   ──────────────────────────────────────────────────────────── */
+#sidebarOverlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.35);z-index:var(--z-overlay);
+}
+#sidebarOverlay.open{display:block}
+#sidebarDrawer{
+  position:fixed;top:0;left:0;bottom:0;
+  width:min(300px,82vw);
+  background:var(--bg2);
+  border-right:1px solid var(--border2);
+  display:flex;flex-direction:column;
+  z-index:var(--z-sidebar);
+  transform:translateX(-100%);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  padding-top:var(--st);
+}
+#sidebarDrawer.open{transform:translateX(0)}
+#drawerScroll{flex:1;overflow-y:auto;padding:4px 10px;-webkit-overflow-scrolling:touch}
+#drawerUserBar{
+  padding:10px 14px calc(10px + var(--sb));
+  border-top:1px solid var(--border2);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+  background:var(--surface-0);
+}
+
+
+/* ═══ DRAWER — New Navigation System ═══ */
+
+/* Header bar with logo + close */
+.dw-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border2);
+  flex-shrink:0;
+  background:var(--bg2);
+}
+.dw-logo-img{
+  width:28px;height:28px;border-radius:var(--r-sm);
+  object-fit:contain;
+}
+.dw-logo-text{
+  font-size:16px;font-weight:var(--weight-bold);
+  color:var(--text);flex:1;
+  letter-spacing:.3px;
+}
+.dw-close{
+  width:32px;height:32px;border-radius:var(--r-md);
+  background:var(--surface-1);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s var(--ease-out);
+  flex-shrink:0;
+}
+.dw-close:hover{background:var(--surface-3);color:var(--text)}
+.dw-close:active{transform:scale(.92)}
+
+/* Quick Actions — 4-column icon grid */
+.dw-actions{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:6px;padding:12px 4px 8px;
+}
+.dw-action{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:12px 4px 10px;
+  border-radius:var(--r-lg);
+  cursor:pointer;
+  transition:all .18s var(--ease-out);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.dw-action:hover{background:var(--surface-hover)}
+.dw-action:active{background:var(--surface-active);transform:scale(.95)}
+
+.dw-action-icon{
+  width:42px;height:42px;
+  border-radius:var(--r-lg);
+  background:var(--surface-1);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);
+  transition:all .2s var(--ease-out);
+}
+.dw-action-icon svg{width:18px;height:18px;stroke-width:1.8}
+.dw-action:hover .dw-action-icon{
+  border-color:var(--primary-dim);
+  color:var(--text-secondary);
+  background:var(--surface-2);
+}
+/* Colored accent variants */
+.dw-action-trade{color:var(--primary)!important;border-color:rgba(61,168,122,.2)!important;background:rgba(61,168,122,.06)!important}
+.dw-action:hover .dw-action-trade{background:rgba(61,168,122,.12)!important;border-color:rgba(61,168,122,.35)!important}
+.dw-action-market{color:#4080e0!important;border-color:rgba(64,128,224,.2)!important;background:rgba(64,128,224,.06)!important}
+.dw-action:hover .dw-action-market{background:rgba(64,128,224,.12)!important;border-color:rgba(64,128,224,.35)!important}
+.dw-action-leader{color:#e8a040!important;border-color:rgba(232,160,64,.2)!important;background:rgba(232,160,64,.06)!important}
+.dw-action:hover .dw-action-leader{background:rgba(232,160,64,.12)!important;border-color:rgba(232,160,64,.35)!important}
+
+.dw-action-label{
+  font-size:10px;font-weight:var(--weight-semi);
+  color:var(--muted);letter-spacing:.2px;
+  text-align:center;
+}
+.dw-action:hover .dw-action-label{color:var(--text-secondary)}
+
+/* Section headers (Messages, Servers, Channels) */
+.dw-section-head{
+  display:flex;align-items:center;gap:6px;
+  padding:14px 8px 6px;
+}
+.dw-section-label{
+  font-size:10px;font-weight:var(--weight-bold);
+  color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;flex:1;
+  opacity:.7;
+}
+.dw-section-btn{
+  width:26px;height:26px;border-radius:var(--r-sm);
+  background:none;border:none;
+  color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s var(--ease-out);
+  flex-shrink:0;
+  opacity:.6;
+}
+.dw-section-btn:hover{background:var(--surface-hover);color:var(--text);opacity:1}
+.dw-section-btn:active{transform:scale(.9)}
+
+/* Browse servers button */
+.dw-srv-browse{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:8px 4px 4px;
+  padding:10px 16px;
+  border-radius:var(--r-lg);
+  background:var(--surface-0);
+  border:1px dashed var(--border);
+  color:var(--muted);
+  font-size:12px;font-weight:var(--weight-semi);
+  cursor:pointer;
+  transition:all .18s var(--ease-out);
+  user-select:none;
+}
+.dw-srv-browse:hover{
+  background:var(--surface-1);
+  border-color:var(--primary-dim);
+  color:var(--text-secondary);
+}
+.dw-srv-browse:active{transform:scale(.98)}
+.dw-srv-browse svg{opacity:.5}
+.dw-srv-browse:hover svg{opacity:.8}
+
+/* ═══ SETTINGS NAV CLOSE BUTTON (mobile) ═══ */
+.sp-nav-close-btn{
+  display:none;
+  margin-left:auto;
+  background:var(--surface-1);border:1px solid var(--border);
+  color:var(--muted);width:34px;height:34px;
+  border-radius:var(--r-md);cursor:pointer;
+  align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .15s;
+}
+.sp-nav-close-btn:hover{background:var(--surface-3);color:var(--text)}
+@media(max-width:767px){
+  .sp-nav-close-btn{display:flex}
+}
+
+/* ═══ TV / LARGE SCREENS (1400px+) ═══ */
+@media(min-width:1400px){
+  #sidebarNav{width:220px}#channelBar{width:260px}#membersBar{width:260px}
+  .ch-item,.dm-item{font-size:var(--text-base);padding:var(--sp-3)}
+  .chat-top{padding:var(--sp-5) var(--sp-8)}#msgsWrap{padding:var(--sp-6) var(--sp-8)}#inputArea{padding:var(--sp-4) var(--sp-8) var(--sp-5)}
+  .msg-text{font-size:var(--text-base)}.form-input{font-size:var(--text-md)}#authCard{max-width:480px}
+}
+@media(min-width:1800px){
+  #sidebarNav{width:240px}#channelBar{width:280px}#membersBar{width:290px}
+  .msg-text{font-size:var(--text-md);line-height:1.65}
+}
+
+/* ═══ TABLET (768–1023px) ═══ */
+@media(max-width:1023px){
+  #membersBar{display:none}
+  #sidebarNav{width:180px}
+  #channelBar{width:200px}
+}
+@media(max-width:900px){
+  #sidebarNav{width:170px}
+  #channelBar{width:180px}
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE (<767px) — The primary experience
+   ═══════════════════════════════════════════════════════════════ */
+@media(max-width:767px){
+
+  /* ─── App Shell ─── */
+  #sidebarNav,#channelBar,#membersBar,#serverBar{display:none!important}
+  #appScreen.visible{gap:0;padding:0;background:var(--bg)}
+  #chatArea{border-radius:0;background:var(--bg)}
+  #mobileNav{display:flex}
+  #sidebarToggle{display:flex}
+
+  /* ─── Global mobile scroll improvements ─── */
+  #msgsWrap,#drawerScroll,#mobileMembersList,.trd-body,#trdBottomBody,.fp-body,.lp-body{
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+
+  /* ─── Drawer = full-screen primary view ─── */
+  #sidebarOverlay{
+    display:none!important;
+    background:none!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    pointer-events:none;
+  }
+  #sidebarDrawer{
+    width:100vw!important;
+    border-right:none;
+    background:var(--bg);
+    transition:transform .2s cubic-bezier(.4,0,.2,1);
+  }
+  #sidebarDrawer.open{
+    transform:translateX(0);
+  }
+  /* Pad drawer bottom for mobile nav bar */
+  #drawerUserBar{
+    padding-bottom:calc(56px + var(--sb) + 10px);
+  }
+  #drawerScroll{
+    padding:6px 12px;
+    padding-bottom:calc(56px + var(--sb));
+  }
+  /* When drawer is open, hide the chat area completely */
+  body.drawer-open #chatArea{visibility:hidden}
+  body.drawer-open #inputArea{display:none!important}
+  body.drawer-open #typingBar{display:none!important}
+
+  /* Drawer header — safe area on mobile */
+  .dw-header{
+    padding:14px 16px;
+    padding-top:calc(14px + var(--st));
+    background:var(--bg);
+    border-bottom:1px solid var(--border2);
+  }
+  /* Hide close button on mobile — bottom nav handles it */
+  .dw-close{display:none}
+
+  /* Quick actions — slightly larger touch targets on mobile */
+  .dw-actions{gap:8px;padding:14px 8px 10px}
+  .dw-action{padding:14px 4px 12px}
+  .dw-action-icon{width:46px;height:46px;border-radius:var(--r-xl)}
+  .dw-action-icon svg{width:20px;height:20px}
+  .dw-action-label{font-size:11px}
+
+  /* Section heads — bigger touch on mobile */
+  .dw-section-head{padding:16px 8px 8px}
+  .dw-section-label{font-size:11px;letter-spacing:1.2px}
+  .dw-section-btn{width:30px;height:30px}
+
+  /* Browse servers — full width */
+  .dw-srv-browse{margin:10px 4px 8px;padding:12px 16px;font-size:13px;border-radius:var(--r-xl)}
+
+  /* Drawer DM items — bigger touch targets */
+  #drawerDmList .dm-item,
+  #drawerGcList .gc-item{
+    padding:10px 12px;
+    min-height:48px;
+    border-radius:var(--r-lg);
+    gap:12px;
+  }
+  #drawerDmList .dm-av,
+  #drawerGcList .gc-av{
+    width:36px;height:36px;font-size:14px;
+  }
+  #drawerDmList .dm-name,
+  #drawerGcList .gc-name{
+    font-size:14px;
+  }
+  /* DM section header in drawer */
+  .dm-section-header{
+    padding:14px 8px 6px;
+  }
+  .dm-badge{
+    font-size:8px;padding:2px 6px;
+  }
+  /* Channel items in drawer */
+  #drawerChannelItems .ch-item{
+    padding:10px 12px;
+    min-height:44px;
+    font-size:14px;
+  }
+  /* Browse servers button */
+  #drawerScroll .srvb-create-btn{
+    margin:12px 4px 8px;
+    width:calc(100% - 8px);
+    padding:12px;
+    font-size:12px;
+    border-radius:var(--r-lg);
+  }
+
+  /* ─── Chat Top Bar ─── */
+  .chat-top{
+    padding:10px 12px;
+    padding-top:calc(10px + var(--st));
+    background:var(--bg2);
+    gap:8px;
+    border-bottom:1px solid var(--border2);
+  }
+  #sidebarToggle{
+    width:36px;height:36px;
+    border-radius:var(--r-md);
+    background:var(--surface-1);
+    border:1px solid var(--border);
+    color:var(--text-secondary);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .chat-icon{width:30px;height:30px;border-radius:var(--r-md);font-size:12px}
+  .chat-name{font-size:15px;font-weight:var(--weight-bold)}
+  .chat-desc{display:none}
+
+  /* Top action bar — show search + call + members, compact */
+  .top-actions{
+    padding:2px;gap:1px;border-radius:var(--r-lg);
+    background:var(--surface-0);
+    border:1px solid var(--border);
+  }
+  .top-btn{width:32px;height:32px}
+  .top-btn svg{width:15px;height:15px}
+  /* Show settings, search, voice call, video call — hide pinned + members */
+  .top-actions .top-btn:nth-child(n+5){display:none}
+
+  /* ─── Messages ─── */
+  #msgsWrap{
+    padding:8px 8px calc(108px + var(--sb));
+    gap:0;
+    background:var(--bg);
+  }
+  .msg{
+    padding:6px 8px;
+    border-radius:var(--r-md);
+    gap:8px;
+  }
+  .msg:hover{transform:none;background:transparent}
+  .msg:active{background:var(--surface-0);border-radius:var(--r-md)}
+  .msg-av{width:32px;height:32px;min-width:32px}
+  .msg-body{min-width:0}
+  .msg-text{
+    font-size:14px;
+    line-height:1.55;
+    padding:5px 10px;
+    border-radius:0 var(--r-md) var(--r-md) 0;
+    border-left-width:2px;
+  }
+  .msg-author{font-size:12px;font-weight:var(--weight-bold)}
+  .msg-time{font-size:9px}
+  .msg-img{max-height:220px;border-radius:var(--r-lg);border-width:1px}
+  .msg-vid{max-height:240px;border-radius:var(--r-lg)}
+  .msg-audio{max-width:100%;height:36px}
+  .msg-file{font-size:12px;padding:8px 12px;border-radius:var(--r-lg)}
+
+  /* Message actions — always visible (no hover on touch) */
+  .msg-acts{display:flex!important;gap:2px;margin-top:4px}
+  .msg-act{
+    font-size:10px;padding:3px 8px;min-height:24px;
+    border-radius:var(--r-sm);
+    background:var(--surface-0);
+    border:1px solid var(--border2);
+  }
+  .msg-act:active{background:var(--surface-2)}
+
+  /* Reply quote */
+  .reply-quote{
+    padding:4px 8px;margin-bottom:4px;
+    border-radius:0 var(--r-sm) var(--r-sm) 0;
+  }
+
+  /* Reactions */
+  .msg-reactions{gap:4px;margin-top:4px}
+  .rxn{padding:4px 8px;font-size:13px}
+
+  /* ─── Input Area — fixed just above bottom nav ─── */
+  #inputArea{
+    position:fixed;
+    bottom:calc(48px + var(--sb));
+    left:0;right:0;
+    z-index:785;
+    padding:6px 10px 8px;
+    background:var(--bg2);
+    border-top:1px solid var(--border2);
+  }
+  .input-row{gap:6px}
+  .input-tools{gap:2px}
+  #msgInput{
+    padding:9px 14px;
+    font-size:15px;
+    min-height:38px;
+    border-radius:var(--r-xl);
+    background:var(--surface-0);
+    border:1px solid var(--border);
+  }
+  #msgInput:focus{
+    border-color:var(--primary-dim);
+    background:var(--surface-1);
+  }
+  .tool-btn{
+    width:38px;height:38px;border-radius:var(--r-lg);
+    background:var(--surface-0);border-color:var(--border);
+  }
+  .send-btn{
+    width:38px;height:38px;border-radius:var(--r-lg);
+  }
+  #replyStrip{padding:6px 10px 4px;border-radius:0}
+
+  /* ─── Typing indicator — above input ─── */
+  #typingBar{
+    position:fixed;
+    bottom:calc(48px + var(--sb) + 48px);
+    left:0;right:0;
+    z-index:785;
+    padding:0 12px 2px;
+    background:var(--bg2);
+  }
+
+  /* ─── Notifications — above input ─── */
+  #notifBox{
+    bottom:calc(48px + var(--sb) + 68px);
+    right:12px;left:12px;
+    align-items:stretch;
+  }
+  .notif{
+    max-width:none;font-size:13px;
+    padding:10px 14px;
+    border-radius:var(--r-lg);
+    background:var(--bg3);
+    border:1px solid var(--border);
+  }
+
+  /* ─── DM Banner ─── */
+  .dm-banner{padding:24px 16px 16px}
+  .dm-banner-av{width:56px;height:56px;font-size:22px}
+  .dm-banner-name{font-size:17px}
+  .dm-banner-sub{font-size:11px}
+
+  /* ─── Empty states ─── */
+  .empty{padding:40px 20px}
+  .empty-icon{font-size:44px;opacity:.1}
+  .empty-title{font-size:15px;font-weight:var(--weight-semi)}
+  .empty-sub{font-size:12px;line-height:1.5}
+  .empty-state{padding:40px 20px}
+  .empty-state svg{width:40px;height:40px}
+  .empty-state h3{font-size:15px}
+  .empty-state p{font-size:12px}
+
+  /* ─── Call overlay — bottom sheet, scrollable ─── */
+  #callOverlay{align-items:flex-end;padding:0;padding-bottom:var(--sb)}
+  #callCard{
+    width:100vw;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    margin-bottom:0;
+    max-height:92vh;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .call-card-body{padding:20px 16px 16px;gap:8px}
+  #callAvatarWrap{width:80px;height:80px;font-size:28px;margin-bottom:8px;box-shadow:0 0 0 6px var(--primary-dim),0 0 0 12px rgba(61,168,122,.03)}
+  #callPersonName{font-size:18px}
+  #callTimerDisplay{font-size:16px}
+  #callStatus{font-size:12px}
+
+  /* Video — fill width, taller on mobile */
+  #callVideoWrap{border-radius:var(--r-lg);margin:0 0 8px}
+  #callRemoteVideo{max-height:45vh;min-height:200px;width:100%;object-fit:cover}
+  #callLocalVideo{width:90px;height:68px;bottom:8px;right:8px;border-radius:var(--r-md)}
+  #callCard.video-mode{width:100vw}
+  #callCard.video-mode .call-card-body{padding:12px 12px 16px}
+  /* GC video grid — 2 columns on mobile */
+  #gcVideoGrid{grid-template-columns:repeat(2,1fr);gap:4px}
+
+  .call-actions{gap:10px;padding:12px 8px}
+  .call-act{min-width:52px}
+  .call-act-icon{width:48px;height:48px;border-radius:50%}
+  .call-act-label{font-size:9px}
+  .call-bottom{padding:10px 16px calc(16px + var(--sb))}
+  .call-end-btn{width:54px;height:54px;border-radius:50%}
+  .call-min-btn{width:40px;height:40px}
+
+  /* Incoming call */
+  #incomingCallCard{padding:0 20px}
+  .ic-top-label{margin-bottom:24px;font-size:10px}
+  .ic-avatar-area{width:140px;height:140px;margin-bottom:20px}
+  #icAvatar{width:110px;height:110px;font-size:38px}
+  #icCallerName{font-size:24px}
+  #icCallType{margin-bottom:40px}
+  .ic-actions{gap:56px}
+  .ic-btn span:first-child{width:62px;height:62px}
+
+  /* Mini call bar */
+  #miniCallBar{
+    bottom:calc(48px + var(--sb) + 58px);
+    left:12px;right:12px;
+    border-radius:var(--r-lg);
+  }
+
+  /* ─── Settings — full screen ─── */
+  #settingsPanel{
+    width:100vw!important;
+    max-width:100vw!important;
+    border-left:none;border-radius:0;
+    inset:0;
+  }
+  /* Settings nav — show as list on mobile */
+  #settingsPanel.sp-nav-mode .sp-nav{
+    padding-top:var(--st);
+    padding-bottom:calc(56px + var(--sb));
+  }
+  #settingsPanel .sp-main{padding-bottom:calc(56px + var(--sb))}
+  .sp-section{padding:14px}
+  .sp-grid{grid-template-columns:1fr!important}
+
+  /* ─── Emoji — bottom sheet ─── */
+  .emoji-card{
+    width:100vw;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    margin-bottom:0;
+    max-height:50vh;
+    padding:16px 12px calc(56px + var(--sb) + 12px);
+  }
+  .emoji-head{font-size:14px;margin-bottom:10px}
+  .emoji-grid{grid-template-columns:repeat(8,1fr);gap:2px}
+  .emoji-btn{font-size:22px;padding:6px;min-height:42px}
+
+  /* ─── Modals — full width, bottom sheet, above drawer (z>750) ─── */
+  #srvBrowserOverlay{padding:0;align-items:flex-end;z-index:800!important}
+  #srvBrowserCard{
+    width:100%;max-height:92vh;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+  }
+  #gcCreateOverlay,#gcSettingsOverlay{padding:0;align-items:flex-end;z-index:800!important}
+  #gcCreateCard,#gcSettingsCard{
+    width:100%;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    max-height:90vh;
+  }
+  #userSearchOverlay{padding:0;align-items:flex-end;z-index:800!important}
+  #userSearchCard{
+    width:100%;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    max-height:85vh;
+  }
+  #srvSettingsOverlay{padding:0;align-items:flex-end;z-index:800!important}
+  #srvSettingsCard{
+    width:100%;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    max-height:90vh;
+  }
+  #inviteOverlay{padding:16px;z-index:800!important}
+  #inviteCard{
+    width:100%;
+    border-radius:var(--r-xl);
+  }
+  #addChModal{padding:16px}
+  .addch-card{
+    width:100%;
+    border-radius:var(--r-xl);
+  }
+
+  /* ─── Search panel ─── */
+  .search-panel{border-radius:0}
+  .search-input-wrap{padding:8px 12px}
+  .search-field{font-size:15px}
+  .search-results{max-height:50vh}
+  .sr-item{padding:10px 12px}
+
+  /* ─── React picker — above input ─── */
+  #reactPicker{
+    left:8px!important;right:8px!important;
+    max-width:none;width:auto;
+    bottom:calc(44px + var(--sb) + 56px)!important;
+    top:auto!important;
+    border-radius:var(--r-xl);
+    padding:8px;
+  }
+  .rp-btn{font-size:24px;padding:6px 8px}
+
+  /* ─── Profile popup — bottom sheet, above everything ─── */
+  #profilePopup{padding:0;align-items:flex-end;z-index:810!important}
+  .pp-card{
+    width:100%!important;max-width:none!important;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    margin-top:auto;max-height:85vh;
+  }
+  .pp-banner{height:100px}
+  .pp-body{padding:8px 20px 24px}
+  .pp-name{font-size:18px}
+  .pp-actions{margin-top:12px}
+  .pp-dm-btn{padding:10px 20px;font-size:13px;border-radius:var(--r-lg)}
+
+  /* ─── Friends page ─── */
+  #friendsPage{padding-bottom:calc(56px + var(--sb))}
+  .fp-header{
+    padding:14px 16px;
+    padding-top:calc(14px + var(--st));
+  }
+  .fp-title{font-size:17px}
+  .fp-close{width:34px;height:34px;border-radius:var(--r-md)}
+  .fp-tabs{padding:0 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0}
+  .fp-tab{padding:10px 14px;font-size:11px;white-space:nowrap}
+  .fp-body{padding:10px 12px;padding-bottom:calc(56px + var(--sb))}
+  .fp-search{font-size:14px;padding:10px 14px;border-radius:var(--r-lg)}
+  .fp-user{padding:10px 12px;border-radius:var(--r-lg);gap:10px}
+  .fp-uav{width:38px;height:38px;font-size:15px}
+  .fp-uname{font-size:14px}
+  .fp-ustatus{font-size:10px}
+  .fp-ubtn{padding:8px 12px;font-size:11px;border-radius:var(--r-md)}
+  .fp-empty{font-size:14px}
+
+  /* ─── Leaderboard page ─── */
+  #leaderPage{padding-bottom:calc(56px + var(--sb))}
+  .lp-header{
+    padding:14px 16px;
+    padding-top:calc(14px + var(--st));
+  }
+  .lp-title{font-size:17px}
+  .lp-close{width:34px;height:34px;border-radius:var(--r-md)}
+  .lp-body{padding:10px 12px;padding-bottom:calc(56px + var(--sb))}
+  .lp-refresh{padding:8px 14px;font-size:12px;border-radius:var(--r-md)}
+  .lp-item{padding:10px 12px;border-radius:var(--r-lg);gap:10px}
+  .lp-rank{width:28px;font-size:15px}
+  .lp-av{width:34px;height:34px;font-size:14px}
+  .lp-uname{font-size:14px}
+  .lp-total{font-size:14px}
+  .lp-pnl{font-size:11px}
+
+  /* ─── Server browser / create ─── */
+  .srvb-head{padding:14px 16px}
+  .srvb-title{font-size:16px}
+  .srvb-body{padding:8px 12px}
+  .srvb-item{padding:12px;border-radius:var(--r-lg);gap:10px}
+  .srvb-icon{width:40px;height:40px;font-size:16px;border-radius:var(--r-md)}
+  .srvb-name{font-size:14px}
+  .srvb-desc{font-size:11px}
+  .srvb-join-btn{padding:8px 12px;font-size:11px}
+  .srvb-footer{padding:8px 12px calc(8px + var(--sb))}
+  .srvb-create-btn{padding:12px;font-size:12px}
+  .srvb-empty{font-size:14px;padding:40px 20px}
+
+  /* ─── GC create / settings ─── */
+  .gcc-head{padding:14px 16px}
+  .gcc-title{font-size:16px}
+  .gcc-body{padding:16px}
+  .gcc-input{font-size:15px;padding:12px 14px}
+  .gcc-search{font-size:14px;padding:10px 12px}
+  .gcc-user{padding:10px;min-height:44px}
+  .gcc-user-av{width:32px;height:32px}
+  .gcc-user-name{font-size:14px}
+  .gcc-create-btn{padding:14px;font-size:14px}
+
+  /* ─── User search ─── */
+  .us-head{padding:14px 16px}
+  .us-title{font-size:16px}
+  .us-search-wrap{padding:10px 12px 8px}
+  .us-input{font-size:15px;padding:10px 14px}
+  .us-item{min-height:52px;padding:8px 10px}
+  .us-av{width:38px;height:38px;font-size:15px}
+  .us-uname{font-size:14px}
+  .us-msg-btn{padding:8px 12px;font-size:11px}
+
+  /* ─── Invite modal ─── */
+  .invite-banner{height:90px}
+  .invite-body{padding:0 20px 24px}
+  .invite-icon{width:52px;height:52px;font-size:20px}
+  .invite-name{font-size:20px}
+  .invite-desc{font-size:13px}
+  .invite-join-btn{padding:14px;font-size:15px;border-radius:var(--r-lg)}
+  .invite-close-btn{padding:10px;font-size:13px}
+
+  /* ─── Server settings ─── */
+  .srvs-head{padding:14px 16px}
+  .srvs-title{font-size:16px}
+  .srvs-body{padding:12px 16px}
+
+  /* ─── Add channel modal ─── */
+  .addch-card{padding:20px}
+  .addch-title{font-size:16px}
+  .addch-input{font-size:15px;padding:12px}
+  .addch-types{gap:8px}
+  .addch-type{padding:12px 8px}
+  .addch-btns button{padding:10px 18px;font-size:14px}
+
+  /* ═══ TRADING PAGE — Mobile Redesign ═══ */
+  /* Page shell — allow full scroll, no overflow hidden */
+  #tradingPage{
+    overflow:hidden!important;
+    padding-bottom:0;
+  }
+
+  /* ─── Top bar — compact, fixed at top ─── */
+  .trd-topbar{
+    padding:8px 12px;
+    padding-top:calc(8px + var(--st));
+    gap:6px;
+    height:auto;
+    flex-wrap:wrap;
+    flex-shrink:0;
+  }
+  .trd-brand-name{font-size:14px}
+  .trd-badge{font-size:7px;padding:2px 6px}
+  .trd-topbar-spacer{display:none}
+  .trd-close-btn{margin-left:auto}
+  /* Show portfolio stats inline in top bar on mobile */
+  .trd-topbar-stats{
+    display:flex!important;
+    width:100%;order:10;
+    gap:0;
+    background:var(--bg2);
+    border:1px solid var(--border2);
+    border-radius:var(--r-md);
+    padding:6px 0;
+    margin-top:2px;
+  }
+  .trd-ts{flex:1;text-align:center;border-right:1px solid var(--border2)}
+  .trd-ts:last-child{border-right:none}
+  .trd-ts-label{font-size:7px;letter-spacing:1px}
+  .trd-ts-val{font-size:11px;margin-top:1px}
+
+  /* ─── Body — THE scrollable container ─── */
+  .trd-body{
+    flex-direction:column;
+    gap:0;
+    padding:0;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch;
+    flex:1;
+    min-height:0;
+    padding-bottom:calc(52px + var(--sb));
+  }
+
+  /* ─── Watchlist — horizontal scrolling strip ─── */
+  .trd-wl{
+    display:flex!important;
+    width:100%!important;
+    max-height:none!important;
+    border-right:none;
+    border-bottom:1px solid var(--border2);
+    flex-shrink:0;
+    flex-direction:column;
+    overflow:visible;
+  }
+  .trd-wl-head{
+    padding:8px 12px 6px;
+    display:flex;flex-direction:row;align-items:center;gap:8px;
+    border-bottom:none;
+  }
+  .trd-wl-head-title{margin-bottom:0;font-size:10px;flex-shrink:0}
+  .trd-wl-search{
+    font-size:13px;padding:7px 12px;
+    border-radius:var(--r-full);
+    flex:1;
+  }
+  .trd-wl-list{
+    display:flex!important;
+    flex-direction:row!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    max-height:none!important;
+    flex:none!important;
+    padding:4px 12px 10px;
+    gap:8px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .trd-wl-list::-webkit-scrollbar{display:none}
+  .trd-wl-item{
+    flex:0 0 auto;
+    min-width:120px;
+    max-width:140px;
+    flex-direction:column;
+    align-items:flex-start;
+    padding:10px 12px;
+    border:1px solid var(--border2);
+    border-radius:var(--r-lg);
+    border-left:2px solid transparent;
+    gap:4px;
+    min-height:auto;
+    background:var(--bg2);
+  }
+  .trd-wl-item.active{
+    border-color:var(--primary);
+    background:rgba(61,168,122,.06);
+    border-left-color:var(--primary);
+  }
+  .trd-wl-left{width:100%}
+  .trd-wl-right{text-align:left;width:100%;display:flex;align-items:baseline;gap:6px}
+  .trd-wl-sym{font-size:12px}
+  .trd-wl-name{font-size:8px;max-width:none}
+  .trd-wl-price{font-size:13px;font-weight:var(--weight-extra)}
+  .trd-wl-chg{font-size:10px;margin-top:0}
+
+  /* ─── Center: chart + holdings ─── */
+  .trd-center{flex:none!important;min-height:0;overflow:visible!important}
+  .trd-center:not(.has-stock){display:none}
+  .trd-center.has-stock .trd-no-select{display:none}
+  .trd-stock-hd{padding:10px 14px}
+  .trd-stock-name{font-size:16px}
+  .trd-stock-price{font-size:20px}
+  .trd-stock-chg{font-size:11px}
+  .trd-stock-meta{font-size:9px}
+  .trd-held-strip{font-size:10px;padding:5px 10px;gap:8px}
+  .trd-chart-wrap{height:180px;flex:none!important;min-height:180px;overflow:hidden}
+
+  /* Bottom tabs — holdings/history */
+  .trd-bottom{border-top:1px solid var(--border2);height:auto!important;flex-shrink:0;overflow:visible!important}
+  .trd-btabs{padding:6px 10px;gap:4px}
+  .trd-btab{font-size:11px;padding:6px 12px}
+  .trd-reset-btn{font-size:8px;padding:3px 8px}
+  #trdBottomBody{max-height:none;overflow:visible;padding:4px 10px}
+  .trd-hold-item{grid-template-columns:1fr auto auto;gap:8px;padding:8px 10px}
+  .trd-hold-qty{display:none}
+  .trd-hold-header span:nth-child(2){display:none}
+  .trd-hold-header{grid-template-columns:1fr auto auto;gap:8px;padding:4px 10px}
+
+  /* ─── Order panel — compact ─── */
+  .trd-order{
+    width:100%!important;border-left:none;
+    border-top:1px solid var(--border2);
+    max-height:none;
+    flex-shrink:0;
+    overflow:visible!important;
+  }
+  /* Hide portfolio card in order panel — shown in top bar instead */
+  .trd-portfolio-card{display:none}
+  .trd-tabs{margin:10px 12px 0;border-radius:var(--r-lg)}
+  .trd-tab{padding:10px 8px;font-size:12px}
+  .trd-form{padding:10px 12px 16px;gap:10px;flex:none}
+  .trd-field-label{font-size:9px}
+  .trd-qty-input{font-size:16px;padding:10px 14px;border-radius:var(--r-lg)}
+  .trd-qty-presets{gap:4px}
+  .trd-preset{padding:8px 4px;font-size:11px;border-radius:var(--r-md)}
+  .trd-order-summary{border-radius:var(--r-lg)}
+  .trd-orow{padding:8px 12px;font-size:12px}
+  .trd-orow.total{padding:10px 12px;font-size:14px}
+  .trd-exec-btn{padding:14px;font-size:15px;border-radius:var(--r-lg);margin-top:4px;margin-bottom:8px}
+  /* Mini chart — hide on mobile to save space */
+  .trd-mini-chart{display:none!important}
+  /* Remove stray line between content and nav */
+  .trd-order{border-top:none}
+
+  /* ─── Confirm modal ─── */
+  .trd-confirm-card{padding:24px 20px;border-radius:var(--r-xl)}
+  .trd-confirm-title{font-size:16px}
+  .trd-confirm-row{font-size:13px}
+  .trd-confirm-btns{gap:10px}
+  .trd-confirm-cancel,.trd-confirm-exec{padding:14px;font-size:14px;border-radius:var(--r-lg)}
+
+  /* ─── Stocks page ─── */
+  #stocksPage{padding-bottom:calc(56px + var(--sb))}
+
+  /* ─── Loading overlay ─── */
+  #loadingOverlay .loading-text{font-size:13px}
+}
+
+
+/* ═══ SMALL PHONES (<380px) ═══ */
+@media(max-width:380px){
+  /* Auth */
+  #authCard{padding:28px 20px 24px}
+  .auth-logo-text{font-size:22px;letter-spacing:4px}
+  .auth-tag{font-size:9px;letter-spacing:2px;margin-bottom:24px}
+  .form-input{font-size:13px!important;padding:10px 14px 10px 38px!important}
+  .auth-btn{padding:11px 16px;font-size:13px}
+
+  /* Nav — tighter */
+  .mob-nav-btn{padding:4px 6px;min-width:44px}
+  .mob-nav-label{font-size:8px}
+  .mob-nav-svg{width:20px;height:20px}
+
+  /* Chat */
+  .chat-top{padding:8px 10px;padding-top:calc(8px + var(--st))}
+  .chat-name{font-size:13px}
+  .msg-av{width:28px;height:28px;min-width:28px}
+  .msg-text{font-size:13px;padding:4px 8px}
+  .msg-author{font-size:11px}
+  #msgInput{font-size:14px;padding:8px 10px}
+  .tool-btn{width:34px;height:34px}
+  .send-btn{width:36px;height:36px}
+
+  /* Emoji */
+  .emoji-grid{grid-template-columns:repeat(7,1fr)}
+  .emoji-btn{font-size:20px;min-height:38px}
+
+  /* Drawer — same full width */
+  #sidebarDrawer{width:100vw!important}
+  .dw-actions{gap:4px;padding:10px 4px 8px}
+  .dw-action{padding:10px 2px 8px}
+  .dw-action-icon{width:40px;height:40px}
+  .dw-action-icon svg{width:17px;height:17px}
+  .dw-action-label{font-size:9px}
+  #drawerDmList .dm-item{padding:8px 10px;min-height:44px}
+  #drawerDmList .dm-av{width:32px;height:32px}
+  #drawerDmList .dm-name{font-size:13px}
+
+  /* Trading — smaller cards */
+  .trd-wl-item{min-width:105px;max-width:125px;padding:8px 10px}
+  .trd-wl-sym{font-size:11px}
+  .trd-wl-price{font-size:12px}
+  .trd-wl-chg{font-size:9px}
+  .trd-chart-wrap{height:150px;min-height:150px}
+  .trd-stock-price{font-size:18px}
+  .trd-ts-val{font-size:10px}
+
+  /* Modals */
+  .gcc-input{font-size:14px}
+  .us-input{font-size:14px}
+  .addch-input{font-size:14px}
+}
+
+
+/* ═══ EXTRA SMALL (<340px) — very compact phones ═══ */
+@media(max-width:340px){
+  .mob-nav-btn{min-width:38px;padding:4px 4px}
+  .mob-nav-svg{width:18px;height:18px}
+  .mob-nav-label{font-size:7px}
+
+  .chat-top{gap:4px}
+  #sidebarToggle{width:32px;height:32px}
+  .chat-icon{width:24px;height:24px}
+  .top-btn{width:28px;height:28px}
+
+  .msg-av{width:26px;height:26px;min-width:26px}
+  .msg-text{font-size:12px}
+  #msgInput{font-size:13px}
+}

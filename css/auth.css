@@ -1,0 +1,158 @@
+/* ═══ AUTH ═══ */
+#authScreen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:#0a0a0a;overflow-y:auto;z-index:100;
+  padding:max(20px,var(--st)) 16px max(20px,var(--sb));
+}
+
+/* Animated background orbs — soft glow */
+.auth-bg-orbs{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.auth-orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.25}
+.auth-orb-1{
+  width:500px;height:500px;top:-10%;left:-5%;
+  background:radial-gradient(circle,rgba(61,168,122,.08),transparent 70%);
+  animation:orbFloat1 12s ease-in-out infinite;
+}
+.auth-orb-2{
+  width:400px;height:400px;bottom:-5%;right:-5%;
+  background:radial-gradient(circle,rgba(61,168,122,.05),transparent 70%);
+  animation:orbFloat2 15s ease-in-out infinite;
+}
+.auth-orb-3{
+  width:300px;height:300px;top:30%;right:20%;
+  background:radial-gradient(circle,rgba(255,255,255,.03),transparent 70%);
+  animation:orbFloat3 10s ease-in-out infinite;
+}
+@keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,40px) scale(1.15)}}
+@keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-20px,-30px) scale(1.1)}}
+@keyframes orbFloat3{0%,100%{transform:translate(0,0) scale(.9)}50%{transform:translate(-15px,25px) scale(1.05)}}
+
+/* Bubble canvas overlay */
+#authBubbles{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+#authCard{
+  position:relative;width:100%;max-width:380px;
+  padding:40px 36px 36px;
+  background:#111;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-2xl);
+  animation:slideUp .6s var(--ease-out);
+  overflow:hidden;z-index:1;
+  box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.02) inset;
+  backdrop-filter:blur(20px);
+}
+#authCard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.12) 50%,transparent 95%);
+  pointer-events:none;
+}
+
+.auth-logo{text-align:center;margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.auth-logo-icon{
+  width:72px;height:72px;border-radius:18px;overflow:hidden;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
+  transition:transform .3s var(--ease-out);
+}
+.auth-logo-icon:hover{transform:scale(1.05)}
+.auth-logo-icon img{width:85%;height:85%;object-fit:contain}
+.auth-logo-text{
+  display:block;font-size:28px;font-weight:var(--weight-extra);letter-spacing:6px;
+  color:#fff;
+}
+.auth-tag{
+  text-align:center;font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.35);margin-bottom:32px;
+}
+
+/* Form inputs with icons */
+.form-group{margin-bottom:16px}
+.form-label{
+  display:block;font-size:11px;font-weight:var(--weight-bold);
+  letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;
+}
+.form-input-wrap{
+  position:relative;display:flex;align-items:center;
+}
+.form-icon{
+  position:absolute;left:14px;width:16px;height:16px;color:rgba(255,255,255,.25);
+  pointer-events:none;transition:color .2s;
+}
+.form-input-wrap:focus-within .form-icon{color:rgba(255,255,255,.7)}
+
+#authCard .form-input{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);border-radius:var(--r-md);
+  font-size:14px;padding:12px 16px 12px 42px;
+  color:#fff;transition:all .2s var(--ease-out);
+}
+#authCard .form-input::placeholder{color:rgba(255,255,255,.25)}
+#authCard .form-input:focus{
+  border-color:rgba(255,255,255,.3);
+  box-shadow:0 0 0 3px rgba(255,255,255,.05);
+  outline:none;background:rgba(255,255,255,.06);
+}
+
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{
+  -webkit-box-shadow:0 0 0 1000px #111 inset!important;
+  -webkit-text-fill-color:#fff!important;caret-color:#fff;
+  transition:background-color 9999s;
+}
+
+/* Auth buttons — monochrome */
+.auth-btn{
+  display:block;width:100%;padding:13px 20px;border:none;border-radius:var(--r-md);
+  font-size:14px;font-weight:var(--weight-bold);letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  font-family:var(--font);transition:all .2s var(--ease-out);
+  position:relative;overflow:hidden;
+}
+.auth-btn-primary{
+  background:#fff;color:#000;margin-top:8px;
+  box-shadow:0 2px 12px rgba(255,255,255,.1);
+}
+.auth-btn-primary:hover{
+  background:#e8e8e8;transform:translateY(-1px);
+  box-shadow:0 4px 20px rgba(255,255,255,.15);
+}
+.auth-btn-primary:active{transform:translateY(0);box-shadow:0 1px 6px rgba(255,255,255,.05)}
+.auth-btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.auth-btn-secondary{
+  background:transparent;color:rgba(255,255,255,.6);margin-top:10px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.auth-btn-secondary:hover{
+  background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.2);color:#fff;
+}
+.auth-btn-secondary:active{background:rgba(255,255,255,.08)}
+.auth-btn-secondary:disabled{opacity:.5;cursor:not-allowed}
+
+.auth-footer{
+  text-align:center;font-size:12px;color:rgba(255,255,255,.3);margin-top:20px;
+  line-height:1.5;
+}
+
+.auth-msg{
+  padding:12px 16px;border-radius:var(--r-md);
+  font-size:13px;margin-bottom:16px;display:none;animation:fadeUp .3s;
+  line-height:1.4;
+}
+.auth-msg.show{display:block}
+.auth-msg.error{background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.2);color:rgba(224,80,80,.9)}
+.auth-msg.success{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+
+/* ═══ LOADING ═══ */
+#loadingOverlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.95);
+  display:none;align-items:center;justify-content:center;
+  z-index:999;flex-direction:column;gap:16px;
+}
+#loadingOverlay.show{display:flex}
+.spinner{
+  width:32px;height:32px;
+  border:2px solid rgba(255,255,255,.1);border-top-color:#fff;
+  border-radius:50%;animation:spin .75s linear infinite;
+}
+.loading-text{font-size:12px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase}
