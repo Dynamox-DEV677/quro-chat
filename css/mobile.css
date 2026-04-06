@@ -9,12 +9,13 @@
 #mobileNav{
   display:none;
   position:fixed;bottom:0;left:0;right:0;
-  height:calc(56px + var(--sb));
-  background:rgba(10,10,12,.92);
+  height:56px;
+  background:rgba(10,10,12,.95);
   -webkit-backdrop-filter:saturate(180%) blur(28px);
   backdrop-filter:saturate(180%) blur(28px);
   border-top:1px solid rgba(255,255,255,.06);
-  padding:0 8px var(--sb);
+  padding:0 8px 0;
+  padding-bottom:env(safe-area-inset-bottom,0px);
   z-index:var(--z-call);
   justify-content:space-around;
   align-items:center;
