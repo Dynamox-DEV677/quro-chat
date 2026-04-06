@@ -6,7 +6,7 @@ import { ME } from './state.js';
 import { escH, notify } from './utils.js';
 import { qConfirm } from './modal.js';
 
-const ADMIN_USERNAME = 'Dynamox';
+const ADMIN_USERNAME = 'dynamox';
 var _useLocalBans = false; // fallback if table doesn't exist
 var _localBans = {}; // { oderId: { username, banned_at } }
 
@@ -19,7 +19,7 @@ function _saveLocalBans() {
 
 // ─── Check if current user is admin ───
 export function isAdmin() {
-  return ME && ME.username === ADMIN_USERNAME;
+  return ME && ME.username && ME.username.toLowerCase() === ADMIN_USERNAME;
 }
 
 // ─── Show admin UI if user is Dynamox ───

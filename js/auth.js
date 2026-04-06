@@ -12,6 +12,7 @@ import { _subscribeCallSignals } from './calls-incoming.js';
 import { _subscribeServerVCNotifications } from './channels.js';
 import { initDragDrop } from './drag-drop.js';
 import { closeSettings } from './settings.js';
+import { initAdmin, checkBanned, showBannedScreen } from './admin.js';
 import { stopAuthBubbles, startAuthBubbles } from './auth-bubbles.js';
 import { qConfirm } from './modal.js';
 
@@ -42,7 +43,7 @@ export async function doRegister(){
     if(siErr) throw siErr;
     await sb.from('profiles').upsert({id:siData.user.id,username,avatar:username.charAt(0).toUpperCase(),photo:null});
     authOk('Account created!');btn.textContent='\u2713';
-    setTimeout(async()=>{btn.disabled=false;btn.textContent='Create Account';await loadAndEnterApp(siData.user);},800);
+    setTimeout(async()=>{btn.disabled=false;btn.textContent='Create Account';await loadAndEnterApp(siData.user);initAdmin();},800);
   }catch(err){showLoading(false);btn.disabled=false;btn.textContent='Create Account';authErr(err.message||'Sign up failed.');}
 }
 
@@ -55,7 +56,7 @@ export async function doLogin(){
   try{
     const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error) throw error;
-    btn.disabled=false;btn.textContent='Sign In';await loadAndEnterApp(data.user);
+    btn.disabled=false;btn.textContent='Sign In';await loadAndEnterApp(data.user);initAdmin();
   }catch(err){showLoading(false);btn.disabled=false;btn.textContent='Sign In';authErr(err.message?.includes('Invalid login')?'Wrong username or password.':err.message||'Login failed.');}
 }
 
