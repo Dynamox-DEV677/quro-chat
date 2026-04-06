@@ -139,24 +139,32 @@ Object.assign(window, {
 })();
 
 // ═══ Service Worker Registration ═══
+var _swReloading = false;
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/sw.js').then(function(reg){
-    // Check for updates immediately, then every 60s
-    reg.update();
+    // Check for updates every 60s (not immediately — let page settle first)
+    setTimeout(function(){ reg.update(); }, 5000);
     setInterval(function(){ reg.update(); }, 60000);
     reg.onupdatefound=function(){
       var w=reg.installing;
+      if(!w) return;
       w.onstatechange=function(){
-        if(w.state==='activated'){
-          // New SW is active — auto-reload so user gets fresh version
+        if(w.state==='activated' && !_swReloading){
+          _swReloading = true;
+          // Mark that next load should skip splash
+          try { sessionStorage.setItem('quro_sw_reload','1'); } catch(e){}
           window.location.reload();
         }
       };
     };
   }).catch(function(){});
-  // Listen for controller change (new SW took over)
+  // Listen for controller change (new SW took over) — single reload guard
   navigator.serviceWorker.addEventListener('controllerchange', function(){
-    window.location.reload();
+    if(!_swReloading){
+      _swReloading = true;
+      try { sessionStorage.setItem('quro_sw_reload','1'); } catch(e){}
+      window.location.reload();
+    }
   });
 }
 
@@ -164,39 +172,69 @@ if('serviceWorker' in navigator){
 // Show splash intro, then check session
 (async function boot() {
   initErrorHandler();
-  initSplash();
+
+  // If this is a SW-triggered reload, skip the splash entirely
+  var _skipSplash = false;
+  try {
+    if (sessionStorage.getItem('quro_sw_reload')) {
+      sessionStorage.removeItem('quro_sw_reload');
+      _skipSplash = true;
+    }
+  } catch(e) {}
+
+  function hideSplashNow() {
+    var sp = document.getElementById('splashScreen');
+    if (sp) {
+      sp.style.transition = 'opacity .4s ease';
+      sp.style.opacity = '0';
+      setTimeout(function() { sp.classList.add('hidden'); sp.style.display = 'none'; }, 450);
+    }
+  }
+
+  if (_skipSplash) {
+    // SW reload — hide splash instantly, no animation
+    var sp = document.getElementById('splashScreen');
+    if (sp) { sp.classList.add('hidden'); sp.style.display = 'none'; }
+  } else {
+    initSplash();
+  }
   startAuthBubbles();
 
-  // Safety: force splash away after 15s no matter what
+  // Safety: force splash away after 10s no matter what
   var _splashTimeout = setTimeout(function() {
     var sp = document.getElementById('splashScreen');
     if (sp && !sp.classList.contains('hidden')) {
-      sp.classList.add('zoom-out');
-      setTimeout(function() { sp.classList.add('hidden'); }, 1000);
+      hideSplashNow();
       showLoading(false);
     }
-  }, 15000);
+  }, 10000);
 
   // Check session in background while splash plays
   try {
     var { data: { session } } = await sb.auth.getSession();
     clearTimeout(_splashTimeout);
     if (session && session.user) {
-      // User is logged in — hide splash immediately and load app
-      var sp = document.getElementById('splashScreen');
-      if (sp) { sp.classList.add('zoom-out'); setTimeout(() => sp.classList.add('hidden'), 1000); }
+      // User is logged in — hide splash quickly and load app
+      hideSplashNow();
       stopAuthBubbles();
       await loadAndEnterApp(session.user);
       initDragDrop();
     } else {
       showLoading(false);
-      // Splash will reveal auth screen when its animation finishes
+      // Splash will reveal auth screen when its animation finishes (or skip if SW reload)
+      if (_skipSplash) {
+        var auth = document.getElementById('authScreen');
+        if (auth) { auth.style.display = 'flex'; auth.style.opacity = '1'; }
+      }
     }
   } catch(bootErr) {
     clearTimeout(_splashTimeout);
     console.warn('[Quro] Session check failed:', bootErr.message);
-    // Clear stale session to avoid GoTrue lock issues
-    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {/* cleanup stale session */}
+    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {}
+    hideSplashNow();
     showLoading(false);
+    // Show auth screen on failure
+    var auth = document.getElementById('authScreen');
+    if (auth) { auth.style.display = 'flex'; auth.style.opacity = '1'; }
   }
 })();
