@@ -7,9 +7,39 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "build:win": "cd electron && electron-builder --win",
-    "build:mac": "cd electron && electron-builder --mac",
-    "build:linux": "cd electron && electron-builder --linux"
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.quro.desktop",
+    "productName": "Quro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "admin.html",
+      "css/**/*",
+      "js/**/*",
+      "huddleicon.png",
+      "icon-*.png",
+      "icon.ico",
+      "manifest.json",
+      "sw.js",
+      "vercel.json",
+      "robots.txt",
+      "sitemap.xml"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false
+    }
   },
   "devDependencies": {
     "electron": "^33.0.0",

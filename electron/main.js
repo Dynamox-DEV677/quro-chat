@@ -5,7 +5,7 @@ const path = require('path');
 let mainWindow = null;
 
 function createWindow() {
-  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'icon-512.png'));
+  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'icon.ico'));
 
   mainWindow = new BrowserWindow({
     width: 1280,
