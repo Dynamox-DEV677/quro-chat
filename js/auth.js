@@ -12,7 +12,7 @@ import { _subscribeCallSignals } from './calls-incoming.js';
 import { _subscribeServerVCNotifications } from './channels.js';
 import { initDragDrop } from './drag-drop.js';
 import { closeSettings } from './settings.js';
-import { initAdmin, checkBanned, showBannedScreen } from './admin.js';
+import { initAdmin, hideAdmin, checkBanned, showBannedScreen } from './admin.js';
 import { stopAuthBubbles, startAuthBubbles } from './auth-bubbles.js';
 import { qConfirm } from './modal.js';
 
@@ -110,7 +110,7 @@ export async function doLogout(){
   if(_dataRefreshInt){clearInterval(_dataRefreshInt);_dataRefreshInt=null;}
   if(realtimeSub){try{await sb.removeChannel(realtimeSub);}catch(e){/* cleanup */}setRealtimeSub(null);}
   try{await sb.auth.signOut({scope:'local'});}catch(e){/* cleanup */}setME(null);setChatMode('channel');setCurDMUser(null);setAppMode('home');
-  closeSettings();closeDrawer();
+  hideAdmin();closeSettings();closeDrawer();
   try{document.getElementById('authUser').value='';document.getElementById('authPass').value='';}catch(e){/* DOM element may not exist */}
   setRegPhotoB64('');
   document.getElementById('appScreen').classList.remove('visible');

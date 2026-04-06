@@ -1,14 +1,18 @@
 // ═══ ADMIN — User Management (Dynamox only) ═══
-// Uses a separate 'banned_users' table to avoid needing schema changes on profiles.
+// Uses a separate 'banned_users' table + admin_config for passcode.
 // If banned_users table doesn't exist, falls back to localStorage ban list.
+// Passcode gate: 8-char code, 5 attempts per session, then locked out.
 import { sb } from './config.js';
 import { ME } from './state.js';
 import { escH, notify } from './utils.js';
 import { qConfirm } from './modal.js';
 
 const ADMIN_USERNAME = 'dynamox';
-var _useLocalBans = false; // fallback if table doesn't exist
-var _localBans = {}; // { oderId: { username, banned_at } }
+const MAX_ATTEMPTS = 5;
+var _useLocalBans = false;
+var _localBans = {};
+var _adminUnlocked = false;
+var _adminAttempts = 0;
 
 function _loadLocalBans() {
   try { _localBans = JSON.parse(localStorage.getItem('quro_bans') || '{}'); } catch(e) { _localBans = {}; }
@@ -22,19 +26,137 @@ export function isAdmin() {
   return ME && ME.username && ME.username.toLowerCase() === ADMIN_USERNAME;
 }
 
+// ─── Hide admin UI (call on every login/logout to reset) ───
+export function hideAdmin() {
+  var els = ['spAdminSep','spAdminCat','spAdminNav','spSecAdmin'];
+  els.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  _adminUnlocked = false;
+  // Reset gate UI
+  var gate = document.getElementById('spAdminGate');
+  var content = document.getElementById('spAdminContent');
+  if (gate) gate.style.display = '';
+  if (content) content.style.display = 'none';
+}
+
 // ─── Show admin UI if user is Dynamox ───
 export function initAdmin() {
+  // Always hide first — prevents bleed across logins
+  hideAdmin();
   if (!isAdmin()) return;
+
+  // Load attempt count from sessionStorage
+  try {
+    _adminAttempts = parseInt(sessionStorage.getItem('quro_admin_attempts') || '0');
+  } catch(e) { _adminAttempts = 0; }
+
+  // If locked out this session, don't show admin at all
+  if (_adminAttempts >= MAX_ATTEMPTS) return;
+
   _loadLocalBans();
+
+  // Show admin nav items + section
   var els = ['spAdminSep','spAdminCat','spAdminNav','spSecAdmin'];
   els.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = '';
   });
-  // Test if banned_users table exists
-  _testBanTable().then(function() {
-    loadBannedUsers();
-  });
+
+  // Show passcode gate (locked state)
+  var gate = document.getElementById('spAdminGate');
+  var content = document.getElementById('spAdminContent');
+  if (gate) gate.style.display = '';
+  if (content) content.style.display = 'none';
+
+  // Update attempts remaining display
+  _updateAttemptsDisplay();
+
+  // Clear any previous input
+  var input = document.getElementById('spAdminPasscode');
+  if (input) input.value = '';
+  var msg = document.getElementById('spAdminPassMsg');
+  if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+
+  // Test if banned_users table exists (in background)
+  _testBanTable();
+}
+
+function _updateAttemptsDisplay() {
+  var el = document.getElementById('spAdminAttempts');
+  if (!el) return;
+  var left = MAX_ATTEMPTS - _adminAttempts;
+  el.textContent = left + ' attempt' + (left !== 1 ? 's' : '') + ' remaining';
+  // Color it red when low
+  el.style.color = left <= 2 ? 'var(--error)' : '';
+}
+
+// ─── Verify admin passcode ───
+export async function verifyAdminPasscode() {
+  if (!isAdmin()) return;
+  if (_adminAttempts >= MAX_ATTEMPTS) {
+    hideAdmin();
+    return;
+  }
+
+  var input = document.getElementById('spAdminPasscode');
+  var msg = document.getElementById('spAdminPassMsg');
+  var code = (input ? input.value : '').trim();
+
+  // Must be exactly 8 characters
+  if (!code || code.length !== 8) {
+    if (msg) { msg.textContent = 'Passcode must be exactly 8 characters'; msg.style.display = 'block'; msg.className = 'sp-admin-pass-msg err'; }
+    return;
+  }
+
+  // Disable button during check
+  var btn = document.getElementById('spAdminVerifyBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+
+  try {
+    // Fetch passcode from admin_config table
+    var { data, error } = await sb.from('admin_config')
+      .select('value')
+      .eq('key', 'admin_passcode')
+      .single();
+
+    if (error) throw error;
+
+    if (data && data.value === code) {
+      // ✓ Correct — unlock admin
+      _adminUnlocked = true;
+      _adminAttempts = 0;
+      try { sessionStorage.setItem('quro_admin_attempts', '0'); } catch(e) {}
+
+      var gate = document.getElementById('spAdminGate');
+      var content = document.getElementById('spAdminContent');
+      if (gate) gate.style.display = 'none';
+      if (content) content.style.display = '';
+
+      notify('Admin access granted', 'success');
+      loadBannedUsers();
+    } else {
+      // ✗ Wrong — increment attempts
+      _adminAttempts++;
+      try { sessionStorage.setItem('quro_admin_attempts', String(_adminAttempts)); } catch(e) {}
+
+      if (_adminAttempts >= MAX_ATTEMPTS) {
+        // Locked out — hide everything
+        hideAdmin();
+        notify('Admin access locked — too many attempts', 'error');
+      } else {
+        _updateAttemptsDisplay();
+        if (msg) { msg.textContent = 'Incorrect passcode'; msg.style.display = 'block'; msg.className = 'sp-admin-pass-msg err'; }
+        if (input) { input.value = ''; input.focus(); }
+      }
+    }
+  } catch(e) {
+    // If admin_config table doesn't exist, fall back to hardcoded
+    if (msg) { msg.textContent = 'Error: ' + escH(e.message || 'Could not verify'); msg.style.display = 'block'; msg.className = 'sp-admin-pass-msg err'; }
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Unlock'; }
 }
 
 async function _testBanTable() {
@@ -51,6 +173,7 @@ async function _testBanTable() {
 // ─── Search users ───
 var _adminSearchTimeout = null;
 export function adminSearchUsers(query) {
+  if (!isAdmin() || !_adminUnlocked) return;
   clearTimeout(_adminSearchTimeout);
   var list = document.getElementById('spAdminList');
   if (!list) return;
@@ -65,7 +188,6 @@ export function adminSearchUsers(query) {
 
   _adminSearchTimeout = setTimeout(async function() {
     try {
-      // Only select columns that definitely exist
       var { data, error } = await sb.from('profiles')
         .select('id,username,avatar,photo')
         .ilike('username', '%' + query + '%')
@@ -77,7 +199,6 @@ export function adminSearchUsers(query) {
         return;
       }
 
-      // Check which users are banned
       var bannedIds = await _getBannedIds();
 
       list.innerHTML = data.map(function(u) {
@@ -87,7 +208,7 @@ export function adminSearchUsers(query) {
           : escH((u.avatar || u.username.charAt(0)).toUpperCase());
         var tag = isBanned ? '<span class="sp-admin-tag">BANNED</span>' : '';
         var btn = '';
-        if (u.username !== ADMIN_USERNAME) {
+        if (u.username.toLowerCase() !== ADMIN_USERNAME) {
           if (isBanned) {
             btn = '<button class="sp-admin-unban" onclick="adminUnbanUser(\'' + escH(u.id) + '\',\'' + escH(u.username) + '\')">UNBAN</button>';
           } else {
@@ -120,7 +241,6 @@ async function _getBannedIds() {
     var { data } = await sb.from('banned_users').select('user_id');
     if (data) data.forEach(function(r) { ids[r.user_id] = true; });
   } catch(e) {
-    // Fallback to local
     Object.keys(_localBans).forEach(function(k) { ids[k] = true; });
   }
   return ids;
@@ -128,7 +248,7 @@ async function _getBannedIds() {
 
 // ─── Kick (ban) a user ───
 export async function adminKickUser(userId, username) {
-  if (!isAdmin()) return;
+  if (!isAdmin() || !_adminUnlocked) return;
 
   var confirmed = await qConfirm(
     'Ban ' + username + ' permanently from Quro?\n\nThey will see a "You have been kicked" message on next login.'
@@ -141,7 +261,6 @@ export async function adminKickUser(userId, username) {
         .upsert({ user_id: userId, username: username, banned_by: ME.username, banned_at: new Date().toISOString() });
       if (error) throw error;
     }
-    // Always save locally too (syncs across devices for admin, acts as fallback)
     _localBans[userId] = { username: username, banned_at: new Date().toISOString() };
     _saveLocalBans();
 
@@ -150,7 +269,6 @@ export async function adminKickUser(userId, username) {
     if (search && search.value) adminSearchUsers(search.value);
     loadBannedUsers();
   } catch(e) {
-    // If table error, save locally
     _localBans[userId] = { username: username, banned_at: new Date().toISOString() };
     _saveLocalBans();
     _useLocalBans = true;
@@ -163,7 +281,7 @@ export async function adminKickUser(userId, username) {
 
 // ─── Unban a user ───
 export async function adminUnbanUser(userId, username) {
-  if (!isAdmin()) return;
+  if (!isAdmin() || !_adminUnlocked) return;
 
   var confirmed = await qConfirm('Unban ' + username + '? They will be able to use Quro again.');
   if (!confirmed) return;
@@ -207,7 +325,6 @@ async function loadBannedUsers() {
     } catch(e) { _useLocalBans = true; }
   }
 
-  // Merge local bans
   if (_useLocalBans || bannedArr.length === 0) {
     Object.keys(_localBans).forEach(function(uid) {
       var b = _localBans[uid];
@@ -222,7 +339,6 @@ async function loadBannedUsers() {
     return;
   }
 
-  // Get avatars/photos for banned users
   var profiles = {};
   try {
     var ids = bannedArr.map(function(b) { return b.id; });
@@ -251,7 +367,6 @@ async function loadBannedUsers() {
 export async function checkBanned() {
   if (!ME) return false;
 
-  // Check banned_users table first
   try {
     var { data, error } = await sb.from('banned_users')
       .select('user_id')
@@ -260,7 +375,6 @@ export async function checkBanned() {
     if (!error && data) return true;
   } catch(e) {}
 
-  // Fallback: check localStorage (works if admin banned from same device)
   try {
     var bans = JSON.parse(localStorage.getItem('quro_bans') || '{}');
     if (bans[ME.id]) return true;
