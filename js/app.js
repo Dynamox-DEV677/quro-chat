@@ -32,6 +32,7 @@ import { openTradingPage, closeTradingPage, trd_execute, trd_select, trd_setTab,
 import { initSplash } from './splash.js';
 import { startAuthBubbles, stopAuthBubbles } from './auth-bubbles.js';
 import { qConfirm, qPrompt, qAlert } from './modal.js';
+import { isAdmin, initAdmin, adminSearchUsers, adminKickUser, adminUnbanUser, checkBanned, showBannedScreen } from './admin.js';
 
 // ═══ Expose all onclick/onchange/oninput/onkeydown functions to window ═══
 // This is needed because HTML uses inline event handlers (onclick="fn()")
@@ -98,6 +99,8 @@ Object.assign(window, {
   closeTrdConfirm, confirmTrdExec,
   // Modal
   qConfirm, qPrompt, qAlert,
+  // Admin
+  adminSearchUsers, adminKickUser, adminUnbanUser,
   // Shared utils needed by inline handlers
   escH, getMsgKey, isMobile, setAvatarEl, showLoading,
   // State access (for inline handlers that check state)
@@ -218,6 +221,19 @@ if('serviceWorker' in navigator){
       hideSplashNow();
       stopAuthBubbles();
       await loadAndEnterApp(session.user);
+      // Check if user is banned
+      var banned = await checkBanned();
+      if (banned) {
+        showBannedScreen();
+        // Expose signout for banned screen button
+        window.bannedSignOut = async function() {
+          try { await sb.auth.signOut(); } catch(e) {}
+          window.location.reload();
+        };
+        return;
+      }
+      // Init admin panel if user is Dynamox
+      initAdmin();
       initDragDrop();
     } else {
       showLoading(false);

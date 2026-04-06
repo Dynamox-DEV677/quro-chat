@@ -430,6 +430,9 @@
     <div class="sp-nav-sep"></div>
     <div class="sp-nav-cat">App</div>
     <div class="sp-nav-item" data-section="spSecDesktop" onclick="spNavTo(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Desktop App</div>
+    <div class="sp-nav-sep" id="spAdminSep" style="display:none"></div>
+    <div class="sp-nav-cat" id="spAdminCat" style="display:none">Admin</div>
+    <div class="sp-nav-item" id="spAdminNav" data-section="spSecAdmin" onclick="spNavTo(this)" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>User Management</div>
     <div class="sp-nav-sep"></div>
     <div class="sp-nav-item danger" onclick="doLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</div>
   </nav>
@@ -534,6 +537,36 @@
               </div>
             </div>
           </div>
+
+          <!-- Admin: User Management (Dynamox only) -->
+          <div id="spSecAdmin" class="sp-section-anchor" style="display:none">
+            <div class="sp-section">
+              <div class="sp-section-head">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div class="sp-section-title">User Management</div>
+              </div>
+              <p class="sp-section-desc">Ban users permanently from Quro. Only visible to admin.</p>
+
+              <div class="sp-admin-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="sp-admin-search" id="spAdminSearch" placeholder="Search users..." oninput="adminSearchUsers(this.value)">
+              </div>
+
+              <div class="sp-admin-list" id="spAdminList">
+                <div class="sp-admin-empty">Type a username to search</div>
+              </div>
+
+              <!-- Banned users section -->
+              <div class="sp-admin-banned-head">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                Banned Users
+              </div>
+              <div class="sp-admin-list" id="spBannedList">
+                <div class="sp-admin-empty">No banned users</div>
+              </div>
+            </div>
+          </div>
+
         </div>
         <!-- Full-width customization sections -->
         <div id="spSecNameStyle" class="sp-section-anchor">

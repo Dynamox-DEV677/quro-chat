@@ -64,7 +64,8 @@ export var _spNavTitles={
   spSecAppearance:'Appearance',
   spSecNotif:'Notifications',
   spSecEmail:'Email',
-  spSecPassword:'Change Password'
+  spSecPassword:'Change Password',
+  spSecAdmin:'User Management'
 };
 
 export function spNavTo(el){

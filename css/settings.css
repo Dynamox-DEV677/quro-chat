@@ -561,3 +561,103 @@
 [data-theme="light"] .sp-desk-sidebar{background:#eee;border-right-color:rgba(0,0,0,0.06)}
 [data-theme="light"] .sp-desk-line{background:rgba(0,0,0,0.08)}
 [data-theme="light"] .sp-desktop-actions{border-top-color:rgba(0,0,0,0.06)}
+
+/* ─── Admin: User Management ─── */
+.sp-admin-search-wrap{position:relative;margin-bottom:16px}
+.sp-admin-search{
+  width:100%;padding:11px 14px 11px 38px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-lg);color:var(--text);font-size:14px;
+  font-family:var(--font);outline:none;
+  transition:border-color var(--dur-normal),background var(--dur-normal);
+}
+.sp-admin-search:focus{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06)}
+.sp-admin-search::placeholder{color:rgba(255,255,255,.25)}
+
+.sp-admin-list{
+  display:flex;flex-direction:column;gap:6px;
+  max-height:320px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  margin-bottom:20px;
+}
+.sp-admin-empty{
+  text-align:center;padding:20px 12px;
+  font-size:13px;color:rgba(255,255,255,.2);
+}
+
+/* User row */
+.sp-admin-user{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:var(--r-lg);
+  transition:background var(--dur-fast),border-color var(--dur-fast);
+}
+.sp-admin-user:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+.sp-admin-av{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface-1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:var(--text);
+  overflow:hidden;flex-shrink:0;
+}
+.sp-admin-av img{width:100%;height:100%;object-fit:cover}
+.sp-admin-info{flex:1;min-width:0}
+.sp-admin-name{font-size:14px;font-weight:var(--weight-bold);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-admin-id{font-size:10px;color:rgba(255,255,255,.25);margin-top:1px;font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Kick button */
+.sp-admin-kick{
+  padding:7px 16px;
+  background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.2);
+  border-radius:var(--r-md);
+  color:var(--error);font-size:11px;font-weight:var(--weight-extra);
+  letter-spacing:.5px;cursor:pointer;font-family:var(--font);
+  flex-shrink:0;
+  transition:background var(--dur-fast),border-color var(--dur-fast),transform var(--dur-fast);
+}
+.sp-admin-kick:hover{background:rgba(224,80,80,.2);border-color:rgba(224,80,80,.4);transform:translateY(-1px)}
+.sp-admin-kick:active{transform:scale(.96)}
+
+/* Unban button */
+.sp-admin-unban{
+  padding:7px 16px;
+  background:rgba(61,168,122,.1);border:1px solid rgba(61,168,122,.2);
+  border-radius:var(--r-md);
+  color:var(--success);font-size:11px;font-weight:var(--weight-extra);
+  letter-spacing:.5px;cursor:pointer;font-family:var(--font);
+  flex-shrink:0;
+  transition:background var(--dur-fast),border-color var(--dur-fast),transform var(--dur-fast);
+}
+.sp-admin-unban:hover{background:rgba(61,168,122,.2);border-color:rgba(61,168,122,.4);transform:translateY(-1px)}
+.sp-admin-unban:active{transform:scale(.96)}
+
+/* Banned tag */
+.sp-admin-tag{
+  padding:3px 8px;border-radius:var(--r-full);
+  font-size:9px;font-weight:var(--weight-extra);letter-spacing:.5px;
+  background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.15);
+  color:var(--error);margin-left:6px;flex-shrink:0;
+}
+
+/* Banned users header */
+.sp-admin-banned-head{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:var(--weight-extra);
+  letter-spacing:1px;text-transform:uppercase;
+  color:rgba(224,80,80,.6);
+  margin-bottom:10px;padding-top:4px;
+  border-top:1px solid rgba(255,255,255,.05);
+  padding-top:16px;
+}
+
+/* Light theme */
+[data-theme="light"] .sp-admin-search{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:var(--text)}
+[data-theme="light"] .sp-admin-search:focus{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.06)}
+[data-theme="light"] .sp-admin-search::placeholder{color:rgba(0,0,0,.3)}
+[data-theme="light"] .sp-admin-user{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .sp-admin-user:hover{background:rgba(0,0,0,.05)}
+[data-theme="light"] .sp-admin-empty{color:rgba(0,0,0,.25)}
+[data-theme="light"] .sp-admin-id{color:rgba(0,0,0,.3)}
+[data-theme="light"] .sp-admin-banned-head{color:rgba(224,80,80,.7);border-top-color:rgba(0,0,0,.06)}
