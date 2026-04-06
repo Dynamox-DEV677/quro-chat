@@ -141,11 +141,23 @@ Object.assign(window, {
 // ═══ Service Worker Registration ═══
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/sw.js').then(function(reg){
+    // Check for updates immediately, then every 60s
+    reg.update();
+    setInterval(function(){ reg.update(); }, 60000);
     reg.onupdatefound=function(){
       var w=reg.installing;
-      w.onstatechange=function(){if(w.state==='activated')notify('App updated! Refresh for latest.','info');};
+      w.onstatechange=function(){
+        if(w.state==='activated'){
+          // New SW is active — auto-reload so user gets fresh version
+          window.location.reload();
+        }
+      };
     };
   }).catch(function(){});
+  // Listen for controller change (new SW took over)
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    window.location.reload();
+  });
 }
 
 // ═══ Boot ═══
