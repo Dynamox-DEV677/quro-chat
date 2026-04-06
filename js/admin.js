@@ -105,8 +105,8 @@ export async function verifyAdminPasscode() {
   var code = (input ? input.value : '').trim();
 
   // Must be exactly 8 characters
-  if (!code || code.length !== 8) {
-    if (msg) { msg.textContent = 'Passcode must be exactly 8 characters'; msg.style.display = 'block'; msg.className = 'sp-admin-pass-msg err'; }
+  if (!code || code.length < 1) {
+    if (msg) { msg.textContent = 'Enter the admin passcode'; msg.style.display = 'block'; msg.className = 'sp-admin-pass-msg err'; }
     return;
   }
 
