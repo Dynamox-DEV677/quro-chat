@@ -1,0 +1,180 @@
+/* ═══ Quro — Custom Electron Titlebar ═══ */
+
+.q-titlebar {
+  display: none; /* Hidden in browser — shown only in Electron */
+  height: 32px;
+  background: #050505;
+  -webkit-app-region: drag; /* Makes entire titlebar draggable */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  user-select: none;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Show when Electron is detected */
+body.is-electron .q-titlebar {
+  display: flex;
+}
+
+/* Push entire app down when titlebar visible */
+body.is-electron {
+  padding-top: 32px;
+}
+body.is-electron #loadingOverlay,
+body.is-electron #splashScreen,
+body.is-electron #authScreen {
+  top: 32px;
+}
+
+/* ═══ Left: Logo + App Name ═══ */
+.q-tb-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  -webkit-app-region: drag;
+}
+
+.q-tb-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.q-tb-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #3da87a 0%, #5cc89a 40%, #ffffff 60%, #5cc89a 80%, #3da87a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.q-tb-sep {
+  width: 1px;
+  height: 14px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 4px;
+}
+
+.q-tb-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.5px;
+}
+
+/* ═══ Center: Subtle tagline (optional) ═══ */
+.q-tb-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.15);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ═══ Right: Window Controls ═══ */
+.q-tb-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.q-tb-btn {
+  width: 46px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  -webkit-app-region: no-drag;
+  outline: none;
+  padding: 0;
+}
+
+.q-tb-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+}
+
+.q-tb-btn:active {
+  background: rgba(255,255,255,0.12);
+}
+
+.q-tb-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Close button — red on hover */
+.q-tb-close:hover {
+  background: #e05050;
+  color: #fff;
+}
+
+.q-tb-close:active {
+  background: #c43e3e;
+}
+
+/* ═══ Light Theme ═══ */
+[data-theme="light"] .q-titlebar {
+  background: #f0f0f0;
+  border-bottom-color: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .q-tb-title {
+  background: linear-gradient(135deg, #2a8a60 0%, #3da87a 40%, #111 60%, #3da87a 80%, #2a8a60 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+[data-theme="light"] .q-tb-subtitle {
+  color: rgba(0,0,0,0.35);
+}
+
+[data-theme="light"] .q-tb-center {
+  color: rgba(0,0,0,0.15);
+}
+
+[data-theme="light"] .q-tb-sep {
+  background: rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .q-tb-btn {
+  color: rgba(0,0,0,0.55);
+}
+
+[data-theme="light"] .q-tb-btn:hover {
+  background: rgba(0,0,0,0.08);
+  color: rgba(0,0,0,0.9);
+}
+
+[data-theme="light"] .q-tb-close:hover {
+  background: #e05050;
+  color: #fff;
+}

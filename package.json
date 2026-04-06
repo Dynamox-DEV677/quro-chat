@@ -1,0 +1,48 @@
+{
+  "name": "quro",
+  "version": "1.0.0",
+  "description": "Quro — Chat, Markets & Paper Trading",
+  "main": "electron/main.js",
+  "author": "Quro",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.quro.desktop",
+    "productName": "Quro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "admin.html",
+      "css/**/*",
+      "js/**/*",
+      "huddleicon.png",
+      "icon-*.png",
+      "icon.ico",
+      "manifest.json",
+      "sw.js",
+      "vercel.json",
+      "robots.txt",
+      "sitemap.xml"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

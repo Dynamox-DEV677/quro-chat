@@ -1,0 +1,237 @@
+/*
+ * LIGHT MODE OVERRIDES
+ *
+ * This file provides light-mode design tweaks for components where the
+ * token-resolved value is intentionally different from the automatic
+ * var() result.  The base CSS files use design-token variables from
+ * variables.css; these overrides exist only where the light design
+ * requires values that DIFFER from what the tokens provide (e.g.
+ * softer backgrounds, tighter contrast, theme-specific gradients).
+ *
+ * Scrollbar light overrides live in variables.css.
+ * Keyframe animations live in variables.css (no duplicates here).
+ *
+ * Sections kept:
+ *   - Auth (gradient/shimmer, error/success msgs, loading overlay)
+ *   - Server bar (intentional bg/color tweaks)
+ *   - Channel bar (contrast tweaks, active indicator style)
+ *   - Add-channel modal (softer surfaces)
+ *   - DM list (avatar/dot border, hover contrast)
+ *   - User bar (avatar border)
+ *   - Members bar (bg, contrast tweaks)
+ *   - Mobile nav/drawer (bg, border tweaks)
+ *   - Emoji modal (bg swap)
+ *   - Server browser (bg, text contrast)
+ *   - User search (bg, text contrast)
+ *   - Notifications (bg, border-left style swap)
+ *   - Friends page (header bg, contrast, hover)
+ *   - Leaderboard (header bg, contrast, hover)
+ *   - Stocks page (header bg, card bg, contrast)
+ *   - Stock detail (card bg, chart bg, contrast)
+ *   - Trading page (full set of contrast/surface tweaks)
+ */
+
+/* ── Auth ── */
+[data-theme="light"] #authCard::before{background:linear-gradient(90deg,transparent 5%,rgba(0,0,0,.08) 25%,rgba(0,0,0,.15) 50%,rgba(0,0,0,.08) 75%,transparent 95%)}
+[data-theme="light"] .auth-msg.error{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.12);color:rgba(0,0,0,.7)}
+[data-theme="light"] .auth-msg.success{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.15);color:#1a1a1a}
+
+/* ── Loading ── */
+[data-theme="light"] #loadingOverlay{background:rgba(255,255,255,.92)}
+
+/* ── Server bar ── */
+[data-theme="light"] #serverBar{background:#e8e8e8;border-right-color:rgba(0,0,0,.06)}
+[data-theme="light"] .srv-btn{background:#ffffff;border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.55)}
+[data-theme="light"] .srv-btn:hover,[data-theme="light"] .srv-btn:active{background:#f0f0f0;border-color:rgba(0,0,0,.2);color:#000}
+[data-theme="light"] .srv-btn.active{background:#e0e0e0;border-color:rgba(0,0,0,.25);color:#000}
+[data-theme="light"] .srv-add{border-color:rgba(0,0,0,.15);color:rgba(0,0,0,.3)}
+[data-theme="light"] .srv-add:hover,[data-theme="light"] .srv-add:active{background:#f0f0f0;border-color:rgba(0,0,0,.3);color:#000}
+[data-theme="light"] .srv-stocks.active{background:#e0e0e0!important;border-color:rgba(0,0,0,.2)!important}
+
+/* ── Channel bar ── */
+[data-theme="light"] .ch-header{color:#333;border-bottom-color:rgba(0,0,0,.06)}
+[data-theme="light"] .ch-section{color:rgba(0,0,0,.35)}
+[data-theme="light"] .ch-item:hover,[data-theme="light"] .ch-item:active{background:rgba(0,0,0,.05);color:rgba(0,0,0,.75)}
+[data-theme="light"] .ch-item.active{background:rgba(0,0,0,.08);color:#000;box-shadow:inset -2px 0 0 rgba(0,0,0,.4)}
+[data-theme="light"] .ch-hash{opacity:.4}
+[data-theme="light"] .ch-icon-svg{opacity:.35}
+[data-theme="light"] .vc-connected{color:rgba(61,168,122,.8)}
+
+/* ── Add channel modal ── */
+[data-theme="light"] .addch-card{border-color:rgba(0,0,0,.1)}
+[data-theme="light"] .addch-title{color:#111}
+[data-theme="light"] .addch-label{color:rgba(0,0,0,.4)}
+[data-theme="light"] .addch-input{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12);color:#111}
+[data-theme="light"] .addch-type{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
+[data-theme="light"] .addch-type svg{stroke:rgba(0,0,0,.4)}
+[data-theme="light"] .addch-type-name{color:rgba(0,0,0,.5)}
+
+/* ── DM list ── */
+[data-theme="light"] .dm-badge{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.12);color:rgba(0,0,0,.6)}
+[data-theme="light"] .dm-section-title{color:rgba(0,0,0,.3)}
+[data-theme="light"] .dm-item:hover,[data-theme="light"] .dm-item:active{background:rgba(0,0,0,.05);color:rgba(0,0,0,.75)}
+[data-theme="light"] .dm-item.active{background:rgba(0,0,0,.08);color:#000}
+[data-theme="light"] .dm-av{background:#e0e0e0;border-color:rgba(0,0,0,.1)}
+[data-theme="light"] .dm-dot{border-color:#f0f0f0}
+[data-theme="light"] .u-av{background:#e0e0e0;border-color:rgba(0,0,0,.12)}
+[data-theme="light"] .u-sdot{border-color:#f0f0f0}
+
+/* ── Members bar ── */
+[data-theme="light"] #membersBar{background:#f0f0f0}
+[data-theme="light"] .mb-head{color:rgba(0,0,0,.35)}
+[data-theme="light"] .mb-item:hover,[data-theme="light"] .mb-item:active{background:rgba(0,0,0,.05)}
+[data-theme="light"] .mb-av{background:#e0e0e0;border-color:rgba(0,0,0,.1)}
+[data-theme="light"] .mb-dot{border-color:#f0f0f0}
+[data-theme="light"] .mb-name{color:rgba(0,0,0,.65)}
+[data-theme="light"] .mb-role{color:rgba(0,0,0,.35)}
+
+/* ── Mobile nav ── */
+[data-theme="light"] #mobileNav{background:rgba(255,255,255,.92);border-top-color:rgba(0,0,0,.06)}
+[data-theme="light"] .mob-nav-btn{color:rgba(0,0,0,.35)}
+[data-theme="light"] .mob-nav-btn.active{color:var(--primary)}
+[data-theme="light"] .mob-nav-btn.active::before{background:rgba(56,161,105,.08)}
+[data-theme="light"] .mob-nav-svg{opacity:.3}
+[data-theme="light"] .mob-nav-btn.active .mob-nav-svg{opacity:1}
+[data-theme="light"] .mm-head{border-bottom-color:rgba(0,0,0,.06)}
+
+/* ── Mobile frosted bars ── */
+@media(max-width:767px){
+  [data-theme="light"] .chat-top{background:rgba(255,255,255,.9)}
+  [data-theme="light"] #inputArea{background:rgba(255,255,255,.9)}
+}
+
+/* ── Mobile drawer ── */
+[data-theme="light"] #sidebarDrawer{background:#f5f5f5;border-right-color:rgba(0,0,0,.06)}
+[data-theme="light"] #sidebarDrawer.open{box-shadow:6px 0 32px rgba(0,0,0,.1)}
+[data-theme="light"] #sidebarOverlay.open{background:rgba(0,0,0,.2)}
+
+/* ── Emoji modal ── */
+[data-theme="light"] .emoji-card{background:#ffffff;border-color:rgba(0,0,0,.1)}
+[data-theme="light"] .emoji-head{color:#444}
+
+/* ── Server browser ── */
+[data-theme="light"] #srvBrowserCard{border-top-color:rgba(0,0,0,.15)}
+[data-theme="light"] .srvb-title{color:#333}
+[data-theme="light"] .srvb-close{background:rgba(0,0,0,.05);color:rgba(0,0,0,.5)}
+[data-theme="light"] .srvb-item:hover{background:#eee}
+[data-theme="light"] .srvb-icon{background:#e8e8e8;border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.6)}
+[data-theme="light"] .srvb-name{color:#333}
+[data-theme="light"] .srvb-desc{color:rgba(0,0,0,.4)}
+[data-theme="light"] .srvb-join-btn{background:#222;color:#fff}
+[data-theme="light"] .srvb-join-btn:active{background:#444}
+[data-theme="light"] .srvb-join-btn.joined{background:rgba(0,0,0,.05);color:rgba(0,0,0,.4);border-color:rgba(0,0,0,.1)}
+[data-theme="light"] .srvb-empty{color:rgba(0,0,0,.3)}
+[data-theme="light"] .srvb-create-btn:hover,[data-theme="light"] .srvb-create-btn:active{border-color:rgba(0,0,0,.3);color:#000}
+
+/* ── User search ── */
+[data-theme="light"] #userSearchCard{border-top-color:rgba(0,0,0,.15)}
+[data-theme="light"] .us-title{color:#333}
+[data-theme="light"] .us-close{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.08);color:rgba(0,0,0,.45)}
+[data-theme="light"] .us-input:focus{border-color:rgba(0,0,0,.25)}
+[data-theme="light"] .us-input::placeholder{color:rgba(0,0,0,.3)}
+[data-theme="light"] .us-av{background:#e0e0e0}
+[data-theme="light"] .us-uname{color:#333}
+[data-theme="light"] .us-ustatus{color:rgba(0,0,0,.35)}
+[data-theme="light"] .us-msg-btn{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.55)}
+[data-theme="light"] .us-msg-btn:active{background:rgba(0,0,0,.12);color:#000}
+[data-theme="light"] .us-empty{color:rgba(0,0,0,.25)}
+
+/* ── Notifications ── */
+[data-theme="light"] .notif{background:#fff;border-color:rgba(0,0,0,.08);box-shadow:var(--shadow-md);color:rgba(0,0,0,.6)}
+[data-theme="light"] .notif.success{border-left-color:var(--success)}
+[data-theme="light"] .notif.error{border-left-color:var(--error)}
+[data-theme="light"] .notif.info{border-left-color:var(--info)}
+
+/* ── Friends page ── */
+[data-theme="light"] .fp-header{background:#eee;border-bottom-color:rgba(0,0,0,.08)}
+[data-theme="light"] .fp-close{color:rgba(0,0,0,.5)}
+[data-theme="light"] .fp-tabs{background:#eee;border-bottom-color:rgba(0,0,0,.08)}
+[data-theme="light"] .fp-tab{color:rgba(0,0,0,.35)}
+[data-theme="light"] .fp-tab.active{color:#000;border-bottom-color:#000}
+[data-theme="light"] .fp-search:focus{border-color:rgba(0,0,0,.25)}
+[data-theme="light"] .fp-search::placeholder{color:rgba(0,0,0,.3)}
+[data-theme="light"] .fp-user{background:#fff}
+[data-theme="light"] .fp-user:hover{background:#f8f8f8}
+[data-theme="light"] .fp-uav{background:#e0e0e0}
+[data-theme="light"] .fp-dot{border-color:#fff}
+[data-theme="light"] .fp-uname{color:#333}
+[data-theme="light"] .fp-ustatus{color:rgba(0,0,0,.35)}
+[data-theme="light"] .fp-ubtn{background:rgba(0,0,0,.05);color:rgba(0,0,0,.55)}
+[data-theme="light"] .fp-ubtn:active{background:rgba(0,0,0,.12);color:#000}
+[data-theme="light"] .fp-empty{color:rgba(0,0,0,.25)}
+
+/* ── Leaderboard ── */
+[data-theme="light"] .lp-header{background:#eee;border-bottom-color:rgba(0,0,0,.08)}
+[data-theme="light"] .lp-close{color:rgba(0,0,0,.5)}
+[data-theme="light"] .lp-refresh:hover{border-color:rgba(0,0,0,.25);color:#000}
+[data-theme="light"] .lp-item{background:#fff}
+[data-theme="light"] .lp-item.me{background:#f8f8f8}
+[data-theme="light"] .lp-rank{color:rgba(0,0,0,.25)}
+[data-theme="light"] .lp-av{background:#e0e0e0}
+[data-theme="light"] .lp-uname{color:#333}
+[data-theme="light"] .lp-utype{color:rgba(0,0,0,.35)}
+[data-theme="light"] .lp-total{color:#1a1a1a}
+
+/* ── Stocks page ── */
+[data-theme="light"] .stp-header{background:#eee;border-bottom-color:rgba(0,0,0,.08)}
+[data-theme="light"] .stp-close{color:rgba(0,0,0,.5)}
+[data-theme="light"] .stp-section{color:rgba(0,0,0,.3)}
+[data-theme="light"] .idx-card{border-color:rgba(0,0,0,.08)}
+[data-theme="light"] .idx-card:hover{background:#f8f8f8}
+[data-theme="light"] .idx-name{color:rgba(0,0,0,.4)}
+[data-theme="light"] .stp-filter.active{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.2);color:#000}
+[data-theme="light"] .stk-card{background:#fff}
+[data-theme="light"] .stk-card:hover{background:#f8f8f8;border-color:rgba(0,0,0,.15)}
+[data-theme="light"] .stk-icon{background:#f0f0f0;border-color:rgba(0,0,0,.08);color:rgba(0,0,0,.55)}
+[data-theme="light"] .stk-name{color:#333}
+[data-theme="light"] .stk-sector{color:rgba(0,0,0,.35)}
+
+/* ── Stock detail ── */
+[data-theme="light"] #stkDetailCard{border-top-color:rgba(0,0,0,.15)}
+[data-theme="light"] .stkd-sub{color:rgba(0,0,0,.35)}
+[data-theme="light"] .stkd-close{background:rgba(0,0,0,.05);color:rgba(0,0,0,.45)}
+[data-theme="light"] .stkd-range{background:rgba(0,0,0,.03);color:rgba(0,0,0,.35)}
+[data-theme="light"] .stkd-range.active{background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.18);color:#000}
+[data-theme="light"] .stkd-ohlc-bar{color:rgba(0,0,0,.55)}
+[data-theme="light"] .stkd-ohlc-lbl{color:rgba(0,0,0,.35)}
+[data-theme="light"] .stkd-chart-wrap{background:#f8f8f8}
+[data-theme="light"] .stkd-loader{background:#f8f8f8;color:rgba(0,0,0,.25)}
+[data-theme="light"] .stkd-stat-label{color:rgba(0,0,0,.3)}
+[data-theme="light"] .stkd-stat-val{color:#333}
+
+/* ── Trading page ── */
+[data-theme="light"] .trd-header{border-bottom-color:rgba(0,0,0,.08)}
+[data-theme="light"] .trd-close-btn{background:rgba(0,0,0,.05);color:rgba(0,0,0,.5)}
+[data-theme="light"] .trd-wl-wrap{background:#fff;border-right-color:rgba(0,0,0,.06)}
+[data-theme="light"] .trd-wl-search-box input{background:#f5f5f5}
+[data-theme="light"] .trd-wl-search-box input::placeholder{color:rgba(0,0,0,.3)}
+[data-theme="light"] .trd-wl-item{border-bottom-color:rgba(0,0,0,.04)}
+[data-theme="light"] .trd-wl-item.active{background:rgba(0,0,0,.06);border-right-color:#000}
+[data-theme="light"] .trd-wl-name{color:#444}
+[data-theme="light"] .trd-stock-hd{background:#fff}
+[data-theme="light"] .trd-stock-meta{color:rgba(0,0,0,.35)}
+[data-theme="light"] .trd-chart-wrap{background:#fafafa}
+[data-theme="light"] .trd-order{background:#fff;border-left-color:rgba(0,0,0,.06)}
+[data-theme="light"] .trd-tab{color:rgba(0,0,0,.4)}
+[data-theme="light"] .trd-field-label{color:rgba(0,0,0,.35)}
+[data-theme="light"] .trd-qty-input{background:#f5f5f5}
+[data-theme="light"] .trd-qty-input:focus{border-color:rgba(0,0,0,.3)}
+[data-theme="light"] .trd-preset{background:#f5f5f5;color:rgba(0,0,0,.5)}
+[data-theme="light"] .trd-preset:active{background:#e8e8e8;color:#000}
+[data-theme="light"] .trd-olabel{color:rgba(0,0,0,.4)}
+[data-theme="light"] .trd-oval{color:#333}
+[data-theme="light"] .trd-order-box{background:#f8f8f8;border-color:rgba(0,0,0,.08)}
+[data-theme="light"] .trd-exec-btn:disabled{background:#eee;color:rgba(0,0,0,.2)}
+[data-theme="light"] .trd-bottom{background:#fff;border-top-color:rgba(0,0,0,.06)}
+[data-theme="light"] .trd-btab{color:rgba(0,0,0,.35)}
+[data-theme="light"] .trd-btab.active{color:#000;border-bottom-color:rgba(0,0,0,.4)}
+[data-theme="light"] .trd-empty-msg{color:rgba(0,0,0,.25)}
+[data-theme="light"] .trd-hold-item,[data-theme="light"] .trd-hist-item{border-bottom-color:rgba(0,0,0,.04)}
+[data-theme="light"] .trd-hold-item:hover,[data-theme="light"] .trd-hist-item:hover{background:rgba(0,0,0,.03)}
+[data-theme="light"] .trd-hold-name{color:#333}
+[data-theme="light"] .trd-hold-sub{color:rgba(0,0,0,.35)}
+[data-theme="light"] .trd-hist-name{color:#333}
+[data-theme="light"] .trd-hist-sub{color:rgba(0,0,0,.35)}
+[data-theme="light"] .trd-no-select{color:rgba(0,0,0,.2)}
+[data-theme="light"] .trd-reset-btn{border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.35)}
+[data-theme="light"] .trd-reset-btn:active{color:#000;border-color:rgba(0,0,0,.3)}
