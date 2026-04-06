@@ -7,7 +7,7 @@ import { ME } from './state.js';
 import { escH, notify } from './utils.js';
 import { qConfirm } from './modal.js';
 
-const ADMIN_USERNAMES = ['dynamox', 'quro'];
+const ADMIN_USERNAMES = ['dynamox'];
 const MAX_ATTEMPTS = 5;
 var _useLocalBans = false;
 var _localBans = {};

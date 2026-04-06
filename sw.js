@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'quro-v56';
+const CACHE_VERSION = 'quro-v57';
 const STATIC_CACHE = CACHE_VERSION + '-static';
 const DYNAMIC_CACHE = CACHE_VERSION + '-dynamic';
 
