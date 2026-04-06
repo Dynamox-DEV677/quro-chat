@@ -155,9 +155,20 @@ if('serviceWorker' in navigator){
   initSplash();
   startAuthBubbles();
 
+  // Safety: force splash away after 15s no matter what
+  var _splashTimeout = setTimeout(function() {
+    var sp = document.getElementById('splashScreen');
+    if (sp && !sp.classList.contains('hidden')) {
+      sp.classList.add('zoom-out');
+      setTimeout(function() { sp.classList.add('hidden'); }, 1000);
+      showLoading(false);
+    }
+  }, 15000);
+
   // Check session in background while splash plays
   try {
     var { data: { session } } = await sb.auth.getSession();
+    clearTimeout(_splashTimeout);
     if (session && session.user) {
       // User is logged in — hide splash immediately and load app
       var sp = document.getElementById('splashScreen');
@@ -170,6 +181,7 @@ if('serviceWorker' in navigator){
       // Splash will reveal auth screen when its animation finishes
     }
   } catch(bootErr) {
+    clearTimeout(_splashTimeout);
     console.warn('[Quro] Session check failed:', bootErr.message);
     // Clear stale session to avoid GoTrue lock issues
     try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {/* cleanup stale session */}
