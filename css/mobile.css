@@ -549,50 +549,62 @@
     align-items:stretch;justify-content:stretch;
     padding:0;
   }
+  #callOverlay::before{
+    display:none!important;
+  }
   #callCard{
     width:100vw;height:100vh;height:100dvh;
     border-radius:0;
     max-height:none;
     overflow:hidden;
-    background:linear-gradient(180deg,rgba(12,12,18,.98) 0%,rgba(8,8,14,.99) 100%);
+    background:linear-gradient(180deg,#0c0c12 0%,#08080e 100%);
     border:none;
     display:flex;flex-direction:column;
   }
   .call-card-top{
-    padding:calc(var(--st) + 8px) 16px 8px;
+    padding:calc(var(--st) + 10px) 16px 10px;
     background:transparent;border-bottom:none;
-    position:absolute;top:0;left:0;right:0;
+    position:relative;top:auto;left:auto;right:auto;
     z-index:2;
+    flex-shrink:0;
   }
   .call-card-body{
     flex:1;display:flex;flex-direction:column;
     align-items:center;justify-content:center;
-    padding:0 24px calc(var(--sb) + 16px);
-    gap:4px;position:relative;
+    padding:0 24px 0;
+    gap:6px;position:relative;
+    overflow:hidden;
   }
 
-  /* Voice call avatar — centered, clean size */
+  /* Voice call avatar — centered, contained */
   #callAvatarWrap{
-    width:96px;height:96px;font-size:32px;
-    margin-bottom:16px;
-    box-shadow:0 0 0 6px var(--primary-dim),0 0 60px rgba(61,168,122,.1);
+    width:100px;height:100px;font-size:34px;
+    margin-bottom:16px;flex-shrink:0;
+    box-shadow:0 0 0 6px var(--primary-dim),0 0 40px rgba(61,168,122,.08);
   }
-  #callPersonName{font-size:22px;font-weight:700;margin-bottom:2px}
-  #callStatus{font-size:13px;margin-bottom:0}
-  #callTimerDisplay{font-size:28px;margin-bottom:4px;margin-top:4px}
+  #callAvatarWrap.ringing{animation:callPulse 2s ease-out infinite}
+  #callAvatarWrap.ringing::before,
+  #callAvatarWrap.ringing::after{
+    display:none!important;
+  }
+  #callPersonName{font-size:22px;font-weight:700;margin-bottom:2px;flex-shrink:0}
+  #callStatus{font-size:13px;margin-bottom:0;flex-shrink:0}
+  #callTimerDisplay{font-size:28px;margin-bottom:4px;margin-top:4px;flex-shrink:0}
 
   /* Action buttons — horizontal strip */
   .call-actions{
     display:flex;justify-content:center;
-    gap:20px;padding:0;
-    margin:auto 0 12px;
-    width:100%;max-width:320px;
+    gap:16px;padding:0 16px;
+    margin:auto 0 8px;
+    width:100%;max-width:340px;
+    flex-shrink:0;
   }
   .call-act{min-width:0;flex:1;max-width:72px}
   .call-act-icon{
-    width:52px;height:52px;border-radius:50%;
+    width:50px;height:50px;border-radius:50%;
     background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
   }
+  .call-act-icon svg{width:20px;height:20px}
   .call-act-icon.active{
     background:rgba(56,161,105,.15);border-color:rgba(56,161,105,.3);
   }
@@ -601,17 +613,18 @@
   /* End/minimize row */
   .call-bottom{
     display:flex;justify-content:center;align-items:center;
-    gap:24px;padding:0 0 calc(var(--sb) + 20px);
-    width:100%;
+    gap:24px;padding:12px 0 calc(var(--sb) + 20px);
+    width:100%;flex-shrink:0;
   }
-  .call-end-btn{width:64px;height:64px;border-radius:50%}
-  .call-min-btn{width:42px;height:42px}
+  .call-end-btn{width:60px;height:60px;border-radius:50%;font-size:20px}
+  .call-min-btn{width:40px;height:40px}
 
   /* ── Video mode — immersive ── */
   #callCard.video-mode{width:100vw;height:100vh;height:100dvh}
   #callCard.video-mode .call-card-top{
     background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,transparent 100%);
     padding-top:calc(var(--st) + 10px);
+    position:absolute;top:0;left:0;right:0;
   }
   #callCard.video-mode .call-card-body{
     padding:0;justify-content:flex-end;
@@ -629,10 +642,9 @@
   }
   #callCard.video-mode .call-actions{
     position:relative;z-index:2;
-    margin:0;padding:12px 0;
+    margin:0;padding:12px 24px;
     background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,transparent 100%);
     max-width:none;width:100%;
-    padding-left:24px;padding-right:24px;
   }
   #callCard.video-mode .call-bottom{
     position:relative;z-index:2;
@@ -663,10 +675,15 @@
   .gc-vid-tile{border-radius:0;aspect-ratio:auto}
 
   /* ── Incoming call ── */
+  #incomingCallOverlay::before,
+  #incomingCallOverlay::after{display:none!important}
   #incomingCallCard{padding:0 20px}
   .ic-top-label{margin-bottom:24px;font-size:10px}
-  .ic-avatar-area{width:140px;height:140px;margin-bottom:20px}
-  #icAvatar{width:110px;height:110px;font-size:38px}
+  .ic-avatar-area{width:120px;height:120px;margin-bottom:20px}
+  .ic-pulse-ring{display:none}
+  #icAvatar{width:100px;height:100px;font-size:36px;
+    box-shadow:0 0 0 4px rgba(61,168,122,.08),0 0 40px rgba(61,168,122,.1);
+  }
   #icCallerName{font-size:24px}
   #icCallType{margin-bottom:40px}
   .ic-actions{gap:56px}
