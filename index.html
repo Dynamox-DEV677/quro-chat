@@ -29,7 +29,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat&family=Dancing+Script&family=Fira+Code&family=Kanit&family=Lobster&family=Orbitron&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Satisfy&family=Space+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>(function(){var t=localStorage.getItem('quro-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})()</script>
+<script>(function(){var t=localStorage.getItem('quro-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');if(window.electronAPI&&window.electronAPI.isElectron)document.body?.classList.add('is-electron');})()</script>
+<script>document.addEventListener('DOMContentLoaded',function(){if(window.electronAPI&&window.electronAPI.isElectron)document.body.classList.add('is-electron');});</script>
 <link rel="stylesheet" href="css/variables.css?v=43">
 <link rel="stylesheet" href="css/light.css?v=43">
 <link rel="stylesheet" href="css/auth.css?v=43">
@@ -45,9 +46,32 @@
 <link rel="stylesheet" href="css/stocks.css?v=43">
 <link rel="stylesheet" href="css/trading.css?v=43">
 <link rel="stylesheet" href="css/splash.css?v=43">
+<link rel="stylesheet" href="css/titlebar.css?v=43">
 <!-- OLD INLINE STYLE REMOVED — CSS now in css/ folder -->
 </head>
 <body>
+
+<!-- ═══ Electron Custom Titlebar ═══ -->
+<div class="q-titlebar" id="qTitlebar">
+  <div class="q-tb-left">
+    <img class="q-tb-icon" src="huddleicon.png" alt="Quro">
+    <span class="q-tb-title">QURO</span>
+    <div class="q-tb-sep"></div>
+    <span class="q-tb-subtitle">Desktop</span>
+  </div>
+  <div class="q-tb-center">Chat · Trade · Compete</div>
+  <div class="q-tb-controls">
+    <button class="q-tb-btn q-tb-min" onclick="window.electronAPI?.minimize()" aria-label="Minimize">
+      <svg viewBox="0 0 14 14"><line x1="2" y1="7" x2="12" y2="7"/></svg>
+    </button>
+    <button class="q-tb-btn q-tb-max" onclick="window.electronAPI?.maximize()" aria-label="Maximize">
+      <svg viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+    </button>
+    <button class="q-tb-btn q-tb-close" onclick="window.electronAPI?.close()" aria-label="Close">
+      <svg viewBox="0 0 14 14"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
+    </button>
+  </div>
+</div>
 
 <div id="loadingOverlay"><div class="spinner"></div><div class="loading-text">Connecting…</div></div>
 

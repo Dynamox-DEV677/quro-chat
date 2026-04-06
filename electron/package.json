@@ -1,0 +1,56 @@
+{
+  "name": "quro-desktop",
+  "version": "1.0.0",
+  "description": "Quro — Chat, Markets & Paper Trading (Desktop)",
+  "main": "main.js",
+  "author": "Quro",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.quro.desktop",
+    "productName": "Quro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "../index.html",
+      "../css/**/*",
+      "../js/**/*",
+      "../huddleicon.png",
+      "../icon-*.png",
+      "../manifest.json",
+      "../sw.js"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "../icon-512.png"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "../icon-512.png",
+      "category": "public.app-category.social-networking"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "../icon-512.png",
+      "category": "Network"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "installerIcon": "../icon-512.png",
+      "uninstallerIcon": "../icon-512.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

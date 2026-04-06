@@ -1,0 +1,18 @@
+{
+  "name": "quro",
+  "version": "1.0.0",
+  "description": "Quro — Chat, Markets & Paper Trading",
+  "main": "electron/main.js",
+  "author": "Quro",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "cd electron && electron-builder --win",
+    "build:mac": "cd electron && electron-builder --mac",
+    "build:linux": "cd electron && electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}
