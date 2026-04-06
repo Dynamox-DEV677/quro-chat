@@ -1063,9 +1063,11 @@
     display:flex!important;flex-direction:column!important;
     overflow:hidden!important;
     padding:0!important;margin:0!important;
-    transform:none!important;
+    transform:translateY(100%)!important;
+    transition:transform .3s cubic-bezier(.32,.72,.0,1)!important;
+    animation:none!important;
   }
-  #tradingPage:not(.open){transform:translateY(100%)!important}
+  #tradingPage.open{transform:translateY(0)!important;animation:none!important}
 
   /* ▸ Top bar — compact 44px header */
   .trd-topbar{
@@ -1624,8 +1626,8 @@
     transition:color 200ms ease,background 200ms ease;
   }
 
-  /* Overlay page slide-up entrances */
-  #tradingPage.open,#stocksPage.open,#leaderPage.open,#settingsPanel.open,#friendsPage.open{
+  /* Overlay page slide-up entrances (tradingPage excluded — uses transition only) */
+  #stocksPage.open,#leaderPage.open,#settingsPanel.open,#friendsPage.open{
     animation:mobileSlideUp .3s var(--ease-out);
   }
 
