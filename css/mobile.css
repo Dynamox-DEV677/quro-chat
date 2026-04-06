@@ -1046,26 +1046,34 @@
 
 
   /* ──────────────────────────────────────────
-     TRADING PAGE
+     TRADING PAGE — Mobile Layout
+     Structure: fixed overlay → topbar (sticky) → body (scrolls)
+     Body stacks: watchlist → center(stock+chart+holdings) → order
      ────────────────────────────────────────── */
+
+  /* Page shell — fullscreen overlay above everything except bottom nav */
   #tradingPage{
-    position:fixed;inset:0;
-    bottom:calc(56px + var(--sb))!important;
-    background:var(--bg);
-    overflow:hidden;
-    padding-bottom:0;
-    display:flex;flex-direction:column;
+    position:fixed!important;
+    top:0!important;left:0!important;right:0!important;
+    bottom:calc(56px + env(safe-area-inset-bottom,0px))!important;
+    background:var(--bg)!important;
+    z-index:var(--z-popover)!important;
+    display:flex!important;flex-direction:column!important;
+    overflow:hidden!important;
+    padding:0!important;margin:0!important;
   }
 
-  /* Top bar — 48px + safe area */
+  /* Top bar — brand + close + stats row */
   .trd-topbar{
     padding:8px 12px;
     padding-top:calc(8px + var(--st));
-    height:calc(48px + var(--st));
+    height:auto;min-height:48px;
     gap:6px;
     flex-wrap:wrap;
     flex-shrink:0;
     display:flex;align-items:center;
+    background:var(--bg);
+    border-bottom:1px solid var(--border2);
   }
   .trd-brand-name{font-size:16px;font-weight:var(--weight-bold)}
   .trd-badge{font-size:7px;padding:2px 6px}
@@ -1076,7 +1084,7 @@
   }
   .trd-close-btn:active{transform:scale(.95)}
 
-  /* Stats row — 4 evenly spaced */
+  /* Stats row — wraps to full width below brand */
   .trd-topbar-stats{
     display:flex!important;
     width:100%;order:10;gap:0;
@@ -1090,20 +1098,22 @@
   .trd-ts-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
   .trd-ts-val{font-size:13px;font-weight:var(--weight-bold);margin-top:1px}
 
-  /* Body — single column scroll */
+  /* Body — THE single scroll container, vertical column */
   .trd-body{
-    flex-direction:column;gap:0;padding:0;
+    display:flex!important;flex-direction:column!important;
+    gap:0!important;padding:0!important;
     overflow-y:auto!important;overflow-x:hidden!important;
     -webkit-overflow-scrolling:touch;
-    flex:1 1 0;min-height:0;
-    padding-bottom:16px;
+    flex:1 1 0!important;min-height:0!important;
+    padding-bottom:16px!important;
   }
 
-  /* Watchlist — horizontal scroll strip, 60px height cards */
+  /* ── Watchlist: horizontal scroll strip ── */
   .trd-wl{
     display:flex!important;width:100%!important;max-height:none!important;
-    border-right:none;border-bottom:1px solid var(--border2);
-    flex-shrink:0;flex-direction:column;overflow:visible;
+    border-right:none!important;border-bottom:1px solid var(--border2);
+    flex-shrink:0!important;flex-direction:column!important;
+    overflow:hidden!important;
   }
   .trd-wl-head{
     padding:8px 12px 6px;
@@ -1150,26 +1160,37 @@
   .trd-wl-price{font-size:14px;font-weight:var(--weight-extra)}
   .trd-wl-chg{font-size:10px;margin-top:0}
 
-  /* Chart — full width, 200px height */
-  .trd-chart-wrap{height:200px;flex:none!important;min-height:200px;overflow:hidden}
+  /* ── Center section: stock header + chart + holdings ── */
+  .trd-center{
+    flex:none!important;min-height:0!important;
+    overflow:hidden!important;
+    width:100%!important;
+  }
+  .trd-center:not(.has-stock){display:none!important}
+  .trd-center.has-stock .trd-no-select{display:none}
 
   /* Stock header */
-  .trd-center{flex:none!important;min-height:0;overflow:visible!important}
-  .trd-center:not(.has-stock){display:none}
-  .trd-center.has-stock .trd-no-select{display:none}
-  .trd-stock-hd{padding:14px 14px}
+  .trd-stock-hd{padding:14px}
   .trd-stock-name{font-size:18px}
   .trd-stock-price{font-size:24px;font-weight:var(--weight-bold)}
   .trd-stock-chg{font-size:11px}
   .trd-stock-meta{font-size:9px}
   .trd-held-strip{font-size:10px;padding:5px 10px;gap:8px}
 
-  /* Holdings tab — 52px rows, 3 columns */
-  .trd-bottom{border-top:1px solid var(--border2);height:auto!important;flex-shrink:0;overflow:visible}
+  /* Chart — fixed 200px */
+  .trd-chart-wrap{height:200px!important;flex:none!important;min-height:200px!important;overflow:hidden!important}
+
+  /* Holdings/History tabs */
+  .trd-bottom{
+    border-top:1px solid var(--border2);
+    height:auto!important;
+    flex-shrink:0!important;
+    overflow:hidden!important;
+  }
   .trd-btabs{padding:6px 10px;gap:4px}
   .trd-btab{font-size:11px;padding:6px 12px}
   .trd-reset-btn{font-size:8px;padding:3px 8px}
-  #trdBottomBody{max-height:none;overflow:visible;padding:4px 10px}
+  #trdBottomBody{max-height:220px;overflow-y:auto!important;padding:4px 10px}
   .trd-hold-item{
     grid-template-columns:1fr auto auto;gap:8px;padding:8px 10px;
     min-height:52px;
@@ -1178,32 +1199,37 @@
   .trd-hold-header span:nth-child(2){display:none}
   .trd-hold-header{grid-template-columns:1fr auto auto;gap:8px;padding:4px 10px}
 
-  /* Order section — full width, inside scroll */
+  /* ── Order section: buy/sell form ── */
   .trd-order{
-    width:100%!important;border-left:none;
-    border-top:1px solid var(--border2);
-    max-height:none;flex-shrink:0;overflow:visible;
+    width:100%!important;
+    border-left:none!important;
+    border-top:1px solid var(--border2)!important;
+    max-height:none!important;
+    flex-shrink:0!important;
+    overflow:hidden!important;
   }
   .trd-portfolio-card{display:none}
+  .trd-mini-chart{display:none!important}
 
-  /* Buy/Sell tabs — 44px height, 50% width each */
+  /* Buy/Sell tabs */
   .trd-tabs{margin:10px 12px 0;border-radius:var(--r-lg)}
   .trd-tab{padding:10px 8px;font-size:12px;height:44px;flex:1}
 
-  /* Quantity input — 48px height, centered */
+  /* Quantity input */
   .trd-form{padding:10px 12px 16px;gap:10px;flex:none}
   .trd-field-label{font-size:9px}
   .trd-qty-input{font-size:18px;padding:10px 14px;border-radius:var(--r-lg);height:48px;text-align:center}
 
-  /* Presets — pills, 36px height */
+  /* Presets */
   .trd-qty-presets{gap:4px;display:flex}
   .trd-preset{padding:8px 4px;font-size:11px;border-radius:var(--r-md);height:36px}
 
+  /* Order summary */
   .trd-order-summary{border-radius:var(--r-lg)}
   .trd-orow{padding:8px 12px;font-size:12px}
   .trd-orow.total{padding:10px 12px;font-size:14px}
 
-  /* Execute button — 48px height, full width */
+  /* Execute button */
   .trd-exec-btn{
     padding:14px;font-size:16px;font-weight:var(--weight-bold);
     border-radius:var(--r-lg);
@@ -1213,10 +1239,8 @@
   }
   .trd-exec-btn:active{transform:scale(.95)}
 
-  .trd-mini-chart{display:none!important}
-  .trd-order{border-top:none}
-
-  /* Confirm modal */
+  /* Confirm modal — bottom sheet style */
+  .trd-confirm-overlay{z-index:calc(var(--z-popover) + 10)!important}
   .trd-confirm-card{padding:24px 20px;border-radius:var(--r-xl)}
   .trd-confirm-title{font-size:16px}
   .trd-confirm-row{font-size:13px}
