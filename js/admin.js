@@ -7,7 +7,7 @@ import { ME } from './state.js';
 import { escH, notify } from './utils.js';
 import { qConfirm } from './modal.js';
 
-const ADMIN_USERNAME = 'dynamox';
+const ADMIN_USERNAMES = ['dynamox', 'quro'];
 const MAX_ATTEMPTS = 5;
 var _useLocalBans = false;
 var _localBans = {};
@@ -23,7 +23,7 @@ function _saveLocalBans() {
 
 // ─── Check if current user is admin ───
 export function isAdmin() {
-  return ME && ME.username && ME.username.toLowerCase() === ADMIN_USERNAME;
+  return ME && ME.username && ADMIN_USERNAMES.indexOf(ME.username.toLowerCase()) !== -1;
 }
 
 // ─── Hide admin UI (call on every login/logout to reset) ───
@@ -208,7 +208,7 @@ export function adminSearchUsers(query) {
           : escH((u.avatar || u.username.charAt(0)).toUpperCase());
         var tag = isBanned ? '<span class="sp-admin-tag">BANNED</span>' : '';
         var btn = '';
-        if (u.username.toLowerCase() !== ADMIN_USERNAME) {
+        if (ADMIN_USERNAMES.indexOf(u.username.toLowerCase()) === -1) {
           if (isBanned) {
             btn = '<button class="sp-admin-unban" onclick="adminUnbanUser(\'' + escH(u.id) + '\',\'' + escH(u.username) + '\')">UNBAN</button>';
           } else {
