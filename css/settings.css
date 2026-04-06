@@ -449,6 +449,17 @@
   .sp-banner-grid{grid-template-columns:repeat(4,1fr)}
 }
 
+/* ═══ Beta tag ═══ */
+.sp-beta-tag{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 6px;margin-left:6px;
+  font-size:9px;font-weight:800;letter-spacing:1px;
+  color:var(--primary);background:rgba(56,161,105,.12);
+  border:1px solid rgba(56,161,105,.2);
+  border-radius:var(--r-sm);line-height:1.2;
+  vertical-align:middle;text-transform:uppercase;
+}
+
 /* ═══ Desktop App Section ═══ */
 .sp-desktop-card{
   margin-top:var(--sp-4);
