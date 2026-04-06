@@ -1055,9 +1055,10 @@
      ✦ Sticky execute button at bottom
      ────────────────────────────────────────── */
 
-  /* ▸ CRITICAL: hide chat input when trading is open */
+  /* ▸ CRITICAL: hide chat input AND bottom nav when trading is open */
   body.trading-open #inputArea,
-  body.trading-open #typingBar{
+  body.trading-open #typingBar,
+  body.trading-open #mobileNav{
     display:none!important;
     pointer-events:none!important;
   }
