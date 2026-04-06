@@ -7,7 +7,7 @@ var _typingUsers={};
 var _typingCleanInt=null;
 
 export function _clearTypingChannel(){
-  if(_typingChannel){try{sb.removeChannel(_typingChannel);}catch(e){}  _typingChannel=null;}
+  if(_typingChannel){try{sb.removeChannel(_typingChannel);}catch(e){/* cleanup */}  _typingChannel=null;}
   _typingUsers={};
   if(_typingCleanInt){clearInterval(_typingCleanInt);_typingCleanInt=null;}
   var bar=document.getElementById('typingBar');if(bar)bar.innerHTML='';

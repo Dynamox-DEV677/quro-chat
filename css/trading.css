@@ -20,7 +20,7 @@
 .trd-ts-label{font-size:8px;font-weight:var(--weight-bold);letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);line-height:1}
 .trd-ts-val{font-size:14px;font-weight:var(--weight-extra);color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.3px;margin-top:1px;line-height:1.2}
 .trd-ts-val.up{color:var(--success)}.trd-ts-val.down{color:var(--error)}
-.trd-close-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:14px;width:30px;height:30px;border-radius:var(--r-md);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--dur-normal) var(--ease-out);flex-shrink:0;margin-left:var(--sp-2)}
+.trd-close-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:14px;width:30px;height:30px;border-radius:var(--r-md);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast);flex-shrink:0;margin-left:var(--sp-2)}
 .trd-close-btn:hover{background:var(--surface-1);color:var(--text)}
 
 /* ─── Main Body (3 columns) ─── */
@@ -34,7 +34,7 @@
 .trd-wl-search:focus{border-color:var(--border-hover)}
 .trd-wl-search::placeholder{color:var(--text-faint)}
 .trd-wl-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.trd-wl-item{padding:var(--sp-2) var(--sp-3);cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.02);transition:all var(--dur-fast) var(--ease-out);min-height:44px;gap:var(--sp-2);border-left:2px solid transparent}
+.trd-wl-item{padding:var(--sp-2) var(--sp-3);cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.02);transition:background var(--dur-fast),color var(--dur-fast);min-height:44px;gap:var(--sp-2);border-left:2px solid transparent}
 .trd-wl-item:hover{background:var(--surface-0)}
 .trd-wl-item.active{background:var(--surface-1);border-left-color:var(--primary)}
 .trd-wl-left{min-width:0;flex:1}
@@ -74,11 +74,11 @@
 /* Bottom tabs */
 .trd-bottom{height:clamp(150px,28vh,220px);border-top:1px solid var(--border2);background:var(--bg);display:flex;flex-direction:column;flex-shrink:0}
 .trd-btabs{display:flex;align-items:center;padding:0 var(--sp-4);border-bottom:1px solid var(--border2);flex-shrink:0;gap:0}
-.trd-btab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-faint);font-size:11px;font-weight:var(--weight-bold);letter-spacing:.5px;padding:10px var(--sp-4);cursor:pointer;font-family:var(--font);transition:all var(--dur-normal) var(--ease-out)}
+.trd-btab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-faint);font-size:11px;font-weight:var(--weight-bold);letter-spacing:.5px;padding:10px var(--sp-4);cursor:pointer;font-family:var(--font);transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast)}
 .trd-btab:hover{color:var(--text-secondary)}
 .trd-btab.active{color:var(--text);border-bottom-color:var(--primary)}
 .trd-btab-spacer{flex:1}
-.trd-reset-btn{padding:4px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-faint);font-size:9px;font-weight:var(--weight-bold);letter-spacing:.5px;cursor:pointer;font-family:var(--font);transition:all var(--dur-fast);margin-right:var(--sp-2)}
+.trd-reset-btn{padding:4px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-faint);font-size:9px;font-weight:var(--weight-bold);letter-spacing:.5px;cursor:pointer;font-family:var(--font);transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast);margin-right:var(--sp-2)}
 .trd-reset-btn:hover{border-color:var(--error);color:var(--error)}
 #trdBottomBody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0}
 
@@ -125,7 +125,7 @@
 
 /* Buy/Sell tabs */
 .trd-tabs{display:flex;margin:var(--sp-3) var(--sp-3) 0;border-radius:var(--r-md);overflow:hidden;background:var(--bg2);border:1px solid var(--border);flex-shrink:0}
-.trd-tab{flex:1;padding:10px var(--sp-2);background:transparent;border:none;color:var(--text-faint);font-size:11px;font-weight:var(--weight-extra);letter-spacing:.5px;cursor:pointer;font-family:var(--font);transition:all var(--dur-normal) var(--ease-out)}
+.trd-tab{flex:1;padding:10px var(--sp-2);background:transparent;border:none;color:var(--text-faint);font-size:11px;font-weight:var(--weight-extra);letter-spacing:.5px;cursor:pointer;font-family:var(--font);transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast)}
 .trd-tab-buy.active{background:rgba(61,168,122,.15);color:var(--success)}
 .trd-tab-sell.active{background:rgba(224,80,80,.15);color:var(--error)}
 
@@ -135,7 +135,7 @@
 .trd-qty-input{width:100%;padding:10px var(--sp-3);background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r-md);color:var(--text);font-size:16px;font-weight:var(--weight-extra);font-family:var(--font-mono);outline:none;text-align:center;-webkit-appearance:none;font-variant-numeric:tabular-nums;transition:border-color var(--dur-normal)}
 .trd-qty-input:focus{border-color:var(--primary)}
 .trd-qty-presets{display:flex;gap:var(--sp-1)}
-.trd-preset{padding:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);font-size:10px;font-weight:var(--weight-bold);cursor:pointer;font-family:var(--font);transition:all var(--dur-fast);flex:1;text-align:center}
+.trd-preset{padding:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);font-size:10px;font-weight:var(--weight-bold);cursor:pointer;font-family:var(--font);transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast);flex:1;text-align:center}
 .trd-preset:hover{background:var(--surface-1);color:var(--text-secondary)}
 .trd-preset:active{transform:scale(.95)}
 
@@ -149,7 +149,7 @@
 .trd-orow.total .trd-oval{font-weight:var(--weight-extra);font-size:14px}
 
 /* Execute button */
-.trd-exec-btn{width:100%;padding:12px;border:none;border-radius:var(--r-md);font-size:12px;font-weight:var(--weight-extra);letter-spacing:.5px;cursor:pointer;font-family:var(--font);transition:all var(--dur-normal) var(--ease-out);flex-shrink:0;margin-top:auto}
+.trd-exec-btn{width:100%;padding:12px;border:none;border-radius:var(--r-md);font-size:12px;font-weight:var(--weight-extra);letter-spacing:.5px;cursor:pointer;font-family:var(--font);transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast);flex-shrink:0;margin-top:auto}
 .trd-exec-buy{background:var(--success);color:#fff;box-shadow:0 4px 20px rgba(61,168,122,.25)}
 .trd-exec-buy:hover{box-shadow:0 6px 28px rgba(61,168,122,.35);transform:translateY(-1px)}
 .trd-exec-sell{background:var(--error);color:#fff;box-shadow:0 4px 20px rgba(224,80,80,.25)}
@@ -166,7 +166,7 @@
 #trdMiniChart{width:100%;flex:1;display:block;min-height:60px}
 
 /* ─── Confirm Modal ─── */
-.trd-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:600;backdrop-filter:blur(6px)}
+.trd-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:var(--z-toast);backdrop-filter:blur(6px)}
 .trd-confirm-overlay.open{display:flex}
 .trd-confirm-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-xl);width:min(380px,90vw);padding:var(--sp-6);animation:bubblePop .3s var(--ease-bubble)}
 .trd-confirm-header{text-align:center;margin-bottom:var(--sp-5)}
@@ -179,9 +179,9 @@
 .trd-confirm-val{color:var(--text);font-weight:var(--weight-bold);font-variant-numeric:tabular-nums}
 .trd-confirm-row.total .trd-confirm-val{font-weight:var(--weight-extra);font-size:16px}
 .trd-confirm-btns{display:flex;gap:var(--sp-3)}
-.trd-confirm-cancel{flex:1;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text-secondary);font-family:var(--font);font-size:13px;font-weight:var(--weight-bold);cursor:pointer;transition:all var(--dur-normal)}
+.trd-confirm-cancel{flex:1;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text-secondary);font-family:var(--font);font-size:13px;font-weight:var(--weight-bold);cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast)}
 .trd-confirm-cancel:hover{background:var(--surface-active)}
-.trd-confirm-exec{flex:1;padding:12px;border:none;border-radius:var(--r-md);font-family:var(--font);font-size:13px;font-weight:var(--weight-extra);cursor:pointer;letter-spacing:.3px;transition:all var(--dur-normal)}
+.trd-confirm-exec{flex:1;padding:12px;border:none;border-radius:var(--r-md);font-family:var(--font);font-size:13px;font-weight:var(--weight-extra);cursor:pointer;letter-spacing:.3px;transition:background var(--dur-fast),color var(--dur-fast)}
 .trd-confirm-exec.buy{background:var(--success);color:#fff}
 .trd-confirm-exec.buy:hover{box-shadow:0 4px 16px rgba(61,168,122,.3)}
 .trd-confirm-exec.sell{background:var(--error);color:#fff}

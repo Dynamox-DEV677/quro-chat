@@ -2,6 +2,7 @@
 import { sb } from './config.js';
 import { ME } from './state.js';
 import { notify } from './utils.js';
+import { qConfirm, qPrompt } from './modal.js';
 
 // ─── Reply ───
 var replyTo=null;
@@ -20,11 +21,11 @@ export function clearReply(){
 }
 
 // ─── Edit / Delete ───
-export function editMsg(msgId,currentText){
-  var newText=prompt('Edit your message:',currentText);
+export async function editMsg(msgId,currentText){
+  var newText=await qPrompt('Edit your message',currentText);
   if(newText===null)return;
   newText=newText.trim();
-  if(!newText){if(confirm('Delete this message?'))deleteMsg(msgId);return;}
+  if(!newText){var del=await qConfirm('Delete message','This message will be removed permanently.');if(del)deleteMsg(msgId,true);return;}
   sb.from('messages').update({text:newText}).eq('id',msgId).then(function(res){
     if(res.error){notify('Edit failed: '+res.error.message,'error');return;}
     var el=document.querySelector('[data-msgid="'+msgId+'"]');
@@ -36,8 +37,8 @@ export function editMsg(msgId,currentText){
   });
 }
 
-export function deleteMsg(msgId){
-  if(!confirm('Delete this message?'))return;
+export async function deleteMsg(msgId,skipConfirm){
+  if(!skipConfirm){var ok=await qConfirm('Delete message','This message will be removed permanently.');if(!ok)return;}
   sb.from('messages').delete().eq('id',msgId).then(function(res){
     if(res.error){notify('Delete failed: '+res.error.message,'error');return;}
     var el=document.querySelector('[data-msgid="'+msgId+'"]');

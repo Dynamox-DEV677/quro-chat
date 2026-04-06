@@ -44,12 +44,12 @@ export function _startRingTone(){
     }
     beep();
     set_callRinging(setInterval(function(){beep();},2000));
-  }catch(e){}
+  }catch(e){/* Web Audio API unavailable */}
 }
 
 export function _stopRingTone(){
   clearInterval(_callRinging);set_callRinging(null);
-  if(window._ringCtx){try{window._ringCtx.close();}catch(e){}window._ringCtx=null;}
+  if(window._ringCtx){try{window._ringCtx.close();}catch(e){/* cleanup */}window._ringCtx=null;}
 }
 
 // ─── Listen for incoming calls globally ───
@@ -111,7 +111,6 @@ export function _subscribeCallSignals(){
     }
     set_callTarget({id:data.from,username:data.callerName||'Unknown',photo:data.callerPhoto||'',avatar:(data.callerName||'?').charAt(0).toUpperCase(),name_font:data.callerFont||'default'});
     _setupSignaling().then(function(){
-      console.log('[Call] Callee signaling ready, sending ready signal to caller');
       if(_callSignalChannel){
         _callSignalChannel.send({type:'broadcast',event:'call-signal',payload:{from:ME.id,type:'ready'}});
       }
@@ -149,7 +148,6 @@ export async function acceptIncoming(){
       _gcSignalChannel.send({type:'broadcast',event:'gc-signal',payload:{
         from:ME.id,type:'gc-join'
       }});
-      console.log('[GC] Sent gc-join signal');
 
       _gcUpdateStatus();
     }catch(e){
@@ -189,7 +187,6 @@ export async function acceptIncoming(){
     };
 
     _rtcPeer.ontrack=function(e){
-      console.log('[Call] Remote track received:',e.track.kind);
       if(e.streams&&e.streams[0]){
         document.getElementById('callRemoteVideo').srcObject=e.streams[0];
         if(_callType==='voice'){
@@ -203,7 +200,6 @@ export async function acceptIncoming(){
     };
 
     _rtcPeer.onconnectionstatechange=function(){
-      console.log('[Call] Callee connection state:',_rtcPeer.connectionState);
       if(_rtcPeer.connectionState==='connected'){
         _callConnected();
       }else if(_rtcPeer.connectionState==='disconnected'||_rtcPeer.connectionState==='failed'){
@@ -212,7 +208,6 @@ export async function acceptIncoming(){
     };
 
     _rtcPeer.oniceconnectionstatechange=function(){
-      console.log('[Call] Callee ICE state:',_rtcPeer.iceConnectionState);
       if(_rtcPeer.iceConnectionState==='connected'||_rtcPeer.iceConnectionState==='completed'){
         if(_callState!=='connected')_callConnected();
       }else if(_rtcPeer.iceConnectionState==='failed'){
@@ -223,14 +218,12 @@ export async function acceptIncoming(){
 
     // Set remote offer, create answer
     await _rtcPeer.setRemoteDescription(new RTCSessionDescription(_incomingOffer.sdp));
-    console.log('[Call] Remote description set, processing',_iceCandidateQueue.length,'queued ICE candidates');
     for(var i=0;i<_iceCandidateQueue.length;i++){
       await _rtcPeer.addIceCandidate(new RTCIceCandidate(_iceCandidateQueue[i].candidate)).catch(function(){});
     }
     set_iceCandidateQueue([]);
     var answer=await _rtcPeer.createAnswer();
     await _rtcPeer.setLocalDescription(answer);
-    console.log('[Call] Answer created and sent');
     _callSignalChannel.send({type:'broadcast',event:'call-signal',payload:{
       from:ME.id,type:'answer',sdp:_rtcPeer.localDescription
     }});

@@ -9,6 +9,7 @@ import {
   unreadCounts
 } from './state.js';
 import { escH, notify } from './utils.js';
+import { qConfirm, qPrompt } from './modal.js';
 import { updateServerBadge, clearServerUnread } from './notifications.js';
 import { loadServerChannels } from './channels.js';
 import { goHome, closeDrawer } from './navigation.js';
@@ -141,7 +142,7 @@ export async function joinServer(serverId){
 }
 
 export async function createServer(){
-  var name=prompt('Server name:');if(!name||!name.trim())return;
+  var name=await qPrompt('Create a server','',{inputPlaceholder:'Server name',confirmText:'Create',icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>'});if(!name||!name.trim())return;
   var res=await sb.from('servers').insert({name:name.trim(),owner_id:ME.id,description:''}).select().single();
   if(res.error){notify('Failed: '+res.error.message,'error');return;}
   var srv=res.data;
@@ -241,7 +242,7 @@ export function copyInviteLink(){
 export async function leaveServer(){
   if(!curServer||!ME)return;
   if(_curServerData&&_curServerData.owner_id===ME.id){notify('You cannot leave a server you own. Transfer ownership first.','error');return;}
-  if(!confirm('Leave this server?'))return;
+  var ok=await qConfirm('Leave server','You will lose access to all channels in this server.');if(!ok)return;
   await sb.from('server_members').delete().eq('server_id',curServer).eq('user_id',ME.id);
   notify('Left the server.','info');
   closeServerSettings();

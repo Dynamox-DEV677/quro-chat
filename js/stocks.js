@@ -3,6 +3,7 @@
 // Extracted from index.html <script> block (lines 5709-6279)
 // ═══════════════════════════════════════
 import { SUPABASE_URL, SUPABASE_ANON } from './config.js';
+import { isIndianMarketOpen, getMarketStatusInfo } from './utils.js';
 
 // ─── Data constants ───
 export var STK_STOCKS=[
@@ -65,7 +66,7 @@ export var STK_INDICES=[
 ];
 
 // ─── Module-level state ───
-var stkQuotes={}, stkCurFilter='all', stkDetailSym='', stkDetailRange='1d';
+var stkQuotes={}, stkCurFilter='all', stkDetailSym='', stkDetailRange='1d', stkDetailInterval='5m', _stkSearchOpen=false;
 
 export function stk_fmtIN(n){
   if(isNaN(n))return '—';
@@ -162,6 +163,17 @@ export function openStocksPanel(){
   document.getElementById('srvStocksBtn').classList.add('active');
   document.querySelectorAll('.sb-nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('navStocks').classList.add('active');
+
+  // Check Indian market hours
+  var status=getMarketStatusInfo();
+  var overlay=document.getElementById('stkMarketClosed');
+  if(!status.open){
+    if(overlay) overlay.classList.add('show');
+    _updateMarketClosedUI('stkMarketClosed',status);
+    stk_stopLiveRefresh();
+    return;
+  }
+  if(overlay) overlay.classList.remove('show');
   stk_loadAll();
   stk_startLiveRefresh();
 }
@@ -170,15 +182,15 @@ export function closeStocksPanel(){
   document.getElementById('stocksPage').classList.remove('open');
   document.getElementById('srvStocksBtn').classList.remove('active');
   stk_stopLiveRefresh();
-  var mn=document.getElementById('mnStocks');
-  if(mn)mn.classList.remove('active');
+  var mn=document.getElementById('mnChats');
+  if(mn)mn.classList.add('active');
   if(window.appMode==='home'){document.querySelectorAll('.sb-nav-item').forEach(function(n){n.classList.remove('active');});document.getElementById('navHome').classList.add('active');}
 }
 
 export function mobileOpenStocks(){
   var btns=document.querySelectorAll('.mob-nav-btn');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
-  document.getElementById('mnStocks').classList.add('active');
+  var msBtn=document.getElementById('mnChats');if(msBtn)msBtn.classList.remove('active');
   openStocksPanel();
 }
 
@@ -253,10 +265,13 @@ export async function stk_loadStocks(){
 }
 
 // ─── Auto-refresh live prices every 10 seconds ───
+var _stkRefreshCycle=0;
 export function stk_startLiveRefresh(){
   if(_stkLiveRefreshInt)return;
+  _stkRefreshCycle=0;
   _stkLiveRefreshInt=setInterval(async function(){
     if(!document.getElementById('stocksPage').classList.contains('open'))return;
+    _stkRefreshCycle++;
     var gotReal=await stk_fetchQuotes();
     if(gotReal){
       _stkHasRealData=true;
@@ -273,18 +288,20 @@ export function stk_startLiveRefresh(){
         }
       });
     }
-    // Also refresh indices
-    for(var i=0;i<STK_INDICES.length;i++){
-      (function(idx,i){
-        stk_fetchChart(idx.s).then(function(data){
-          if(data&&data.closes&&data.closes.length>=2){
-            var prev=data.prev,ch=data.price-prev,pc=(ch/prev)*100;
-            stk_renderIndex(i,data.closes,data.price,ch,pc,idx);
-          }
-        });
-      })(STK_INDICES[i],i);
+    // Refresh indices every 3rd cycle (9s) to reduce API load
+    if(_stkRefreshCycle%3===0){
+      for(var i=0;i<STK_INDICES.length;i++){
+        (function(idx,i){
+          stk_fetchChart(idx.s).then(function(data){
+            if(data&&data.closes&&data.closes.length>=2){
+              var prev=data.prev,ch=data.price-prev,pc=(ch/prev)*100;
+              stk_renderIndex(i,data.closes,data.price,ch,pc,idx);
+            }
+          });
+        })(STK_INDICES[i],i);
+      }
     }
-  },10000);
+  },3000);
 }
 
 export function stk_stopLiveRefresh(){
@@ -299,8 +316,35 @@ export function stkFilter(f,btn){
   stk_renderGrid();
 }
 
+var _stkSearchQuery='';
+
+export function stkToggleSearch(){
+  _stkSearchOpen=!_stkSearchOpen;
+  var bar=document.getElementById('stkSearchBar');
+  if(bar){
+    bar.style.display=_stkSearchOpen?'flex':'none';
+    if(_stkSearchOpen){
+      var inp=document.getElementById('stkSearchInput');
+      if(inp){inp.value='';inp.focus();}
+      _stkSearchQuery='';
+    } else {
+      _stkSearchQuery='';
+      stk_renderGrid();
+    }
+  }
+}
+
+export function stkSearchFilter(q){
+  _stkSearchQuery=q.trim().toLowerCase();
+  stk_renderGrid();
+}
+
 export function stk_renderGrid(){
   var stocks=STK_STOCKS.slice();
+  // Apply search filter
+  if(_stkSearchQuery){
+    stocks=stocks.filter(function(s){return s.n.toLowerCase().indexOf(_stkSearchQuery)!==-1||s.s.toLowerCase().indexOf(_stkSearchQuery)!==-1||s.sec.toLowerCase().indexOf(_stkSearchQuery)!==-1;});
+  }
   if(stkCurFilter==='gain')stocks=stocks.filter(function(s){return(stkQuotes[s.s]&&stkQuotes[s.s].chg>=0);});
   if(stkCurFilter==='loss')stocks=stocks.filter(function(s){return(stkQuotes[s.s]&&stkQuotes[s.s].chg<0);});
   stocks.sort(function(a,b){
@@ -362,11 +406,11 @@ var stkCurrentBase=0;
 // ─── Crosshair state ───
 var _crosshairState={};  // keyed by canvas id
 
-export function genOHLC(base,count,vol){
+export function genOHLC(base,count,vol,intSec){
   vol=vol||0.009;
   var candles=[],price=base;
   var now=Math.floor(Date.now()/1000);
-  var intSec=5*60;
+  intSec=intSec||5*60;
   for(var i=0;i<count;i++){
     var o=price;
     var change=o*vol*(Math.random()*2-0.97);
@@ -695,9 +739,17 @@ export async function stk_loadDetailChart(sym,range){
   var q=stkQuotes[sym];if(q&&q.price)base=q.price;
   stkCurrentBase=base;
 
-  var countMap={'1d':80,'5d':50,'1mo':30,'3mo':90,'1y':52};
-  var count=countMap[range]||80;
-  stkCurrentCandles=genOHLC(base,count,0.006+(base>5000?0.003:0.004));
+  var intCountMap={'1m':375,'5m':80,'15m':26,'30m':13,'1h':7};
+  var count;
+  if(range==='1d' && intCountMap[stkDetailInterval]){
+    count=intCountMap[stkDetailInterval];
+  } else {
+    var countMap={'1d':80,'5d':50,'1mo':30,'3mo':90,'1y':52};
+    count=countMap[range]||80;
+  }
+  var intSecMap={'1m':60,'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400};
+  var intSec=intSecMap[stkDetailInterval]||300;
+  stkCurrentCandles=genOHLC(base,count,0.006+(base>5000?0.003:0.004),intSec);
   loader.style.display='none';
   drawCandlestick(cv,stkCurrentCandles);
   attachCrosshair(cv);
@@ -715,7 +767,8 @@ export async function stk_loadDetailChart(sym,range){
     '<div class="stkd-stat"><div class="stkd-stat-label">52W Low</div><div class="stkd-stat-val">\u20B9'+stk_fmtIN(base*0.65)+'</div></div>';
 
   // Try real OHLC in background
-  var intMap={'1d':'5m','5d':'30m','1mo':'1d','3mo':'1d','1y':'1wk'};
+  var intMap={'1d':stkDetailInterval||'5m','5d':'30m','1mo':'1d','3mo':'1d','1y':'1wk'};
+  if(range==='5d'&&(stkDetailInterval==='30m'||stkDetailInterval==='1h')){intMap['5d']=stkDetailInterval;}
   (function(s,r,interval){
     stk_fetchOHLC(s,r,interval).then(function(data){
       if(data&&data.candles&&data.candles.length>=10){
@@ -751,13 +804,49 @@ export function changeStkRange(range,btn){
   var btns=document.querySelectorAll('.stkd-range');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
   btn.classList.add('active');
+  // Show/hide interval buttons (only for intraday ranges)
+  var intvRow=document.getElementById('stkdIntervals');
+  if(intvRow) intvRow.style.display=(range==='1d'||range==='5d')?'flex':'none';
+  // Reset interval to default for the range
+  if(range==='1d') stkDetailInterval='5m';
+  else if(range==='5d') stkDetailInterval='30m';
+  else stkDetailInterval='1d';
+  // Update active interval button
+  var ibtns=document.querySelectorAll('.stkd-intv');
+  for(var j=0;j<ibtns.length;j++){
+    ibtns[j].classList.toggle('active', ibtns[j].textContent.toLowerCase()===stkDetailInterval);
+  }
   stk_loadDetailChart(stkDetailSym,range);
+}
+
+export function changeStkInterval(interval,btn){
+  stkDetailInterval=interval;
+  var btns=document.querySelectorAll('.stkd-intv');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  // Map interval to appropriate range if needed
+  if(interval==='1d'&&(stkDetailRange==='1d'||stkDetailRange==='5d')){
+    stkDetailRange='1mo';
+    var rbtns=document.querySelectorAll('.stkd-range');
+    for(var j=0;j<rbtns.length;j++){rbtns[j].classList.remove('active');if(rbtns[j].textContent==='1M')rbtns[j].classList.add('active');}
+  }
+  stk_loadDetailChart(stkDetailSym,stkDetailRange);
 }
 
 export function closeStkDetail(e, force){
   if(!force && e&&e.target!==document.getElementById('stkDetailOverlay'))return;
   document.getElementById('stkDetailOverlay').classList.remove('open');
   if(stkLiveInterval){clearInterval(stkLiveInterval);stkLiveInterval=null;}
+}
+
+// ─── Market closed UI helper ───
+function _updateMarketClosedUI(overlayId,status){
+  var overlay=document.getElementById(overlayId);
+  if(!overlay) return;
+  var reason=overlay.querySelector('.mkt-closed-reason');
+  var hint=overlay.querySelector('.mkt-closed-hint');
+  if(reason) reason.textContent=status.reason||'Market closed';
+  if(hint) hint.textContent=status.hint||'Try again during market hours (9:15 AM – 3:30 PM IST)';
 }
 
 // Re-export stkQuotes for cross-module access

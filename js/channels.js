@@ -51,7 +51,7 @@ export async function loadServerChannels(serverId){
   if(dItems)dItems.innerHTML='';
   // Clean up old VC presence subscriptions
   Object.keys(_vcPresenceChannels).forEach(function(k){
-    try{sb.removeChannel(_vcPresenceChannels[k]);}catch(e){}
+    try{sb.removeChannel(_vcPresenceChannels[k]);}catch(e){/* cleanup */}
   });
   _vcPresenceChannels={};_vcUsers={};
   var res=await sb.from('channels').select('*').eq('server_id',serverId).order('position');
@@ -279,7 +279,7 @@ export function _notifyVCStarted(chName,chType){
 
 export async function _subscribeServerVCNotifications(){
   // Clean old
-  _srvNotifChannels.forEach(function(ch){try{sb.removeChannel(ch);}catch(e){}});
+  _srvNotifChannels.forEach(function(ch){try{sb.removeChannel(ch);}catch(e){/* cleanup */}});
   _srvNotifChannels=[];
   if(!ME)return;
   var res=await sb.from('server_members').select('server_id, servers(id,name)').eq('user_id',ME.id);
@@ -323,7 +323,7 @@ export function openChannel(name){
   document.getElementById('msgInput').placeholder='Message #'+name+'\u2026';
   document.getElementById('inputArea').style.display='';
   subscribeAndRender();
-  if(isMobile()){closeDrawer();closeMobileMembers();document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mnChat').classList.add('active');updateSidebarToggleIcon();}
+  if(isMobile()){closeDrawer();closeMobileMembers();document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mnChats').classList.add('active');updateSidebarToggleIcon();}
 }
 
 var _addChType='text';

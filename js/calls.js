@@ -203,7 +203,7 @@ export function _setupCallUI(target,type,statusText){
 export function _setupSignaling(){
   return new Promise(function(resolve){
     // Clean up old channel
-    if(_callSignalChannel){try{sb.removeChannel(_callSignalChannel);}catch(e){}set_callSignalChannel(null);}
+    if(_callSignalChannel){try{sb.removeChannel(_callSignalChannel);}catch(e){/* cleanup */}set_callSignalChannel(null);}
 
     // Channel name: sorted user IDs for consistency
     var ids=[ME.id,_callTarget.id].sort();
@@ -217,7 +217,6 @@ export function _setupSignaling(){
 
       if(data.type==='ready'&&_callState==='ringing'&&window._pendingOfferStream){
         // Callee is ready — now send the offer
-        console.log('[Call] Callee ready signal received, sending offer now');
         clearTimeout(window._callerReadyTimeout);
         _createPeerAndOffer(window._pendingOfferStream);
         window._pendingOfferStream=null;
@@ -242,7 +241,6 @@ export function _setupSignaling(){
 
     _callSignalChannel.subscribe(function(status){
       if(status==='SUBSCRIBED'){
-        console.log('[Call] Signaling channel subscribed:',chName);
         resolve();
       }
     });
@@ -267,7 +265,6 @@ export function _createPeerAndOffer(localStream){
   };
 
   _rtcPeer.ontrack=function(e){
-    console.log('[Call] Caller received remote track:',e.track.kind);
     if(e.streams&&e.streams[0]){
       document.getElementById('callRemoteVideo').srcObject=e.streams[0];
       // For voice calls, we still need audio — create hidden audio element
@@ -282,7 +279,6 @@ export function _createPeerAndOffer(localStream){
   };
 
   _rtcPeer.onconnectionstatechange=function(){
-    console.log('[Call] Connection state:',_rtcPeer.connectionState);
     if(_rtcPeer.connectionState==='connected'){
       _callConnected();
     }else if(_rtcPeer.connectionState==='disconnected'||_rtcPeer.connectionState==='failed'){
@@ -291,7 +287,6 @@ export function _createPeerAndOffer(localStream){
   };
 
   _rtcPeer.oniceconnectionstatechange=function(){
-    console.log('[Call] ICE connection state:',_rtcPeer.iceConnectionState);
     if(_rtcPeer.iceConnectionState==='checking'){
       _setCallState('connecting');
     }else if(_rtcPeer.iceConnectionState==='connected'||_rtcPeer.iceConnectionState==='completed'){
@@ -308,7 +303,6 @@ export function _createPeerAndOffer(localStream){
   _rtcPeer.createOffer({offerToReceiveAudio:true,offerToReceiveVideo:_callType==='video'}).then(function(offer){
     return _rtcPeer.setLocalDescription(offer);
   }).then(function(){
-    console.log('[Call] Offer created and sent');
     _callSignalChannel.send({type:'broadcast',event:'call-signal',payload:{
       from:ME.id,type:'offer',sdp:_rtcPeer.localDescription,
       callType:_callType,callerName:ME.username,callerPhoto:ME.photo||'',callerFont:ME.name_font||'default'
@@ -358,10 +352,8 @@ export function _handleCallAccepted(data){
   _stopRingTone();
   set_callState('connecting');
   _setCallState('connecting');
-  console.log('[Call] Answer received, setting remote description');
   if(_rtcPeer){
     _rtcPeer.setRemoteDescription(new RTCSessionDescription(data.sdp)).then(function(){
-      console.log('[Call] Remote desc set on caller, flushing',_iceCandidateQueue.length,'queued ICE candidates');
       _iceCandidateQueue.forEach(function(d){
         _rtcPeer.addIceCandidate(new RTCIceCandidate(d.candidate)).catch(function(e){
           console.warn('[Call] Queued ICE add failed:',e);
@@ -380,7 +372,6 @@ export function _handleRemoteICE(data){
     });
   }else{
     _iceCandidateQueue.push(data);
-    console.log('[Call] ICE candidate queued (remote desc not ready), queue size:',_iceCandidateQueue.length);
   }
 }
 
@@ -467,7 +458,7 @@ export function _cleanupCall(closeUI){
   if(window._callStream){window._callStream.getTracks().forEach(function(t){t.stop();});window._callStream=null;}
 
   // Close peer connection
-  if(_rtcPeer){try{_rtcPeer.close();}catch(e){}set_rtcPeer(null);}
+  if(_rtcPeer){try{_rtcPeer.close();}catch(e){/* cleanup */}set_rtcPeer(null);}
 
   // Remove remote audio element
   var ra=document.getElementById('remoteAudio');if(ra)ra.remove();
@@ -477,7 +468,7 @@ export function _cleanupCall(closeUI){
   var lv=document.getElementById('callLocalVideo');if(lv)lv.srcObject=null;
 
   // Remove signaling channel
-  if(_callSignalChannel){try{sb.removeChannel(_callSignalChannel);}catch(e){}set_callSignalChannel(null);}
+  if(_callSignalChannel){try{sb.removeChannel(_callSignalChannel);}catch(e){/* cleanup */}set_callSignalChannel(null);}
 
   set_incomingOffer(null);set_iceCandidateQueue([]);
 

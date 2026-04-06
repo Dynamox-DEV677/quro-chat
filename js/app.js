@@ -27,10 +27,11 @@ import { handleFileUpload } from './file-upload.js';
 import { initDragDrop } from './drag-drop.js';
 import { openFriendsPage, closeFriendsPage, fpSwitchTab, fpRender, fpOpenDM } from './friends.js';
 import { openLeaderPage, closeLeaderPage, loadLeaderboard } from './leaderboard.js';
-import { openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail, changeStkRange, stkFilter, mobileOpenStocks, stk_startLiveRefresh } from './stocks.js';
+import { openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail, changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks, stk_startLiveRefresh } from './stocks.js';
 import { openTradingPage, closeTradingPage, trd_execute, trd_select, trd_setTab, trd_setMax, trd_setQty, trd_showBottom, trd_filterWatch, trd_updateOrder, trd_resetPortfolio, closeTrdConfirm, confirmTrdExec } from './trading.js';
 import { initSplash } from './splash.js';
 import { startAuthBubbles, stopAuthBubbles } from './auth-bubbles.js';
+import { qConfirm, qPrompt, qAlert } from './modal.js';
 
 // ═══ Expose all onclick/onchange/oninput/onkeydown functions to window ═══
 // This is needed because HTML uses inline event handlers (onclick="fn()")
@@ -89,12 +90,14 @@ Object.assign(window, {
   openLeaderPage, closeLeaderPage, loadLeaderboard,
   // Stocks
   openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail,
-  changeStkRange, stkFilter, mobileOpenStocks,
+  changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks,
   // Trading
   openTradingPage, closeTradingPage, trd_execute, trd_select,
   trd_setTab, trd_setMax, trd_setQty, trd_showBottom,
   trd_filterWatch, trd_updateOrder, trd_resetPortfolio,
   closeTrdConfirm, confirmTrdExec,
+  // Modal
+  qConfirm, qPrompt, qAlert,
   // Shared utils needed by inline handlers
   escH, getMsgKey, isMobile, setAvatarEl, showLoading,
   // State access (for inline handlers that check state)
@@ -169,7 +172,7 @@ if('serviceWorker' in navigator){
   } catch(bootErr) {
     console.warn('[Quro] Session check failed:', bootErr.message);
     // Clear stale session to avoid GoTrue lock issues
-    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {}
+    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {/* cleanup stale session */}
     showLoading(false);
   }
 })();

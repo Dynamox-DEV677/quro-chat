@@ -5,6 +5,7 @@ import { sb } from './config.js';
 import { ME } from './state.js';
 import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair } from './stocks.js';
 import { escH, notify } from './utils.js';
+import { qConfirm } from './modal.js';
 
 // ─── Module state ───
 export var trdPrices = {};
@@ -187,9 +188,13 @@ export function trd_renderWatchlist() {
   }).join('');
 }
 
+var _wlFilterTimer = 0;
 export function trd_filterWatch(q) {
-  trdWlFilter = q.trim().toLowerCase();
-  trd_renderWatchlist();
+  clearTimeout(_wlFilterTimer);
+  _wlFilterTimer = setTimeout(function() {
+    trdWlFilter = q.trim().toLowerCase();
+    trd_renderWatchlist();
+  }, 120);
 }
 
 // ─── Select stock ───
@@ -563,7 +568,7 @@ export async function trd_renderHistory() {
 
 // ─── Reset portfolio ───
 export async function trd_resetPortfolio() {
-  if (!confirm('Reset portfolio to \u20B91,00,000?\nAll holdings and trade history will be cleared.')) return;
+  var ok=await qConfirm('Reset portfolio','All holdings and trade history will be cleared. Cash resets to \u20B91,00,000.');if(!ok)return;
   if (!ME || !ME.id) return;
 
   try {
@@ -688,3 +693,4 @@ function _findStock(sym) {
   }
   return null;
 }
+

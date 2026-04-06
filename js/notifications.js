@@ -18,7 +18,7 @@ export function showDesktopNotif(title,body,icon){
   try{var n=new Notification(title,{body:body,icon:icon||'huddleicon.png',badge:'huddleicon.png',tag:'quro-msg-'+Date.now()});
     n.onclick=function(){window.focus();n.close();};
     setTimeout(function(){n.close();},5000);
-  }catch(e){}
+  }catch(e){/* desktop notifications unsupported */}
 }
 
 // ─── Notification Sound ───
@@ -28,7 +28,7 @@ export function playNotifSound(){
   try{
     if(!_notifAudio){_notifAudio=new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2JkJWNhXdqYGFufomTnJSMgHNkWl1rfIqWn5mShXdrX1tie4mVnZiRhXhtYl5peoqXnZqTiX1yZWBmdYaUnp2YkYZ7cGVianmIlZ2bmJCFe3BmZGt7iJWdm5eQhHtwZmRqe4mVnZuXkIR7cGZjanuJlZ6cl5GFe3BmY2p6ipWenJiShXtwZmRqe4qVnpyXkoV7cGZkanuKlZ6cl5KFe3BmZGp6ipWenJeRhXxwZmRqeoqVnpyYkoV7b2ZkanuKlZ+cmJKFe3BnZGp7ipWenJiShXtwZmRqe4qVnpyYkoV7cGZkanuKlZ6cl5KFe3BmZGp6ipWenJeRhXtwZ2VqeoqVnpyYkod8cGdka3uLlp6cmJKHfHFnZGp7i5WenJmTh3xxZ2Vre4uWnpyZk4d8cWdla3uLlp6cmZOHfHFnZWt7i5aenJmTh3xxZ2Vre4uWnpyZk4d8cWdla3uLlp6cmZOHfHFnZWt7i5aenJmTiHxxZ2Vre4uWnpyZk4h8cWdlanqMlp6dmZOIfHFnZWt7jJafnZqTiHxxZ2Vre4yWn52ak4h8cWdla3uMlp+dmpSIfHFoZmt7jJafnZqUiHxxaGZre4yWn52alIh8cmhma3yNlp+dmpSIfHJoZmt8jZafnZqUiXxyaGZrfI2Wn52alIl8cmhma3yNlp+dm5SJfXJoZmt8jZafnZuViX1yaGZrfI2Xn52blYl9cmhma3yNl5+dm5WJfXJpZmt8jZefnZuViX1yaWZrfI2Xn56blYl9cmhma3yOl5+em5aJfXNoZ2x8jpefnpuWin1zaGdsfI6Xn56blop9c2hna32Ol5+empWJfXJoZmt8jZefnpuViX1yaGZrfI2Xn52blYl9cmhma3yNl5+dm5WJfXJoZmt8jZafnZuUiXxyaGZrfI2Wn52alIl8cmhma3yNlp+dmpSJfHJoZmt8jZafnZqUiHxyaGZre4yWn52alIh8cWhma3uMlp+dmpOIfHFoZmt7jJafnZqTiHxxZ2Vre4yWn52ak4h8cWdla3uMlp6dmZOIfHFnZWt7jJaenZmTiHxxZ2Vre4yWnp2Zk4d8cWdla3uLlp6cmZOHfHFnZWt7i5aenJmTh3xxZ2Vre4uWnpyZk4d8cWdla3uLlp6cmZOHfHFnZWt7i5aenJmTh3xxZ2Vre4uWnpyYkoZ8cGdka3uLlZ6cmJKGfHBnZGp7i5WenJiShnxwZmRqe4uVnpyYkoZ8cGZkanuLlZ6cmJKGfHBnZGp7ipWenJiShXtwZmRqe4qVnpyYkoV7cGZkanuKlZ6cl5KFe3BmZGp6ipWenJeShXtwZmRqe4qVnpyXkoV7cGZkanuKlZ6cl5KFe3BmZGp6ipWenJeRhXtwZmRqeoqVnpyXkYV7cGZjanuJlZ6cl5GFe3BmY2p6iZWenJeRhXtwZmNqeomVnpyXkYV8cGZjanuJlZ6cl5GFe3BnZGp6ipWenJeRhXtwZmRqeoqVnpyXkYV7cGZkanuKlZ6cl5KFe3BmZGp7ipWenJeShXtwZg==');}
     _notifAudio.volume=0.3;_notifAudio.currentTime=0;_notifAudio.play().catch(function(){});
-  }catch(e){}
+  }catch(e){/* audio playback blocked or unsupported */}
 }
 
 // ─── Unread Message Tracking ───
@@ -102,7 +102,7 @@ export function clearGCUnread(channelKey){
 }
 
 export async function subscribeGlobalMessages(){
-  if(globalMsgSub){try{sb.removeChannel(globalMsgSub);}catch(e){}globalMsgSub=null;}
+  if(globalMsgSub){try{sb.removeChannel(globalMsgSub);}catch(e){/* cleanup */}globalMsgSub=null;}
   if(!ME)return;
   // Get all server IDs the user is in
   var res=await sb.from('server_members').select('server_id').eq('user_id',ME.id);

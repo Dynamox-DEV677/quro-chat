@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════
-// DM (Direct Messages) Module
+// DM (Direct Messages) Module — performance-optimized
 // ═══════════════════════════════════════
 import { sb } from './config.js';
 import { ME, REAL_USERS, curDMUser, setCurDMUser, chatMode, setChatMode, curGroupChat, setCurGroupChat, membersOpen, setMembersOpen, _dmLastMsg, set_dmLastMsg, _usTimeout, set_usTimeout } from './state.js';
@@ -26,7 +26,6 @@ export function buildDMList(){
   const dmEmpty=document.getElementById('dmEmpty');
   const dmSkel=document.getElementById('dmSkeleton');
   if(dmSkel)dmSkel.style.display='none';
-  // Sort users: those with recent messages first, then by message time desc
   var sorted=REAL_USERS.slice().sort(function(a,b){
     var ka='dm_'+[ME.id,a.id].sort().join('_');
     var kb='dm_'+[ME.id,b.id].sort().join('_');
@@ -37,22 +36,37 @@ export function buildDMList(){
     if(ta&&tb)return ta>tb?-1:ta<tb?1:0;
     return 0;
   });
+
+  // ── Perf: build items once into a DocumentFragment, clone for second list ──
+  var frag=document.createDocumentFragment();
+  sorted.forEach(u=>{
+    const el=document.createElement('div');el.className='dm-item';el.dataset.dmid=u.id;
+    const dotCls=u.status==='on'?'on':u.status==='idle'?'idle':'off';
+    el.innerHTML=`<div class="dm-av" style="position:relative;overflow:visible">${u.photo?`<img src="${escH(u.photo)}" loading="lazy">`:`<span>${escH(u.avatar)}</span>`}<div class="dm-dot ${dotCls}"></div>${decorRingHTML(u.decor)}</div><span class="dm-name nf-${u.name_font||'default'}"${u.name_color?' style="color:'+u.name_color+'"':''}>${escH(u.username)}</span>`;
+    el.onclick=()=>{openDM(u);closeDrawer();};
+    frag.appendChild(el);
+  });
+
   ['dmList','drawerDmList'].forEach(listId=>{
-    const list=document.getElementById(listId);if(!list)return;list.innerHTML='';
+    const list=document.getElementById(listId);if(!list)return;
+    list.innerHTML='';
     if(!sorted.length){if(listId==='dmList'&&dmEmpty)dmEmpty.style.display='flex';return;}
     if(listId==='dmList'&&dmEmpty)dmEmpty.style.display='none';
-    sorted.forEach(u=>{
-      const el=document.createElement('div');el.className='dm-item';el.dataset.dmid=u.id;
-      const dotCls=u.status==='on'?'on':u.status==='idle'?'idle':'off';
-      el.innerHTML=`<div class="dm-av" style="position:relative;overflow:visible">${u.photo?`<img src="${escH(u.photo)}">`:`<span>${escH(u.avatar)}</span>`}<div class="dm-dot ${dotCls}"></div>${decorRingHTML(u.decor)}</div><span class="dm-name nf-${u.name_font||'default'}"${u.name_color?' style="color:'+u.name_color+'"':''}>${escH(u.username)}</span>`;
-      el.onclick=()=>{openDM(u);closeDrawer();};list.appendChild(el);
+    // ── Perf: clone the fragment for each list — avoids rebuilding DOM ──
+    var clone=frag.cloneNode(true);
+    // Re-attach click handlers on cloned nodes
+    var items=clone.querySelectorAll('.dm-item');
+    items.forEach(function(el){
+      var uid=el.dataset.dmid;
+      var u=sorted.find(function(x){return x.id===uid;});
+      if(u)el.onclick=()=>{openDM(u);closeDrawer();};
     });
+    list.appendChild(clone);
   });
 }
 
 export function openDM(user){
   setCurDMUser(user);setChatMode('dm');setCurGroupChat(null);
-  // Clear DM unread badge
   var dmKey='dm_'+[ME.id,user.id].sort().join('_');
   if(typeof clearDMUnread==='function')clearDMUnread(dmKey);
   document.getElementById('gcSettingsBtn').style.display='none';
@@ -66,7 +80,7 @@ export function openDM(user){
   document.getElementById('msgInput').placeholder='Message '+user.username+'...';
   document.getElementById('inputArea').style.display='';
   subscribeAndRender();
-  if(isMobile()){closeDrawer();closeMobileMembers();document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mnChat').classList.add('active');updateSidebarToggleIcon();}
+  if(isMobile()){closeDrawer();closeMobileMembers();document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mnChats').classList.add('active');updateSidebarToggleIcon();}
 }
 
 export function startNewDM(){openUserSearch();}
@@ -100,10 +114,8 @@ export function searchUsers(raw){
     body.innerHTML='<div class="us-empty">Type a username to find people</div>';
     return;
   }
-  // Show local matches instantly
   var local=REAL_USERS.filter(function(u){return u.username.toLowerCase().includes(q);});
   renderUSResults(local,q);
-  // Then search DB (catches users not yet in REAL_USERS)
   set_usTimeout(setTimeout(async function(){
     var res=await sb.from('profiles').select('id,username,avatar,photo,last_seen,name_font,name_color,nameplate,about,banner').ilike('username','%'+q+'%').neq('id',ME.id).limit(25);
     if(!res.data)return;
@@ -132,7 +144,7 @@ export function renderUSResults(users,q){
     var dotCls=u.status==='on'?'on':u.status==='idle'?'idle':'off';
     var statusTxt=u.status==='on'?'Online':u.status==='idle'?'Away':'Offline';
     return '<div class="us-item" onclick="selectUserForDM(\''+u.id+'\')">'+
-      '<div class="us-av">'+(u.photo?'<img src="'+escH(u.photo)+'">':(escH(u.avatar)))+
+      '<div class="us-av">'+(u.photo?'<img src="'+escH(u.photo)+'" loading="lazy">':(escH(u.avatar)))+
       '<div class="us-sdot '+dotCls+'"></div></div>'+
       '<div style="flex:1;min-width:0"><div class="us-uname nf-'+(u.name_font||'default')+'">@'+escH(u.username)+'</div>'+
       '<div class="us-ustatus">'+statusTxt+'</div></div>'+

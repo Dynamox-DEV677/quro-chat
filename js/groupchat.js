@@ -7,6 +7,7 @@ import { subscribeAndRender } from './messaging.js';
 import { escH, isMobile, notify } from './utils.js';
 import { closeDrawer, updateSidebarToggleIcon } from './navigation.js';
 import { closeMobileMembers } from './members.js';
+import { qConfirm } from './modal.js';
 
 export async function loadGroupChats(){
   if(!ME)return;
@@ -79,7 +80,7 @@ export function openGroupChat(gc){
   var gcBtn=document.getElementById('gcSettingsBtn');
   gcBtn.style.display=(gc.created_by===ME.id)?'':'none';
   subscribeAndRender();
-  if(isMobile()){closeDrawer();closeMobileMembers();document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mnChat').classList.add('active');updateSidebarToggleIcon();}
+  if(isMobile()){closeDrawer();closeMobileMembers();document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mnChats').classList.add('active');updateSidebarToggleIcon();}
 }
 
 // --- Create GC Modal ---
@@ -284,7 +285,7 @@ export async function gcsClearIcon(){
 
 export async function gcsRemoveMember(uid,username){
   if(!curGroupChat||curGroupChat.created_by!==ME.id)return;
-  if(!confirm('Remove '+username+' from the group?'))return;
+  var ok=await qConfirm('Remove member',username+' will be removed from this group.');if(!ok)return;
   try{
     var{error}=await sb.from('group_chat_members').delete().eq('group_id',curGroupChat.id).eq('user_id',uid);
     if(error)throw error;

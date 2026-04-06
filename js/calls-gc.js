@@ -23,7 +23,7 @@ import { _callConnected } from './calls.js';
 
 export function _setupGCSignaling(){
   return new Promise(function(resolve){
-    if(_gcSignalChannel){try{sb.removeChannel(_gcSignalChannel);}catch(e){}set_gcSignalChannel(null);}
+    if(_gcSignalChannel){try{sb.removeChannel(_gcSignalChannel);}catch(e){/* cleanup */}set_gcSignalChannel(null);}
     var chName='gc-call-'+_gcCallId;
     set_gcSignalChannel(sb.channel(chName,{config:{broadcast:{self:false}}}));
 
@@ -33,18 +33,15 @@ export function _setupGCSignaling(){
 
       if(data.type==='gc-join'){
         // A new member joined — we are existing, so WE initiate a peer connection to them
-        console.log('[GC] Member joined:',data.from);
         if(!_gcPeers[data.from]){
           _gcCreatePeer(data.from,true);
         }
         _gcUpdateStatus();
       }else if(data.type==='gc-leave'){
-        console.log('[GC] Member left:',data.from);
         _gcRemovePeer(data.from);
         _gcUpdateStatus();
       }else if(data.type==='offer'&&data.to===ME.id){
         // Offer targeted at us from an existing member
-        console.log('[GC] Received offer from:',data.from);
         if(!_gcPeers[data.from]){
           _gcCreatePeer(data.from,false);
         }
@@ -65,11 +62,9 @@ export function _setupGCSignaling(){
             _gcSignalChannel.send({type:'broadcast',event:'gc-signal',payload:{
               from:ME.id,to:data.from,type:'answer',sdp:peer.localDescription
             }});
-            console.log('[GC] Sent answer to:',data.from);
           }).catch(function(e){console.error('[GC] Offer handling failed:',e);});
         }
       }else if(data.type==='answer'&&data.to===ME.id){
-        console.log('[GC] Received answer from:',data.from);
         var peer=_gcPeers[data.from];
         if(peer){
           peer.setRemoteDescription(new RTCSessionDescription(data.sdp)).then(function(){
@@ -94,7 +89,6 @@ export function _setupGCSignaling(){
 
     _gcSignalChannel.subscribe(function(status){
       if(status==='SUBSCRIBED'){
-        console.log('[GC] Signaling channel subscribed:',chName);
         resolve();
       }
     });
@@ -103,7 +97,7 @@ export function _setupGCSignaling(){
 }
 
 export function _gcCreatePeer(userId,isInitiator){
-  if(_gcPeers[userId]){try{_gcPeers[userId].close();}catch(e){}}
+  if(_gcPeers[userId]){try{_gcPeers[userId].close();}catch(e){/* cleanup */}}
   var peer=new RTCPeerConnection(_rtcConfig);
   _gcPeers[userId]=peer;
 
@@ -123,7 +117,6 @@ export function _gcCreatePeer(userId,isInitiator){
   };
 
   peer.ontrack=function(e){
-    console.log('[GC] Track from',userId,':',e.track.kind);
     if(e.streams&&e.streams[0]){
       _gcStreams[userId]=e.streams[0];
       // Create or update audio element for this peer
@@ -139,7 +132,6 @@ export function _gcCreatePeer(userId,isInitiator){
   };
 
   peer.onconnectionstatechange=function(){
-    console.log('[GC] Peer',userId,'connection:',peer.connectionState);
     if(peer.connectionState==='connected'){
       set_gcConnectedCount(_gcConnectedCount+1);
       _gcUpdateStatus();
@@ -165,13 +157,12 @@ export function _gcCreatePeer(userId,isInitiator){
       _gcSignalChannel.send({type:'broadcast',event:'gc-signal',payload:{
         from:ME.id,to:userId,type:'offer',sdp:peer.localDescription,callType:_callType
       }});
-      console.log('[GC] Sent offer to:',userId);
     }).catch(function(e){console.error('[GC] Offer creation failed:',e);});
   }
 }
 
 export function _gcRemovePeer(userId){
-  if(_gcPeers[userId]){try{_gcPeers[userId].close();}catch(e){}delete _gcPeers[userId];}
+  if(_gcPeers[userId]){try{_gcPeers[userId].close();}catch(e){/* cleanup */}delete _gcPeers[userId];}
   if(_gcStreams[userId])delete _gcStreams[userId];
   if(_gcIceQueues[userId])delete _gcIceQueues[userId];
   // Remove audio element
@@ -267,16 +258,16 @@ export function _gcUpdateTile(userId){
 export function _gcCleanup(){
   // Send leave signal
   if(_gcSignalChannel){
-    try{_gcSignalChannel.send({type:'broadcast',event:'gc-signal',payload:{from:ME.id,type:'gc-leave'}});}catch(e){}
+    try{_gcSignalChannel.send({type:'broadcast',event:'gc-signal',payload:{from:ME.id,type:'gc-leave'}});}catch(e){/* best-effort leave signal */}
   }
   // Close all peer connections
   Object.keys(_gcPeers).forEach(function(uid){
-    try{_gcPeers[uid].close();}catch(e){}
+    try{_gcPeers[uid].close();}catch(e){/* cleanup */}
     var audioEl=document.getElementById('gc-audio-'+uid);if(audioEl)audioEl.remove();
   });
   set_gcPeers({});set_gcStreams({});set_gcIceQueues({});set_gcConnectedCount(0);set_gcCallMembers([]);
   // Remove signaling channel
-  if(_gcSignalChannel){try{sb.removeChannel(_gcSignalChannel);}catch(e){}set_gcSignalChannel(null);}
+  if(_gcSignalChannel){try{sb.removeChannel(_gcSignalChannel);}catch(e){/* cleanup */}set_gcSignalChannel(null);}
   // Clear grid
   var grid=document.getElementById('gcVideoGrid');
   if(grid){grid.innerHTML='';grid.style.display='none';}

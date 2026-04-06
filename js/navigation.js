@@ -71,7 +71,7 @@ export function handleSidebarToggle(){
     return;
   }
   // Mobile: back arrow opens the drawer (primary navigation view)
-  mobileNavTo('home');
+  mobileNavTo('chats');
 }
 
 export function updateSidebarToggleIcon(){
@@ -84,7 +84,9 @@ export function updateSidebarToggleIcon(){
     iconEl.textContent='\u2630';
   }
 }
-window.addEventListener('resize',updateSidebarToggleIcon);
+// ── Perf: debounced resize handler — fires once per 150ms instead of 100x/sec ──
+var _resizeTimer=0;
+window.addEventListener('resize',function(){clearTimeout(_resizeTimer);_resizeTimer=setTimeout(updateSidebarToggleIcon,150);},{passive:true});
 
 /* ─── Mode: Home (DMs) ─── */
 export function goHome(){
@@ -110,7 +112,7 @@ export function goHome(){
   var nh=document.getElementById('navHome');if(nh)nh.classList.add('active');
   document.querySelectorAll('.sb-srv-item').forEach(function(s){s.classList.remove('active');});
   _stopPoll();_clearTypingChannel();clearReply();
-  if(realtimeSub){try{sb.removeChannel(realtimeSub);}catch(e){}setRealtimeSub(null);}
+  if(realtimeSub){try{sb.removeChannel(realtimeSub);}catch(e){/* cleanup */}setRealtimeSub(null);}
 
   // On mobile, auto-open the drawer when going home
   if(isMobile()){
@@ -122,27 +124,59 @@ export function goBackToNav(){
   goHome();
 }
 
+/* ─── Close all overlay pages ─── */
+function _closeAllOverlays(){
+  var tp=document.getElementById('tradingPage');
+  if(tp&&tp.classList.contains('open')&&typeof window.closeTradingPage==='function')window.closeTradingPage();
+  var sp=document.getElementById('stocksPage');
+  if(sp&&sp.classList.contains('open')&&typeof window.closeStocksPanel==='function')window.closeStocksPanel();
+  var lp=document.getElementById('leaderPage');
+  if(lp&&lp.classList.contains('open')&&typeof window.closeLeaderPage==='function')window.closeLeaderPage();
+  var st=document.getElementById('settingsPanel');
+  if(st&&st.classList.contains('open')&&typeof window.closeSettings==='function')window.closeSettings();
+  var pp=document.getElementById('profilePopup');
+  if(pp&&pp.style.display!=='none'&&pp.style.display!=='')if(typeof window.closeProfilePopup==='function')window.closeProfilePopup();
+}
+
 /* ─── Mobile navigation ─── */
 export function mobileNavTo(tab){
   closeMobileMembers();
   document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
-  var btn=document.getElementById('mn'+tab.charAt(0).toUpperCase()+tab.slice(1));
+
+  // Map tab names to button IDs
+  var idMap={chats:'mnChats',trade:'mnTrade',leaderboard:'mnLeaderboard',profile:'mnProfile',settings:'mnSettings',home:'mnChats',chat:'mnChats'};
+  var btnId=idMap[tab]||('mn'+tab.charAt(0).toUpperCase()+tab.slice(1));
+  var btn=document.getElementById(btnId);
   if(btn)btn.classList.add('active');
 
-  if(tab==='home'){
-    // Full-screen drawer — shows DMs, channels, servers
+  // Close overlays before opening new one
+  _closeAllOverlays();
+
+  if(tab==='chats'||tab==='home'){
     openDrawer();
     var ds=document.getElementById('drawerScroll');
     if(ds)ds.scrollTop=0;
   }
   else if(tab==='chat'){
-    // Close drawer — reveal current chat
     closeDrawer();
   }
   else if(tab==='trade'){
     closeDrawer();
     if(typeof window.openTradingPage==='function')window.openTradingPage();
   }
+  else if(tab==='leaderboard'){
+    closeDrawer();
+    if(typeof window.openLeaderPage==='function')window.openLeaderPage();
+  }
+  else if(tab==='profile'){
+    closeDrawer();
+    if(typeof window.openProfilePopup==='function'&&ME)window.openProfilePopup(ME);
+  }
+  else if(tab==='settings'){
+    closeDrawer();
+    if(typeof window.openSettings==='function')window.openSettings();
+  }
+  // Legacy
   else if(tab==='stocks'){
     closeDrawer();
     openStocksPanel();

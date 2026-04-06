@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════
-// MESSAGING Module
+// MESSAGING Module — performance-optimized
 // ═══════════════════════════════════════
 import { sb } from './config.js';
 import { ME, REAL_USERS, chatMode, curChannel, curDMUser, curGroupChat, realtimeSub, setRealtimeSub, _pollTimer, set_pollTimer, _lastSeenId, set_lastSeenId, _rtConnected, set_rtConnected, myMsgCount, setMyMsgCount, MSG_DAILY_LIMIT, replyTo, _dmLastMsg, msgReactions } from './state.js';
@@ -9,6 +9,9 @@ import { _setupTypingChannel } from './typing.js';
 import { clearReply, renderMsgReactions, setReply, editMsg, deleteMsg, showReactPicker } from './reactions.js';
 import { openProfilePopup } from './profile.js';
 import { buildDMList } from './dm.js';
+
+// ── Perf: track rendered message IDs in a Set instead of DOM queries ──
+var _renderedMsgIds=new Set();
 
 export function _stopPoll(){if(_pollTimer){clearInterval(_pollTimer);set_pollTimer(null);}}
 
@@ -21,24 +24,24 @@ export async function _pollNewMsgs(){
     else q=q.limit(1);
     const{data}=await q;
     if(data&&data.length){
-      data.forEach(m=>{if(!document.querySelector(`[data-msgid="${m.id}"]`))appendMessage(m);});
+      data.forEach(m=>{if(!_renderedMsgIds.has(m.id))appendMessage(m);});
       set_lastSeenId(data[data.length-1].id);
     }
-  }catch(e){}
+  }catch(e){/* poll fail — next interval retries */}
 }
 
 export async function subscribeAndRender(){
   _stopPoll(); set_rtConnected(false); set_lastSeenId(null);
-  if(realtimeSub){try{await sb.removeChannel(realtimeSub);}catch(e){}setRealtimeSub(null);}
+  _renderedMsgIds.clear();
+  if(realtimeSub){try{await sb.removeChannel(realtimeSub);}catch(e){/* cleanup */}setRealtimeSub(null);}
   _setupTypingChannel(getMsgKey());
   await fetchAndRenderMessages();
   const key=getMsgKey();
   setRealtimeSub(sb.channel('chat:'+key)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`server_channel=eq.${key}`},payload=>{
       const m=payload.new;
-      if(!document.querySelector(`[data-msgid="${m.id}"]`)){appendMessage(m);}
+      if(!_renderedMsgIds.has(m.id)){appendMessage(m);}
       set_lastSeenId(m.id);
-      // Notify if message is from someone else and tab not focused
       if(m.user_id!==ME.id&&document.hidden){
         playNotifSound();
         var chLabel=chatMode==='gc'?(curGroupChat?curGroupChat.name:'Group'):chatMode==='dm'?(curDMUser?curDMUser.username:'DM'):'#'+curChannel;
@@ -53,6 +56,7 @@ export async function subscribeAndRender(){
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages'},payload=>{
       const el=document.querySelector(`[data-msgid="${payload.old.id}"]`);
       if(el)el.remove();
+      _renderedMsgIds.delete(payload.old.id);
     })
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){
@@ -63,6 +67,7 @@ export async function subscribeAndRender(){
         if(!_pollTimer) set_pollTimer(setInterval(_pollNewMsgs,3000));
       }
     }));
+  // Fallback poll — stop once realtime connects
   if(!_pollTimer) set_pollTimer(setInterval(_pollNewMsgs,3000));
   setTimeout(()=>{if(_rtConnected)_stopPoll();},4000);
 }
@@ -72,6 +77,7 @@ export async function fetchAndRenderMessages(){
   const msgSkel=document.getElementById('msgSkeleton');const msgEmpty=document.getElementById('msgEmpty');
   if(msgSkel)msgSkel.style.display='';if(msgEmpty)msgEmpty.style.display='none';
   wrap.querySelectorAll('.msg,.empty,.dm-banner').forEach(e=>e.remove());
+  _renderedMsgIds.clear();
   const{data:msgs,error}=await sb.from('messages').select('*').eq('server_channel',key).order('created_at',{ascending:true}).limit(200);
   if(msgSkel)msgSkel.style.display='none';
   if(error){wrap.innerHTML=`<div class="empty"><div class="empty-icon" style="opacity:.15"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="empty-title">Could not load</div><div class="empty-sub">${escH(error.message)}</div></div>`;return;}
@@ -81,15 +87,18 @@ export async function fetchAndRenderMessages(){
     else{wrap.innerHTML=`<div class="empty"><div class="empty-icon" style="opacity:.15"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="empty-title">#${escH(curChannel)}</div><div class="empty-sub">Be the first to say something!</div></div>`;}
     return;
   }
-  wrap.innerHTML='';msgs.forEach(m=>appendMessage(m,false));wrap.scrollTop=wrap.scrollHeight;
+  // ── Perf: batch all messages into a DocumentFragment — single DOM write ──
+  var frag=document.createDocumentFragment();
+  msgs.forEach(m=>_buildMsgEl(m,frag));
+  wrap.innerHTML='';
+  wrap.appendChild(frag);
+  // ── Perf: defer scroll to next frame to avoid forced reflow ──
+  requestAnimationFrame(()=>{wrap.scrollTop=wrap.scrollHeight;});
 }
 
-export function appendMessage(m,scroll=true){
-  const wrap=document.getElementById('msgsWrap');
-  const empty=wrap.querySelector('.empty,.dm-banner');if(empty)empty.remove();
-  const msgSkel=document.getElementById('msgSkeleton');if(msgSkel)msgSkel.style.display='none';
-  const msgEmpty=document.getElementById('msgEmpty');if(msgEmpty)msgEmpty.style.display='none';
-  const isOwn=m.user_id===ME.id;const el=document.createElement('div');el.className='msg'+(isOwn?' msg-own':'');if(m.id)el.dataset.msgid=m.id;
+// Build message element without appending (for batching)
+function _buildMsgEl(m,container){
+  const isOwn=m.user_id===ME.id;const el=document.createElement('div');el.className='msg'+(isOwn?' msg-own':'');if(m.id){el.dataset.msgid=m.id;_renderedMsgIds.add(m.id);}
   var mid=m.id||'';
   var plain=_plainText(m.text||'');
   var safeAuthor=escH(m.author||'');
@@ -102,11 +111,22 @@ export function appendMessage(m,scroll=true){
   var fontCls='nf-'+(m.name_font||'default');
   var nameStyle='cursor:pointer'+(m.name_color?';color:'+m.name_color:'');
   var _msgDecor='none';if(m.user_id===ME.id){_msgDecor=ME.decor||'none';}else{var _du=REAL_USERS.find(function(x){return x.id===m.user_id;});if(_du)_msgDecor=_du.decor||'none';}
-  el.innerHTML=`<div class="msg-av" style="cursor:pointer;overflow:visible" data-uid="${m.user_id||''}">${m.photo?`<img src="${escH(m.photo)}">`:`<span>${escH(m.avatar||'?')}</span>`}${decorRingHTML(_msgDecor)}</div><div class="msg-body"><div class="msg-meta"><span class="msg-author ${fontCls}" style="${nameStyle}" data-uid="${m.user_id||''}">${escH(m.author)}</span><span class="msg-time">${escH(m.time||'')}</span></div><div class="msg-text">${renderMsgContent(m.text)}</div><div class="msg-reactions" id="rxn_${mid}"></div>${actBtns}</div>`;
-  el.querySelectorAll('[data-uid]').forEach(function(e){e.onclick=function(ev){ev.stopPropagation();var uid=e.dataset.uid;if(!uid)return;if(uid===ME.id){openProfilePopup(ME);return;}var u=REAL_USERS.find(function(x){return x.id===uid;});if(u)openProfilePopup(u);};});
-  // Restore any existing in-memory reactions
+  el.innerHTML=`<div class="msg-av" style="cursor:pointer;overflow:visible" data-uid="${m.user_id||''}">${m.photo?`<img src="${escH(m.photo)}" loading="lazy">`:`<span>${escH(m.avatar||'?')}</span>`}${decorRingHTML(_msgDecor)}</div><div class="msg-body"><div class="msg-meta"><span class="msg-author ${fontCls}" style="${nameStyle}" data-uid="${m.user_id||''}">${escH(m.author)}</span><span class="msg-time">${escH(m.time||'')}</span></div><div class="msg-text">${renderMsgContent(m.text)}</div><div class="msg-reactions" id="rxn_${mid}"></div>${actBtns}</div>`;
+  el.querySelectorAll('[data-uid]').forEach(function(e){e.onclick=function(ev){ev.stopPropagation();var uid=e.dataset.uid;if(!uid)return;if(uid===ME.id){openProfilePopup(ME);return;}var u=REAL_USERS.find(function(x){return x.id===uid;});if(u){openProfilePopup(u);}else{openProfilePopup({id:uid,username:m.author||'Unknown',avatar:m.avatar||'?',photo:m.photo||'',name_font:'default',name_color:'',nameplate:'',about:'',banner:'b1',decor:'none',contact_email:''});}};});
   if(mid&&msgReactions[mid]){var rxnEl=el.querySelector('.msg-reactions');if(rxnEl)renderMsgReactions(mid,rxnEl);}
-  wrap.appendChild(el);if(scroll)wrap.scrollTop=wrap.scrollHeight;
+  container.appendChild(el);
+  return el;
+}
+
+export function appendMessage(m,scroll=true){
+  const wrap=document.getElementById('msgsWrap');
+  const empty=wrap.querySelector('.empty,.dm-banner');if(empty)empty.remove();
+  const msgSkel=document.getElementById('msgSkeleton');if(msgSkel)msgSkel.style.display='none';
+  const msgEmpty=document.getElementById('msgEmpty');if(msgEmpty)msgEmpty.style.display='none';
+  if(m.id)_renderedMsgIds.add(m.id);
+  _buildMsgEl(m,wrap);
+  // ── Perf: defer scrollTop to avoid forced sync reflow ──
+  if(scroll)requestAnimationFrame(()=>{wrap.scrollTop=wrap.scrollHeight;});
 }
 
 export async function fetchMyMsgCount(){
@@ -116,12 +136,16 @@ export async function fetchMyMsgCount(){
   setMyMsgCount(res.count||0);
 }
 
+var _sendingMsg=false;
 export async function sendMsg(){
-  if(!ME)return;const input=document.getElementById('msgInput');var text=input.value.trim();if(!text)return;
+  if(!ME||_sendingMsg)return;
+  var input=document.getElementById('msgInput');var text=input.value.trim();if(!text)return;
   if(myMsgCount>=MSG_DAILY_LIMIT){
     notify('Daily limit reached ('+MSG_DAILY_LIMIT+' messages/day). Try again tomorrow!','error');
     return;
   }
+  _sendingMsg=true;
+  var sendBtn=document.getElementById('sendBtn');if(sendBtn)sendBtn.disabled=true;
   input.value='';input.style.height='auto';
   if(replyTo){
     var preview=replyTo.text.slice(0,60);
@@ -129,10 +153,10 @@ export async function sendMsg(){
     clearReply();
   }
   const{error}=await sb.from('messages').insert({server_channel:getMsgKey(),user_id:ME.id,author:ME.username,avatar:ME.avatar,photo:ME.photo||null,text,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),name_font:ME.name_font||'default',name_color:ME.name_color||''});
+  _sendingMsg=false;if(sendBtn)sendBtn.disabled=false;
   if(error){notify('Send failed: '+error.message,'error');input.value=text.replace(/^\[reply\][^\[]*\[\/reply\]/,'');}
   else{
     setMyMsgCount(myMsgCount+1);
-    // Update DM sort order -- move this conversation to top
     if(chatMode==='dm'||chatMode==='gc'){var mk=getMsgKey();_dmLastMsg[mk]=new Date().toISOString();buildDMList();}
     var left=MSG_DAILY_LIMIT-myMsgCount;
     if(left<=10&&left>0)notify(left+' messages left today','info');
@@ -140,7 +164,21 @@ export async function sendMsg(){
   }
 }
 export function inputKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
-export function growInput(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+
+// ── Perf: debounced growInput — avoids forced reflow on every keystroke ──
+var _growRaf=0;
+export function growInput(el){
+  cancelAnimationFrame(_growRaf);
+  _growRaf=requestAnimationFrame(()=>{el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';});
+}
+
+// ── Perf: pre-compiled tag patterns for renderMsgContent ──
+var _tagDefs=[
+  {tag:'img',open:'[img]',close:'[/img]'},
+  {tag:'vid',open:'[vid]',close:'[/vid]'},
+  {tag:'audio',open:'[audio]',close:'[/audio]'},
+  {tag:'file',open:'[file]',close:'[/file]'}
+];
 
 export function renderMsgContent(raw){
   if(!raw) return '';
@@ -149,18 +187,15 @@ export function renderMsgContent(raw){
     var vcText=raw.replace('[vc-started] ','');
     return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(61,168,122,.08);border:1px solid rgba(61,168,122,.15);border-radius:8px;font-size:13px;color:rgba(61,168,122,.9)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>'+escH(vcText)+'</div>';
   }
-  // Call started system message
   if(raw.indexOf('[call-started]')===0){
     var csText=raw.replace('[call-started] ','');
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(61,168,122,.08);border:1px solid rgba(61,168,122,.15);border-radius:10px;font-size:13px;color:rgba(61,168,122,.9)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'+escH(csText)+'</div>';
   }
-  // Missed call system message
   if(raw.indexOf('[call-missed]')===0){
     var cmText=raw.replace('[call-missed] ','');
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.15);border-radius:10px;font-size:13px;color:rgba(224,80,80,.9)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>'+escH(cmText)+'</div>';
   }
   var replyHtml='';
-  // Extract [reply]who|preview[/reply] prefix
   raw=raw.replace(/^\[reply\]([^\[]*)\[\/reply\]/,function(m,inner){
     var pipe=inner.indexOf('|');
     var who=pipe!==-1?inner.slice(0,pipe):inner;
@@ -171,25 +206,23 @@ export function renderMsgContent(raw){
   raw=raw.trim();
   let result=replyHtml, rem=raw;
   while(rem.length){
-    // Find earliest tag
-    var tags=[
-      {tag:'img',open:'[img]',close:'[/img]',pos:rem.indexOf('[img]')},
-      {tag:'vid',open:'[vid]',close:'[/vid]',pos:rem.indexOf('[vid]')},
-      {tag:'audio',open:'[audio]',close:'[/audio]',pos:rem.indexOf('[audio]')},
-      {tag:'file',open:'[file]',close:'[/file]',pos:rem.indexOf('[file]')}
-    ].filter(function(t){return t.pos!==-1;}).sort(function(a,b){return a.pos-b.pos;});
-    if(!tags.length){result+=escH(rem);break;}
-    var t=tags[0];
-    result+=escH(rem.slice(0,t.pos));
-    rem=rem.slice(t.pos);
-    var end=rem.indexOf(t.close);
+    // ── Perf: reuse tag defs instead of allocating new arrays each iteration ──
+    var bestTag=null,bestPos=Infinity;
+    for(var ti=0;ti<_tagDefs.length;ti++){
+      var pos=rem.indexOf(_tagDefs[ti].open);
+      if(pos!==-1&&pos<bestPos){bestPos=pos;bestTag=_tagDefs[ti];}
+    }
+    if(!bestTag){result+=escH(rem);break;}
+    result+=escH(rem.slice(0,bestPos));
+    rem=rem.slice(bestPos);
+    var end=rem.indexOf(bestTag.close);
     if(end===-1){result+=escH(rem);break;}
-    var inner=rem.slice(t.open.length,end);
-    if(t.tag==='img'){
+    var inner=rem.slice(bestTag.open.length,end);
+    if(bestTag.tag==='img'){
       result+=`<img src="${escH(inner)}" class="msg-img" onclick="window.open(this.src,'_blank')" loading="lazy">`;
-    }else if(t.tag==='vid'){
+    }else if(bestTag.tag==='vid'){
       result+=`<video src="${escH(inner)}" class="msg-vid" controls preload="metadata" playsinline onclick="event.stopPropagation()"></video>`;
-    }else if(t.tag==='audio'){
+    }else if(bestTag.tag==='audio'){
       var pipe=inner.indexOf('|');
       var aName=pipe!==-1?inner.slice(0,pipe):'Audio';
       var aUrl=pipe!==-1?inner.slice(pipe+1):inner;
@@ -203,7 +236,7 @@ export function renderMsgContent(raw){
       var icon=_fIcons[ext]||'\ud83d\udcce';
       result+=`<a href="${escH(url)}" target="_blank" download="${escH(name)}" class="msg-file"><span class="msg-file-icon">${icon}</span>${escH(name)}</a>`;
     }
-    rem=rem.slice(end+t.close.length);
+    rem=rem.slice(end+bestTag.close.length);
   }
   return result;
 }
