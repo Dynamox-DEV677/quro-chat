@@ -583,6 +583,25 @@
                 <div class="sp-admin-list" id="spBannedList">
                   <div class="sp-admin-empty">No banned users</div>
                 </div>
+
+                <!-- Manage Admins (super admin only) -->
+                <div id="spAdminManage" style="display:none">
+                  <div class="sp-admin-banned-head" style="margin-top:24px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Manage Admins
+                  </div>
+                  <p class="sp-section-desc" style="margin-top:8px;margin-bottom:12px">Grant other users access to this admin panel. They will need the same passcode.</p>
+                  <div class="sp-admin-gate-form" style="margin-top:0;margin-bottom:12px">
+                    <input type="text" id="spAdminGrantInput" class="sp-admin-passcode-input" style="letter-spacing:normal;text-align:left;font-family:var(--font);font-size:13px" placeholder="Enter username" onkeydown="if(event.key==='Enter')adminGrantAccess()">
+                    <button class="sp-admin-verify-btn" style="background:rgba(56,161,105,.12);border-color:rgba(56,161,105,.25);color:var(--primary)" onclick="adminGrantAccess()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Grant
+                    </button>
+                  </div>
+                  <div class="sp-admin-list" id="spAdminUsersList">
+                    <div class="sp-admin-empty">No additional admins granted</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

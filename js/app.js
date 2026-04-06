@@ -32,7 +32,7 @@ import { openTradingPage, closeTradingPage, trd_execute, trd_select, trd_setTab,
 import { initSplash } from './splash.js';
 import { startAuthBubbles, stopAuthBubbles } from './auth-bubbles.js';
 import { qConfirm, qPrompt, qAlert } from './modal.js';
-import { isAdmin, initAdmin, hideAdmin, adminSearchUsers, adminKickUser, adminUnbanUser, verifyAdminPasscode, checkBanned, showBannedScreen } from './admin.js';
+import { isAdmin, initAdmin, hideAdmin, adminSearchUsers, adminKickUser, adminUnbanUser, verifyAdminPasscode, adminGrantAccess, adminRevokeAccess, checkBanned, showBannedScreen } from './admin.js';
 
 // ═══ Expose all onclick/onchange/oninput/onkeydown functions to window ═══
 // This is needed because HTML uses inline event handlers (onclick="fn()")
@@ -100,7 +100,7 @@ Object.assign(window, {
   // Modal
   qConfirm, qPrompt, qAlert,
   // Admin
-  adminSearchUsers, adminKickUser, adminUnbanUser, verifyAdminPasscode,
+  adminSearchUsers, adminKickUser, adminUnbanUser, verifyAdminPasscode, adminGrantAccess, adminRevokeAccess,
   // Shared utils needed by inline handlers
   escH, getMsgKey, isMobile, setAvatarEl, showLoading,
   // State access (for inline handlers that check state)
