@@ -1051,8 +1051,9 @@
     position:fixed;inset:0;
     bottom:calc(56px + var(--sb))!important;
     background:var(--bg);
-    overflow:hidden!important;
+    overflow:hidden;
     padding-bottom:0;
+    display:flex;flex-direction:column;
   }
 
   /* Top bar — 48px + safe area */
@@ -1093,8 +1094,8 @@
     flex-direction:column;gap:0;padding:0;
     overflow-y:auto!important;overflow-x:hidden!important;
     -webkit-overflow-scrolling:touch;
-    flex:1;min-height:0;
-    padding-bottom:var(--sp-4);
+    flex:1 1 0;min-height:0;
+    padding-bottom:16px;
   }
 
   /* Watchlist — horizontal scroll strip, 60px height cards */
@@ -1163,7 +1164,7 @@
   .trd-held-strip{font-size:10px;padding:5px 10px;gap:8px}
 
   /* Holdings tab — 52px rows, 3 columns */
-  .trd-bottom{border-top:1px solid var(--border2);height:auto!important;flex-shrink:0;overflow:visible!important}
+  .trd-bottom{border-top:1px solid var(--border2);height:auto!important;flex-shrink:0;overflow:visible}
   .trd-btabs{padding:6px 10px;gap:4px}
   .trd-btab{font-size:11px;padding:6px 12px}
   .trd-reset-btn{font-size:8px;padding:3px 8px}
@@ -1176,11 +1177,11 @@
   .trd-hold-header span:nth-child(2){display:none}
   .trd-hold-header{grid-template-columns:1fr auto auto;gap:8px;padding:4px 10px}
 
-  /* Order section — full width */
+  /* Order section — full width, inside scroll */
   .trd-order{
     width:100%!important;border-left:none;
     border-top:1px solid var(--border2);
-    max-height:none;flex-shrink:0;overflow:visible!important;
+    max-height:none;flex-shrink:0;overflow:visible;
   }
   .trd-portfolio-card{display:none}
 
