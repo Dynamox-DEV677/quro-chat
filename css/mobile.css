@@ -1046,90 +1046,123 @@
 
 
   /* ──────────────────────────────────────────
-     TRADING PAGE — Zerodha-Inspired Mobile
+     TRADING PAGE — Fintech-Grade Mobile UI
      ─────────────────────────────────────────
-     Shell: fixed fullscreen overlay (above chat, below nav)
-     Layout: topbar → scrollable body
-     Body:  watchlist strip → stock detail → chart → order → holdings
+     ✦ Full-screen dedicated layer (NOT a panel)
+     ✦ Chat input & typing bar hidden via body.trading-open
+     ✦ Slide-up 300ms entrance, z-index above chat
+     ✦ Single scroll body: watchlist → stock → chart → order → holdings
+     ✦ Sticky execute button at bottom
      ────────────────────────────────────────── */
 
-  /* ▸ Page shell — fullscreen fixed overlay */
+  /* ▸ CRITICAL: hide chat input when trading is open */
+  body.trading-open #inputArea,
+  body.trading-open #typingBar{
+    display:none!important;
+    pointer-events:none!important;
+  }
+
+  /* ▸ Page shell — true full-screen overlay */
   #tradingPage{
     position:fixed!important;
     top:0!important;left:0!important;right:0!important;
-    bottom:calc(56px + var(--sb))!important;
+    bottom:0!important;
     background:var(--bg)!important;
-    z-index:var(--z-popover)!important;
+    z-index:calc(var(--z-popover) + 5)!important;
     display:flex!important;flex-direction:column!important;
     overflow:hidden!important;
     padding:0!important;margin:0!important;
     transform:translateY(100%)!important;
     transition:transform .3s cubic-bezier(.32,.72,.0,1)!important;
     animation:none!important;
+    will-change:transform!important;
   }
-  #tradingPage.open{transform:translateY(0)!important;animation:none!important}
+  #tradingPage.open{
+    transform:translateY(0)!important;
+    animation:none!important;
+  }
 
-  /* ▸ Top bar — compact 44px header */
+  /* ▸ Top header — 48px + safe area, frosted glass */
   .trd-topbar{
     display:flex!important;align-items:center!important;
-    padding:0 12px!important;
+    flex-wrap:nowrap!important;flex-shrink:0!important;
+    padding:0 16px!important;
     padding-top:var(--st)!important;
-    height:calc(44px + var(--st))!important;
-    min-height:44px!important;
-    gap:8px!important;
-    flex-shrink:0!important;
-    flex-wrap:nowrap!important;
-    background:var(--bg)!important;
+    height:calc(48px + var(--st))!important;
+    min-height:48px!important;
+    gap:10px!important;
+    background:rgba(var(--bg-rgb,10,10,14),.92)!important;
+    -webkit-backdrop-filter:saturate(180%) blur(20px)!important;
+    backdrop-filter:saturate(180%) blur(20px)!important;
     border-bottom:1px solid var(--border2)!important;
+    position:relative!important;z-index:2!important;
   }
-  .trd-brand{gap:6px}
-  .trd-brand-icon{width:16px;height:16px}
-  .trd-brand-name{font-size:15px;font-weight:var(--weight-bold);letter-spacing:-.3px}
-  .trd-badge{font-size:7px;padding:2px 6px}
+  .trd-brand{display:flex!important;align-items:center!important;gap:8px!important}
+  .trd-brand-icon{width:18px!important;height:18px!important;color:var(--primary)!important}
+  .trd-brand-name{
+    font-size:16px!important;font-weight:var(--weight-extra)!important;
+    letter-spacing:-.4px!important;color:var(--text)!important;
+  }
+  .trd-badge{font-size:7px!important;padding:2px 7px!important;border-radius:var(--r-full)!important}
   .trd-topbar-spacer{display:none!important}
   .trd-close-btn{
-    width:34px;height:34px;margin-left:auto;font-size:13px;
-    border-radius:var(--r-sm);
+    width:36px!important;height:36px!important;margin-left:auto!important;
+    font-size:14px!important;border-radius:var(--r-md)!important;
+    background:var(--surface-1)!important;border:1px solid var(--border)!important;
+    color:var(--text-secondary)!important;
+    transition:transform 100ms ease,background 150ms ease!important;
   }
-  .trd-close-btn:active{transform:scale(.92)}
+  .trd-close-btn:active{transform:scale(.92)!important}
 
-  /* ▸ Portfolio stats — horizontal strip below topbar */
+  /* ▸ Portfolio stats — card strip below header */
   .trd-topbar-stats{
-    display:grid!important;grid-template-columns:repeat(4,1fr)!important;
-    width:100%!important;order:10!important;gap:0!important;
-    background:var(--surface-0)!important;
-    border:1px solid var(--border2)!important;
-    border-radius:var(--r-md)!important;
-    padding:0!important;margin:6px 0 0!important;
-    overflow:hidden!important;
-  }
-  .trd-ts{
-    text-align:center!important;
-    padding:7px 2px!important;
-    border-right:1px solid var(--border2)!important;
-  }
-  .trd-ts:last-child{border-right:none!important}
-  .trd-ts-label{
-    font-size:8px!important;font-weight:var(--weight-bold)!important;
-    text-transform:uppercase!important;letter-spacing:.8px!important;
-    color:var(--text-faint)!important;line-height:1!important;
-  }
-  .trd-ts-val{
-    font-size:12px!important;font-weight:var(--weight-extra)!important;
-    margin-top:2px!important;line-height:1.2!important;
-    letter-spacing:-.2px!important;
+    display:none!important;
   }
 
-  /* ▸ Body — single scrollable column */
+  /* ▸ Body — THE scroll container */
   .trd-body{
     display:flex!important;flex-direction:column!important;
-    gap:0!important;padding:0!important;
+    gap:0!important;
+    padding:0!important;
+    padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))!important;
     overflow-y:auto!important;overflow-x:hidden!important;
     -webkit-overflow-scrolling:touch!important;
     flex:1 1 0!important;min-height:0!important;
   }
 
-  /* ── WATCHLIST — horizontal pill strip ── */
+  /* ── PORTFOLIO CARD — inline in scroll body ── */
+  .trd-portfolio-card{
+    display:grid!important;
+    grid-template-columns:repeat(2,1fr)!important;
+    gap:8px!important;
+    padding:12px 16px!important;
+    border-bottom:1px solid var(--border2)!important;
+    background:var(--bg)!important;
+    flex-shrink:0!important;
+  }
+  .trd-pc-row{
+    display:contents!important;
+    gap:0!important;margin:0!important;
+  }
+  .trd-pc-item{
+    background:var(--surface-0)!important;
+    border:1px solid var(--border2)!important;
+    border-radius:var(--r-md)!important;
+    padding:10px 12px!important;
+  }
+  .trd-pc-label{
+    font-size:8px!important;font-weight:var(--weight-bold)!important;
+    text-transform:uppercase!important;letter-spacing:1px!important;
+    color:var(--text-faint)!important;line-height:1!important;
+  }
+  .trd-pc-val{
+    font-size:14px!important;font-weight:var(--weight-extra)!important;
+    margin-top:4px!important;line-height:1.2!important;
+    letter-spacing:-.3px!important;
+    font-variant-numeric:tabular-nums!important;
+  }
+
+  /* ── WATCHLIST — horizontal scroll strip ── */
   .trd-wl{
     display:flex!important;flex-direction:column!important;
     width:100%!important;max-height:none!important;
@@ -1141,19 +1174,22 @@
   }
   .trd-wl-head{
     display:flex!important;flex-direction:row!important;
-    align-items:center!important;gap:8px!important;
-    padding:8px 14px 4px!important;
+    align-items:center!important;gap:10px!important;
+    padding:10px 16px 6px!important;
     border-bottom:none!important;
   }
   .trd-wl-head-title{
     margin-bottom:0!important;font-size:9px!important;
     flex-shrink:0!important;letter-spacing:1.2px!important;
     color:var(--text-faint)!important;
+    text-transform:uppercase!important;font-weight:var(--weight-extra)!important;
   }
   .trd-wl-search{
-    font-size:13px!important;padding:6px 12px!important;
+    font-size:13px!important;padding:7px 14px!important;
     border-radius:var(--r-full)!important;flex:1!important;
-    height:32px!important;
+    height:34px!important;
+    background:var(--surface-0)!important;
+    border:1px solid var(--border)!important;
   }
 
   /* Watchlist cards — horizontal scroll */
@@ -1161,39 +1197,43 @@
     display:flex!important;flex-direction:row!important;
     overflow-x:auto!important;overflow-y:hidden!important;
     max-height:none!important;flex:none!important;
-    padding:6px 14px 10px!important;gap:8px!important;
+    padding:6px 16px 12px!important;gap:8px!important;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
   }
   .trd-wl-list::-webkit-scrollbar{display:none}
   .trd-wl-item{
     flex:0 0 auto!important;
-    min-width:96px!important;max-width:115px!important;
+    min-width:100px!important;max-width:120px!important;
     flex-direction:column!important;align-items:flex-start!important;
-    padding:8px 10px!important;
+    padding:10px 12px!important;
     border:1px solid var(--border2)!important;
-    border-radius:var(--r-md)!important;
+    border-radius:var(--r-lg)!important;
     border-left:none!important;
-    gap:1px!important;min-height:auto!important;
-    background:var(--bg2)!important;
+    gap:2px!important;min-height:auto!important;
+    background:var(--surface-0)!important;
+    transition:transform 100ms ease,background 150ms ease,border-color 150ms ease!important;
   }
-  .trd-wl-item:active{transform:scale(.96)}
+  .trd-wl-item:active{transform:scale(.96)!important}
   .trd-wl-item.active{
     border-color:var(--primary)!important;
-    background:rgba(61,168,122,.05)!important;
-    box-shadow:0 0 0 1px var(--primary) inset!important;
+    background:rgba(61,168,122,.06)!important;
+    box-shadow:0 0 0 1px var(--primary) inset,0 2px 8px rgba(61,168,122,.1)!important;
   }
   .trd-wl-left{width:100%!important}
   .trd-wl-right{
     text-align:left!important;width:100%!important;
-    display:flex!important;align-items:baseline!important;gap:5px!important;
+    display:flex!important;align-items:baseline!important;gap:6px!important;
   }
-  .trd-wl-sym{font-size:11px!important;font-weight:var(--weight-extra)!important;letter-spacing:.2px!important}
-  .trd-wl-name{font-size:8px!important;max-width:none!important;display:none!important}
-  .trd-wl-price{font-size:13px!important;font-weight:var(--weight-bold)!important}
-  .trd-wl-chg{font-size:9px!important;margin-top:0!important}
+  .trd-wl-sym{
+    font-size:12px!important;font-weight:var(--weight-extra)!important;
+    letter-spacing:.2px!important;color:var(--text)!important;
+  }
+  .trd-wl-name{display:none!important}
+  .trd-wl-price{font-size:14px!important;font-weight:var(--weight-bold)!important}
+  .trd-wl-chg{font-size:10px!important;margin-top:0!important}
 
-  /* ── CENTER — stock detail + chart + holdings ── */
+  /* ── STOCK DETAIL — name left, price right (Zerodha-style) ── */
   .trd-center{
     flex:none!important;min-height:0!important;
     overflow:hidden!important;width:100%!important;
@@ -1201,199 +1241,277 @@
   .trd-center:not(.has-stock){display:none!important}
   .trd-center.has-stock .trd-no-select{display:none!important}
 
-  /* Stock header — Zerodha style: name left, price right */
   .trd-stock-hd{
     display:flex!important;align-items:flex-start!important;
     justify-content:space-between!important;
-    padding:12px 14px 10px!important;gap:12px!important;
+    padding:16px 16px 12px!important;gap:16px!important;
     background:var(--bg)!important;
     border-bottom:none!important;
   }
   .trd-stock-left{min-width:0!important}
   .trd-stock-name{
-    font-size:17px!important;font-weight:var(--weight-extra)!important;
-    letter-spacing:-.3px!important;line-height:1.2!important;
+    font-size:18px!important;font-weight:var(--weight-extra)!important;
+    letter-spacing:-.4px!important;line-height:1.2!important;
+    color:var(--text)!important;
   }
-  .trd-stock-meta{font-size:9px!important;color:var(--text-faint)!important;margin-top:2px!important}
+  .trd-stock-meta{
+    font-size:10px!important;color:var(--text-faint)!important;
+    margin-top:3px!important;
+  }
   .trd-stock-right{text-align:right!important;flex-shrink:0!important}
   .trd-stock-price{
-    font-size:22px!important;font-weight:var(--weight-extra)!important;
-    letter-spacing:-.8px!important;line-height:1!important;
+    font-size:24px!important;font-weight:var(--weight-extra)!important;
+    letter-spacing:-1px!important;line-height:1!important;
+    color:var(--text)!important;font-variant-numeric:tabular-nums!important;
   }
-  .trd-stock-chg{font-size:11px!important;margin-top:3px!important}
+  .trd-stock-chg{font-size:12px!important;margin-top:4px!important;font-weight:var(--weight-bold)!important}
   .trd-held-strip{
-    font-size:10px!important;padding:5px 10px!important;
-    gap:8px!important;margin-top:6px!important;
-    border-radius:var(--r-sm)!important;
+    font-size:10px!important;padding:6px 12px!important;
+    gap:10px!important;margin-top:8px!important;
+    border-radius:var(--r-md)!important;
   }
 
-  /* Chart — 200px full width */
+  /* ── CHART — full width, 220px ── */
   .trd-chart-wrap{
-    height:200px!important;flex:none!important;
-    min-height:200px!important;overflow:hidden!important;
+    height:220px!important;flex:none!important;
+    min-height:220px!important;overflow:hidden!important;
     background:var(--bg)!important;
   }
 
-  /* Holdings/History — contained section */
-  .trd-bottom{
-    border-top:1px solid var(--border2)!important;
-    height:auto!important;
-    flex-shrink:0!important;
-    overflow:hidden!important;
-    background:var(--bg)!important;
-  }
-  .trd-btabs{
-    display:flex!important;align-items:center!important;
-    padding:0 14px!important;gap:0!important;
-    border-bottom:1px solid var(--border2)!important;
-  }
-  .trd-btab{
-    font-size:11px!important;padding:10px 14px!important;
-    border-bottom:2px solid transparent!important;
-  }
-  .trd-btab.active{border-bottom-color:var(--primary)!important}
-  .trd-btab-spacer{flex:1!important}
-  .trd-reset-btn{font-size:8px!important;padding:4px 10px!important}
-  #trdBottomBody{
-    max-height:200px!important;
-    overflow-y:auto!important;
-    -webkit-overflow-scrolling:touch;
-    padding:0!important;
-  }
-  .trd-hold-header{
-    grid-template-columns:1fr auto auto!important;
-    gap:8px!important;padding:6px 14px!important;
-    position:sticky!important;top:0!important;
-    background:var(--bg)!important;z-index:1!important;
-  }
-  .trd-hold-header span:nth-child(2){display:none!important}
-  .trd-hold-item{
-    grid-template-columns:1fr auto auto!important;
-    gap:8px!important;padding:10px 14px!important;
-    min-height:48px!important;
-  }
-  .trd-hold-name{font-size:13px!important}
-  .trd-hold-val{font-size:13px!important}
-  .trd-hold-pnl{font-size:11px!important}
-  .trd-hold-qty{display:none!important}
-  .trd-hold-sub{font-size:9px!important}
-  .trd-hist-item{padding:10px 14px!important;min-height:48px!important}
-  .trd-hist-name{font-size:13px!important}
-  .trd-hist-amt{font-size:13px!important}
-  .trd-empty-msg{padding:24px 14px!important;font-size:13px!important}
-
-  /* ── ORDER PANEL — full width, stacked in scroll ── */
+  /* ── ORDER SECTION — card-style form ── */
   .trd-order{
     width:100%!important;
     border-left:none!important;
-    border-top:1px solid var(--border2)!important;
+    border-top:none!important;
     max-height:none!important;
     flex-shrink:0!important;
     overflow:hidden!important;
     background:var(--bg)!important;
+    margin-top:0!important;
   }
-  .trd-portfolio-card{display:none!important}
   .trd-mini-chart{display:none!important}
 
-  /* Buy/Sell toggle — Zerodha-style segmented control */
+  /* Buy/Sell toggle — segmented control with clear active state */
   .trd-tabs{
     display:flex!important;
-    margin:12px 14px 0!important;
-    border-radius:var(--r-md)!important;
+    margin:0 16px!important;
+    border-radius:var(--r-lg)!important;
     overflow:hidden!important;
     background:var(--bg2)!important;
     border:1px solid var(--border)!important;
+    padding:3px!important;
+    gap:4px!important;
   }
   .trd-tab{
-    flex:1!important;padding:11px 8px!important;
-    font-size:12px!important;font-weight:var(--weight-extra)!important;
-    height:44px!important;letter-spacing:.5px!important;
+    flex:1!important;padding:0!important;
+    font-size:13px!important;font-weight:var(--weight-extra)!important;
+    height:42px!important;letter-spacing:.3px!important;
     border:none!important;background:transparent!important;
+    border-radius:var(--r-md)!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    transition:all 200ms ease!important;
+    color:var(--text-faint)!important;
   }
-  .trd-tab-buy.active{background:rgba(61,168,122,.12)!important;color:var(--success)!important}
-  .trd-tab-sell.active{background:rgba(224,80,80,.12)!important;color:var(--error)!important}
+  .trd-tab-buy.active{
+    background:rgba(61,168,122,.15)!important;color:var(--success)!important;
+    box-shadow:0 1px 4px rgba(61,168,122,.15)!important;
+  }
+  .trd-tab-sell.active{
+    background:rgba(224,80,80,.15)!important;color:var(--error)!important;
+    box-shadow:0 1px 4px rgba(224,80,80,.15)!important;
+  }
 
-  /* Order form — compact, clean spacing */
+  /* Order form — generous spacing */
   .trd-form{
-    padding:12px 14px 14px!important;
-    gap:10px!important;flex:none!important;
+    padding:16px 16px 20px!important;
+    gap:14px!important;flex:none!important;
     display:flex!important;flex-direction:column!important;
   }
   .trd-field-label{
-    font-size:9px!important;letter-spacing:1.2px!important;
-    margin-bottom:2px!important;
+    font-size:9px!important;font-weight:var(--weight-extra)!important;
+    letter-spacing:1.2px!important;text-transform:uppercase!important;
+    margin-bottom:0!important;color:var(--text-faint)!important;
   }
+
+  /* Quantity input — big, centered, prominent */
   .trd-qty-input{
-    font-size:20px!important;padding:10px 14px!important;
-    border-radius:var(--r-md)!important;height:48px!important;
+    font-size:24px!important;padding:12px 16px!important;
+    border-radius:var(--r-lg)!important;height:56px!important;
     text-align:center!important;
     font-weight:var(--weight-extra)!important;
+    background:var(--surface-0)!important;
+    border:1.5px solid var(--border)!important;
+    transition:border-color 200ms ease!important;
   }
+  .trd-qty-input:focus{border-color:var(--primary)!important}
 
-  /* Preset buttons — compact row */
-  .trd-qty-presets{gap:6px!important;display:flex!important}
+  /* Preset buttons — pill row, 40px touch targets */
+  .trd-qty-presets{gap:8px!important;display:flex!important;margin-top:2px!important}
   .trd-preset{
-    padding:7px 4px!important;font-size:11px!important;
-    border-radius:var(--r-sm)!important;height:34px!important;
+    padding:0!important;font-size:12px!important;
+    font-weight:var(--weight-bold)!important;
+    border-radius:var(--r-md)!important;height:40px!important;
     flex:1!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    background:var(--surface-0)!important;
+    border:1px solid var(--border)!important;
+    color:var(--text-secondary)!important;
+    transition:transform 100ms ease,background 150ms ease,border-color 150ms ease!important;
   }
-  .trd-preset:active{transform:scale(.95)}
+  .trd-preset:active{transform:scale(.94)!important}
 
-  /* Order summary — clean card */
+  /* Order summary — card with section separation */
   .trd-order-summary{
-    border-radius:var(--r-md)!important;
+    border-radius:var(--r-lg)!important;
     overflow:hidden!important;
+    border:1px solid var(--border2)!important;
+    background:var(--surface-0)!important;
   }
-  .trd-orow{padding:9px 14px!important;font-size:12px!important}
+  .trd-orow{
+    padding:12px 16px!important;font-size:13px!important;
+    border-bottom:1px solid var(--border2)!important;
+  }
+  .trd-orow:last-child{border-bottom:none!important}
   .trd-orow.total{
-    padding:10px 14px!important;font-size:14px!important;
+    padding:14px 16px!important;font-size:15px!important;
     background:rgba(255,255,255,.02)!important;
   }
-  .trd-olabel{font-size:12px!important}
-  .trd-oval{font-size:12px!important}
-  .trd-orow.total .trd-oval{font-size:15px!important}
+  .trd-olabel{font-size:13px!important;color:var(--text-faint)!important}
+  .trd-oval{font-size:13px!important;color:var(--text)!important;font-weight:var(--weight-bold)!important}
+  .trd-orow.total .trd-oval{font-size:16px!important;font-weight:var(--weight-extra)!important}
 
-  /* Execute button — big, bold, Zerodha green/red */
+  /* Execute button — big, bold, prominent CTA */
   .trd-exec-btn{
-    padding:0!important;font-size:15px!important;
+    padding:0!important;font-size:16px!important;
     font-weight:var(--weight-extra)!important;
     letter-spacing:.3px!important;
-    border-radius:var(--r-md)!important;
-    margin-top:6px!important;
-    width:100%!important;height:50px!important;
+    border-radius:var(--r-lg)!important;
+    margin:4px 0 0!important;
+    width:100%!important;height:54px!important;
     display:flex!important;align-items:center!important;justify-content:center!important;
+    flex-shrink:0!important;
+    transition:transform 100ms ease,box-shadow 200ms ease!important;
   }
-  .trd-exec-btn:active:not(:disabled){transform:scale(.97)}
-  .trd-exec-buy{box-shadow:0 4px 16px rgba(61,168,122,.2)!important}
-  .trd-exec-sell{box-shadow:0 4px 16px rgba(224,80,80,.2)!important}
+  .trd-exec-btn:active:not(:disabled){transform:scale(.97)!important}
+  .trd-exec-buy{box-shadow:0 4px 20px rgba(61,168,122,.25)!important}
+  .trd-exec-sell{box-shadow:0 4px 20px rgba(224,80,80,.25)!important}
+  .trd-exec-btn:disabled{
+    background:var(--surface-1)!important;color:var(--text-faint)!important;
+    box-shadow:none!important;
+  }
 
-  /* ── Confirm modal — bottom sheet ── */
+  /* ── HOLDINGS/HISTORY — card section ── */
+  .trd-bottom{
+    border-top:none!important;
+    height:auto!important;
+    flex-shrink:0!important;
+    overflow:hidden!important;
+    background:var(--bg)!important;
+    margin-top:8px!important;
+    border-radius:var(--r-lg) var(--r-lg) 0 0!important;
+    border:1px solid var(--border2)!important;
+    border-bottom:none!important;
+    margin-left:16px!important;margin-right:16px!important;
+  }
+  .trd-btabs{
+    display:flex!important;align-items:center!important;
+    padding:0 12px!important;gap:0!important;
+    border-bottom:1px solid var(--border2)!important;
+    background:var(--surface-0)!important;
+    border-radius:var(--r-lg) var(--r-lg) 0 0!important;
+  }
+  .trd-btab{
+    font-size:12px!important;padding:12px 16px!important;
+    border-bottom:2px solid transparent!important;
+    color:var(--text-faint)!important;font-weight:var(--weight-bold)!important;
+    transition:color 200ms ease,border-color 200ms ease!important;
+  }
+  .trd-btab.active{
+    border-bottom-color:var(--primary)!important;
+    color:var(--text)!important;
+  }
+  .trd-btab-spacer{flex:1!important}
+  .trd-reset-btn{font-size:9px!important;padding:5px 12px!important;border-radius:var(--r-md)!important}
+  #trdBottomBody{
+    max-height:240px!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    padding:0!important;
+    background:var(--bg)!important;
+  }
+  .trd-hold-header{
+    grid-template-columns:1fr auto auto!important;
+    gap:10px!important;padding:8px 16px!important;
+    position:sticky!important;top:0!important;
+    background:var(--bg)!important;z-index:1!important;
+    font-size:9px!important;
+  }
+  .trd-hold-header span:nth-child(2){display:none!important}
+  .trd-hold-item{
+    grid-template-columns:1fr auto auto!important;
+    gap:10px!important;padding:12px 16px!important;
+    min-height:52px!important;
+    border-bottom:1px solid var(--border2)!important;
+  }
+  .trd-hold-item:last-child{border-bottom:none!important}
+  .trd-hold-name{font-size:14px!important;font-weight:var(--weight-bold)!important}
+  .trd-hold-val{font-size:14px!important;font-weight:var(--weight-bold)!important}
+  .trd-hold-pnl{font-size:12px!important;font-weight:var(--weight-bold)!important}
+  .trd-hold-qty{display:none!important}
+  .trd-hold-sub{font-size:10px!important;color:var(--text-faint)!important}
+  .trd-hist-item{padding:12px 16px!important;min-height:52px!important}
+  .trd-hist-badge{width:28px!important;height:28px!important;border-radius:var(--r-md)!important}
+  .trd-hist-name{font-size:14px!important}
+  .trd-hist-amt{font-size:14px!important}
+  .trd-hist-sub{font-size:10px!important}
+  .trd-empty-msg{padding:32px 16px!important;font-size:14px!important}
+  .trd-empty-msg svg{width:40px!important;height:40px!important}
+
+  /* Extra bottom padding so scroll clears sticky button */
+  .trd-order + .trd-bottom{margin-bottom:0!important}
+  .trd-body > :last-child{margin-bottom:8px!important}
+
+  /* ── CONFIRM MODAL — iOS bottom sheet ── */
   .trd-confirm-overlay{
-    z-index:calc(var(--z-popover) + 10)!important;
+    z-index:calc(var(--z-popover) + 20)!important;
     align-items:flex-end!important;
   }
   .trd-confirm-card{
     width:100%!important;max-width:none!important;
-    padding:20px 16px 24px!important;
-    border-radius:var(--r-2xl) var(--r-2xl) 0 0!important;
+    padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px))!important;
+    border-radius:20px 20px 0 0!important;
     animation:mobileSlideUp .3s var(--ease-out)!important;
+    background:var(--bg2)!important;
+    border:1px solid var(--border)!important;
+    border-bottom:none!important;
   }
   .trd-confirm-card::before{
     content:''!important;display:block!important;
     width:36px!important;height:4px!important;
     border-radius:var(--r-full)!important;
-    background:var(--muted)!important;opacity:.3!important;
-    margin:0 auto 12px!important;
+    background:var(--muted)!important;opacity:.25!important;
+    margin:0 auto 16px!important;
   }
-  .trd-confirm-title{font-size:17px!important}
-  .trd-confirm-subtitle{font-size:11px!important}
-  .trd-confirm-row{font-size:14px!important;padding:10px 0!important}
-  .trd-confirm-row.total{font-size:16px!important}
-  .trd-confirm-btns{gap:10px!important;margin-top:4px!important}
+  .trd-confirm-title{font-size:18px!important;font-weight:var(--weight-extra)!important}
+  .trd-confirm-subtitle{font-size:12px!important;color:var(--text-faint)!important;margin-top:2px!important}
+  .trd-confirm-body{margin-bottom:16px!important}
+  .trd-confirm-row{font-size:15px!important;padding:12px 0!important}
+  .trd-confirm-row.total{
+    font-size:17px!important;
+    border-top:1px solid var(--border)!important;
+    padding-top:14px!important;margin-top:4px!important;
+  }
+  .trd-confirm-label{color:var(--text-faint)!important}
+  .trd-confirm-val{font-weight:var(--weight-bold)!important;color:var(--text)!important}
+  .trd-confirm-btns{gap:12px!important;margin-top:4px!important}
   .trd-confirm-cancel,.trd-confirm-exec{
-    padding:14px!important;font-size:15px!important;
-    border-radius:var(--r-md)!important;min-height:50px!important;
+    padding:0!important;font-size:15px!important;font-weight:var(--weight-extra)!important;
+    border-radius:var(--r-lg)!important;height:52px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
   }
+  .trd-confirm-cancel{background:var(--surface-1)!important;border:1px solid var(--border)!important}
+  .trd-confirm-exec.buy{box-shadow:0 4px 16px rgba(61,168,122,.25)!important}
+  .trd-confirm-exec.sell{box-shadow:0 4px 16px rgba(224,80,80,.25)!important}
 
 
   /* ──────────────────────────────────────────
@@ -1688,16 +1806,22 @@
   #drawerDmList .dm-name{font-size:13px}
 
   /* Trading — compact for small screens */
-  .trd-wl-item{min-width:84px!important;max-width:100px!important;padding:6px 8px!important}
-  .trd-wl-sym{font-size:10px!important}
+  .trd-wl-item{min-width:88px!important;max-width:105px!important;padding:8px 10px!important}
+  .trd-wl-sym{font-size:11px!important}
   .trd-wl-price{font-size:12px!important}
   .trd-wl-chg{font-size:8px!important}
-  .trd-chart-wrap{height:160px!important;min-height:160px!important}
-  .trd-stock-name{font-size:15px!important}
+  .trd-chart-wrap{height:180px!important;min-height:180px!important}
+  .trd-stock-name{font-size:16px!important}
   .trd-stock-price{font-size:20px!important}
-  .trd-ts-val{font-size:11px!important}
-  .trd-ts-label{font-size:7px!important}
-  .trd-exec-btn{height:46px!important;font-size:14px!important}
+  .trd-stock-chg{font-size:10px!important}
+  .trd-pc-val{font-size:12px!important}
+  .trd-pc-label{font-size:7px!important}
+  .trd-qty-input{font-size:20px!important;height:50px!important}
+  .trd-preset{height:36px!important;font-size:11px!important}
+  .trd-exec-btn{height:50px!important;font-size:14px!important}
+  .trd-hold-item{padding:10px 14px!important;min-height:48px!important}
+  .trd-bottom{margin-left:12px!important;margin-right:12px!important}
+  .trd-form{padding:12px 12px 16px!important}
 
   /* Friends/Leaderboard — shrink avatars -4px */
   .fp-uav{width:36px;height:36px}

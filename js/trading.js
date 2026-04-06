@@ -64,6 +64,7 @@ export function trd_stopTicker() {
 // ─── Open / Close ───
 export function openTradingPage() {
   document.getElementById('tradingPage').classList.add('open');
+  document.body.classList.add('trading-open');
   var srvBtn = document.getElementById('srvTradingBtn');
   if (srvBtn) srvBtn.classList.add('active');
   document.querySelectorAll('.sb-nav-item').forEach(function(n) { n.classList.remove('active'); });
@@ -75,6 +76,7 @@ export function openTradingPage() {
 
 export function closeTradingPage() {
   document.getElementById('tradingPage').classList.remove('open');
+  document.body.classList.remove('trading-open');
   var srvBtn = document.getElementById('srvTradingBtn');
   if (srvBtn) srvBtn.classList.remove('active');
   trd_stopTicker();
