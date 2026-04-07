@@ -210,24 +210,4 @@
 }
 
 /* ─── Leaderboard Refinements ─── */
-#leaderPage{position:fixed;inset:0;background:var(--bg);z-index:var(--z-popover);transform:translateY(100%);transition:transform .32s var(--ease-out);display:flex;flex-direction:column}
-#leaderPage.open{transform:translateY(0)}
-.lp-header{display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-4);height:48px;padding-top:var(--st);border-bottom:1px solid var(--border2);flex-shrink:0}
-.lp-title{font-size:16px;font-weight:var(--weight-extra);color:var(--text)}
-.lp-close{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:14px;width:30px;height:30px;border-radius:var(--r-md);cursor:pointer;display:flex;align-items:center;justify-content:center}
-.lp-body{flex:1;overflow-y:auto;padding:var(--sp-3)}
-.lp-refresh{display:block;margin:0 auto var(--sp-3);padding:5px 16px;background:transparent;border:1px solid var(--border);border-radius:var(--r-full);color:var(--text-faint);font-size:10px;font-weight:var(--weight-bold);cursor:pointer;font-family:var(--font)}
-.lp-item{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3);border-radius:var(--r-md);margin-bottom:var(--sp-2);background:var(--surface-0);transition:background var(--dur-fast)}
-.lp-item:hover{background:var(--surface-1)}
-.lp-item.me{border:1px solid rgba(61,168,122,.15);background:rgba(61,168,122,.04)}
-.lp-rank{font-size:16px;font-weight:var(--weight-extra);width:32px;text-align:center;color:var(--text-faint)}
-.lp-rank.r1{color:#ffd700}.lp-rank.r2{color:#c0c0c0}.lp-rank.r3{color:#cd7f32}
-.lp-av{width:36px;height:36px;border-radius:var(--r-md);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:var(--weight-extra);color:var(--text);overflow:hidden;flex-shrink:0}
-.lp-av img{width:100%;height:100%;object-fit:cover}
-.lp-uinfo{flex:1;min-width:0}
-.lp-uname{font-size:13px;font-weight:var(--weight-bold);color:var(--text)}
-.lp-utype{font-size:9px;color:var(--text-faint);margin-top:1px}
-.lp-val{text-align:right;flex-shrink:0}
-.lp-total{font-size:14px;font-weight:var(--weight-extra);color:var(--text);font-variant-numeric:tabular-nums}
-.lp-pnl{font-size:10px;font-weight:var(--weight-semi);font-variant-numeric:tabular-nums;margin-top:1px}
-.lp-pnl.up{color:var(--success)}.lp-pnl.down{color:var(--error)}
+/* Leaderboard styles moved to components.css */

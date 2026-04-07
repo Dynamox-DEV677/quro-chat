@@ -26,7 +26,7 @@ import { openEmoji, closeEmoji, emojiOverlayClick, insertEmoji } from './emoji.j
 import { handleFileUpload } from './file-upload.js';
 import { initDragDrop } from './drag-drop.js';
 import { openFriendsPage, closeFriendsPage, fpSwitchTab, fpRender, fpOpenDM } from './friends.js';
-import { openLeaderPage, closeLeaderPage, loadLeaderboard } from './leaderboard.js';
+import { openLeaderPage, closeLeaderPage, loadLeaderboard, lpSwitchPeriod } from './leaderboard.js';
 import { openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail, changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks, stk_startLiveRefresh } from './stocks.js';
 import { openTradingPage, closeTradingPage, trd_execute, trd_select, trd_setTab, trd_setMax, trd_setQty, trd_showBottom, trd_filterWatch, trd_updateOrder, trd_resetPortfolio, closeTrdConfirm, confirmTrdExec } from './trading.js';
 import { initSplash } from './splash.js';
@@ -88,7 +88,7 @@ Object.assign(window, {
   // Friends
   openFriendsPage, closeFriendsPage, fpSwitchTab, fpRender,
   // Leaderboard
-  openLeaderPage, closeLeaderPage, loadLeaderboard,
+  openLeaderPage, closeLeaderPage, loadLeaderboard, lpSwitchPeriod,
   // Stocks
   openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail,
   changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks,

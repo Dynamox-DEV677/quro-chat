@@ -163,14 +163,32 @@
 /* ── Leaderboard ── */
 [data-theme="light"] .lp-header{background:#eee;border-bottom-color:rgba(0,0,0,.08)}
 [data-theme="light"] .lp-close{color:rgba(0,0,0,.5)}
-[data-theme="light"] .lp-refresh:hover{border-color:rgba(0,0,0,.25);color:#000}
+[data-theme="light"] .lp-period-tabs{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+[data-theme="light"] .lp-period-tab{color:rgba(0,0,0,.4)}
+[data-theme="light"] .lp-period-tab:hover{color:rgba(0,0,0,.7)}
+[data-theme="light"] .lp-period-tab.active{background:rgba(0,0,0,.07);color:#111}
+[data-theme="light"] .lp-reset-bar{background:rgba(0,0,0,.02);border-bottom-color:rgba(0,0,0,.06)}
+[data-theme="light"] .lp-reset-label{color:rgba(0,0,0,.35)}
+[data-theme="light"] .lp-reset-label strong{color:rgba(0,0,0,.6)}
+[data-theme="light"] .lp-podium{background:#f0f0f0}
+[data-theme="light"] .lp-pod{background:#fff;border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .lp-pod.gold{border-color:rgba(180,130,20,.2)}
+[data-theme="light"] .lp-pod-av{border-color:rgba(0,0,0,.1);background:#e0e0e0}
+[data-theme="light"] .lp-pod.gold .lp-pod-av{border-color:rgba(180,130,20,.3);box-shadow:0 0 12px rgba(180,130,20,.08)}
+[data-theme="light"] .lp-pod-name{color:#111}
+[data-theme="light"] .lp-pod-val{color:rgba(0,0,0,.35)}
+[data-theme="light"] .lp-my-rank{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .lp-myrank-pos{color:#111}
+[data-theme="light"] .lp-myrank-of{color:rgba(0,0,0,.35)}
+[data-theme="light"] .lp-myrank-val{color:rgba(0,0,0,.35)}
 [data-theme="light"] .lp-item{background:#fff}
 [data-theme="light"] .lp-item.me{background:#f8f8f8}
 [data-theme="light"] .lp-rank{color:rgba(0,0,0,.25)}
 [data-theme="light"] .lp-av{background:#e0e0e0}
 [data-theme="light"] .lp-uname{color:#333}
 [data-theme="light"] .lp-utype{color:rgba(0,0,0,.35)}
-[data-theme="light"] .lp-total{color:#1a1a1a}
+[data-theme="light"] .lp-total{color:rgba(0,0,0,.35)}
+[data-theme="light"] .lp-empty{color:rgba(0,0,0,.25)}
 
 /* ── Stocks page ── */
 [data-theme="light"] .stp-header{background:#eee;border-bottom-color:rgba(0,0,0,.08)}

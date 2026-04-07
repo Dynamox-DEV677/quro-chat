@@ -1023,36 +1023,35 @@
     background:var(--bg);
   }
   .lp-header{
-    padding:14px 16px;
-    padding-top:calc(14px + var(--st));
-    height:52px;
+    padding:10px 14px;
+    padding-top:calc(10px + var(--st));
     display:flex;align-items:center;
+    gap:8px;
   }
-  .lp-title{font-size:18px;font-weight:var(--weight-bold)}
-  .lp-close{width:36px;height:36px;border-radius:var(--r-md)}
+  .lp-title{font-size:16px;font-weight:var(--weight-bold)}
+  .lp-header-actions{gap:6px}
+  .lp-period-tab{font-size:11px;padding:4px 10px}
+  .lp-close{width:34px;height:34px;border-radius:var(--r-md)}
   .lp-close:active{transform:scale(.95)}
-  .lp-body{padding:10px 12px;padding-bottom:calc(56px + var(--sb))}
-  .lp-refresh{padding:8px 14px;font-size:12px;border-radius:var(--r-md)}
+  .lp-podium{padding:var(--sp-4) var(--sp-3) var(--sp-2)}
+  .lp-pod{padding:var(--sp-3) var(--sp-2) var(--sp-2)}
+  .lp-pod-av{width:44px;height:44px;font-size:var(--text-base)}
+  .lp-pod-medal{font-size:20px}
+  .lp-pod-name{font-size:var(--text-xs)}
+  .lp-pod-pct{font-size:var(--text-sm)}
+  .lp-pod-val{font-size:9px}
+  .lp-body{padding:8px 12px;padding-bottom:calc(56px + var(--sb))}
 
-  /* Top 3 — special cards */
-  .lp-item:nth-child(-n+3){
-    padding:12px 14px;
-  }
-  .lp-item:nth-child(-n+3) .lp-av{width:56px;height:56px;font-size:20px}
-  .lp-item:nth-child(1) .lp-rank{color:#ffd700}
-  .lp-item:nth-child(2) .lp-rank{color:#c0c0c0}
-  .lp-item:nth-child(3) .lp-rank{color:#cd7f32}
-
-  /* List — 56px rows */
+  /* List items */
   .lp-item{
     padding:10px 12px;border-radius:var(--r-lg);gap:10px;
-    min-height:56px;display:flex;align-items:center;
+    min-height:52px;display:flex;align-items:center;
   }
-  .lp-rank{width:24px;font-size:15px}
-  .lp-av{width:36px;height:36px;font-size:14px}
+  .lp-rank{width:26px;font-size:14px}
+  .lp-av{width:34px;height:34px;font-size:14px}
   .lp-uname{font-size:14px}
-  .lp-total{font-size:14px;font-weight:var(--weight-bold);margin-left:auto}
-  .lp-pnl{font-size:11px}
+  .lp-pct{font-size:14px}
+  .lp-total{font-size:10px}
 
 
   /* ──────────────────────────────────────────
