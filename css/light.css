@@ -161,7 +161,7 @@
 [data-theme="light"] .fp-empty{color:rgba(0,0,0,.25)}
 
 /* ── Leaderboard ── */
-[data-theme="light"] .lp-header{background:#eee;border-bottom-color:rgba(0,0,0,.08)}
+[data-theme="light"] .lp-header{background:rgba(238,238,238,.85);border-bottom-color:rgba(0,0,0,.08)}
 [data-theme="light"] .lp-close{color:rgba(0,0,0,.5)}
 [data-theme="light"] .lp-period-tabs{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
 [data-theme="light"] .lp-period-tab{color:rgba(0,0,0,.4)}
@@ -171,18 +171,18 @@
 [data-theme="light"] .lp-reset-label{color:rgba(0,0,0,.35)}
 [data-theme="light"] .lp-reset-label strong{color:rgba(0,0,0,.6)}
 [data-theme="light"] #lpStars{opacity:.15}
-[data-theme="light"] .lp-podium{background:#f0f0f0}
-[data-theme="light"] .lp-pod{background:#fff;border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .lp-podium{background:rgba(240,240,240,.7)}
+[data-theme="light"] .lp-pod{background:rgba(255,255,255,.8);backdrop-filter:blur(8px);border-color:rgba(0,0,0,.06)}
 [data-theme="light"] .lp-pod.gold{border-color:rgba(180,130,20,.2)}
 [data-theme="light"] .lp-pod-av{border-color:rgba(0,0,0,.1);background:#e0e0e0}
 [data-theme="light"] .lp-pod.gold .lp-pod-av{border-color:rgba(180,130,20,.3);box-shadow:0 0 12px rgba(180,130,20,.08)}
 [data-theme="light"] .lp-pod-name{color:#111}
 [data-theme="light"] .lp-pod-val{color:rgba(0,0,0,.35)}
-[data-theme="light"] .lp-my-rank{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .lp-my-rank{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.06)}
 [data-theme="light"] .lp-myrank-pos{color:#111}
 [data-theme="light"] .lp-myrank-of{color:rgba(0,0,0,.35)}
 [data-theme="light"] .lp-myrank-val{color:rgba(0,0,0,.35)}
-[data-theme="light"] .lp-item{background:#fff}
+[data-theme="light"] .lp-item{background:rgba(255,255,255,.75);backdrop-filter:blur(4px)}
 [data-theme="light"] .lp-item.me{background:#f8f8f8}
 [data-theme="light"] .lp-rank{color:rgba(0,0,0,.25)}
 [data-theme="light"] .lp-av{background:#e0e0e0}
