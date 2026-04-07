@@ -7,7 +7,7 @@ import { buildDMList, fetchDMLastMessages } from './dm.js';
 import { loadGroupChats } from './groupchat.js';
 import { loadServersIntoBar, showInviteModal } from './servers.js';
 import { fetchMyMsgCount, _stopPoll } from './messaging.js';
-import { subscribeGlobalMessages } from './notifications.js';
+import { subscribeGlobalMessages, subscribeTradeFeed } from './notifications.js';
 import { _subscribeCallSignals } from './calls-incoming.js';
 import { _subscribeServerVCNotifications } from './channels.js';
 import { initDragDrop } from './drag-drop.js';
@@ -95,6 +95,7 @@ export async function initApp(){
     catch(e){console.warn('[Quro] refresh cycle failed:',e.message);}
   },30000);
   subscribeGlobalMessages();
+  subscribeTradeFeed();
   _subscribeCallSignals();
   _subscribeServerVCNotifications();
   stopAuthBubbles();

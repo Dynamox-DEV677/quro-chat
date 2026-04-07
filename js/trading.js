@@ -2,9 +2,9 @@
 // Paper Trading Terminal — Full Rewrite
 // ═══════════════════════════════════════
 import { sb } from './config.js';
-import { ME } from './state.js';
+import { ME, chatMode, curChannel, curServer, curDMUser, curGroupChat } from './state.js';
 import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair, stk_startLiveRefresh, stk_fetchQuotes } from './stocks.js';
-import { escH, notify } from './utils.js';
+import { escH, notify, getMsgKey } from './utils.js';
 import { qConfirm } from './modal.js';
 
 // ─── Module state ───
@@ -412,6 +412,7 @@ async function _doExecuteTrade(action, symbol, shares, price) {
   var btn = document.getElementById('trdExecBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Processing\u2026'; }
 
+  var tradePnl = '';
   try {
     if (action === 'buy') {
       if (total > trdPortfolio.cash) { notify('Insufficient funds!', 'error'); trd_updateOrder(); return; }
@@ -429,6 +430,9 @@ async function _doExecuteTrade(action, symbol, shares, price) {
     } else {
       var h = trdPortfolio.holdings[symbol];
       if (!h || shares > h.shares) { notify('Not enough shares', 'error'); trd_updateOrder(); return; }
+      // Calculate profit BEFORE modifying holdings
+      var profit = (price - h.avgPrice) * shares;
+      tradePnl = (profit >= 0 ? '+' : '') + profit.toFixed(2);
       // Update local state
       trdPortfolio.cash += total;
       var remaining = h.shares - shares;
@@ -437,8 +441,6 @@ async function _doExecuteTrade(action, symbol, shares, price) {
       } else {
         trdPortfolio.holdings[symbol] = { shares: remaining, avgPrice: h.avgPrice };
       }
-      // Calculate profit for notification
-      var profit = (price - h.avgPrice) * shares;
       var profitUp = profit >= 0;
       notify('Sold ' + shares + ' x ' + p.name + ' — ' + (profitUp ? 'Profit' : 'Loss') + ' \u20B9' + stk_fmtIN(Math.abs(profit)), profitUp ? 'success' : 'error');
     }
@@ -450,12 +452,37 @@ async function _doExecuteTrade(action, symbol, shares, price) {
     notify('Trade executed locally — DB sync failed', 'error');
   }
 
+  // Broadcast trade to chat feed
+  _broadcastTrade(action, symbol, shares, price, stk ? stk.n : symbol, tradePnl);
+
   // Refresh all UI
   trd_updateSummary();
   trd_renderWatchlist();
   trd_updateStockHd(symbol);
   trd_updateOrder();
   trd_renderBottom();
+}
+
+// ─── Broadcast trade as special chat message ───
+async function _broadcastTrade(action, symbol, shares, price, stockName, pnl) {
+  if (!ME || !ME.id) return;
+  try {
+    var tradeTag = '[trade]' + action + '|' + symbol + '|' + stockName + '|' + shares + '|' + price.toFixed(2) + '|' + (pnl || '') + '[/trade]';
+
+    await sb.from('messages').insert({
+      server_channel: 'server:global:trade-feed',
+      user_id: ME.id,
+      author: ME.username,
+      avatar: ME.avatar,
+      photo: ME.photo || null,
+      text: tradeTag,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      name_font: ME.name_font || 'default',
+      name_color: ME.name_color || ''
+    });
+  } catch (e) {
+    console.warn('[Quro] trade broadcast failed:', e.message);
+  }
 }
 
 // ─── Save trade to Supabase ───

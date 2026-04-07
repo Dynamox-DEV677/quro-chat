@@ -289,6 +289,18 @@
 [data-theme="light"] .rp-btn:hover{background:rgba(0,0,0,.06)}
 [data-theme="light"] .drop-overlay{background:rgba(56,161,105,.04);border-color:var(--primary)}
 
+/* ── Live Trade Feed ── */
+[data-theme="light"] .msg-trade{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
+[data-theme="light"] .msg-trade:hover{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.15)}
+[data-theme="light"] .msg-trade.buy{border-left-color:#2d8a62}
+[data-theme="light"] .msg-trade.sell{border-left-color:#c94040}
+[data-theme="light"] .trade-badge.buy{background:rgba(45,138,98,.08);color:#2d8a62}
+[data-theme="light"] .trade-badge.sell{background:rgba(201,64,64,.08);color:#c94040}
+[data-theme="light"] .trade-sym{color:#111}
+[data-theme="light"] .trade-name{color:rgba(0,0,0,.4)}
+[data-theme="light"] .trade-details{color:rgba(0,0,0,.55)}
+[data-theme="light"] .trade-total{color:#111}
+
 /* ═══ SETTINGS PANEL — light mode ═══ */
 [data-theme="light"] .sp-nav{background:#f0f0f0;border-right-color:rgba(0,0,0,.06)}
 [data-theme="light"] .sp-nav::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08)}

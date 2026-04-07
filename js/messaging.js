@@ -191,6 +191,28 @@ export function renderMsgContent(raw){
     var csText=raw.replace('[call-started] ','');
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(61,168,122,.08);border:1px solid rgba(61,168,122,.15);border-radius:10px;font-size:13px;color:rgba(61,168,122,.9)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'+escH(csText)+'</div>';
   }
+  // Trade feed message
+  if(raw.indexOf('[trade]')===0 && raw.indexOf('[/trade]')!==-1){
+    var tradeInner=raw.slice(7,raw.indexOf('[/trade]'));
+    var tp=tradeInner.split('|');
+    // action|symbol|stockName|shares|price|pnl
+    var tAction=tp[0]||'buy', tSym=tp[1]||'', tName=tp[2]||tSym, tShares=tp[3]||'0', tPrice=tp[4]||'0', tPnl=tp[5]||'';
+    var isBuy=tAction==='buy';
+    var pnlHtml='';
+    if(tPnl){
+      var pnlUp=parseFloat(tPnl)>=0;
+      pnlHtml='<div class="trade-pnl '+(pnlUp?'up':'down')+'">'+(pnlUp?'\u25B2':'\u25BC')+' P&L: \u20B9'+escH(tPnl.replace(/^[+-]/,''))+'</div>';
+    }
+    return '<div class="msg-trade '+(isBuy?'buy':'sell')+'">'+
+      '<div class="trade-badge '+(isBuy?'buy':'sell')+'">'+(isBuy?'BUY':'SELL')+'</div>'+
+      '<div class="trade-info">'+
+        '<div class="trade-stock"><span class="trade-sym">'+escH(tSym)+'</span> <span class="trade-name">'+escH(tName)+'</span></div>'+
+        '<div class="trade-details">'+escH(tShares)+' shares @ \u20B9'+escH(tPrice)+'</div>'+
+        pnlHtml+
+      '</div>'+
+      '<div class="trade-total">\u20B9'+escH((parseFloat(tShares)*parseFloat(tPrice)).toLocaleString('en-IN'))+'</div>'+
+    '</div>';
+  }
   if(raw.indexOf('[call-missed]')===0){
     var cmText=raw.replace('[call-missed] ','');
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.15);border-radius:10px;font-size:13px;color:rgba(224,80,80,.9)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>'+escH(cmText)+'</div>';
@@ -241,7 +263,7 @@ export function renderMsgContent(raw){
   return result;
 }
 
-export function _plainText(raw){return (raw||'').replace(/^\[reply\][^\[]*\[\/reply\]/,'').replace(/\[img\][^\[]*\[\/img\]/g,'[image]').replace(/\[vid\][^\[]*\[\/vid\]/g,'[video]').replace(/\[audio\][^\[]*\[\/audio\]/g,'[audio]').replace(/\[file\][^\[]*\[\/file\]/g,'[file]').trim();}
+export function _plainText(raw){return (raw||'').replace(/^\[reply\][^\[]*\[\/reply\]/,'').replace(/\[img\][^\[]*\[\/img\]/g,'[image]').replace(/\[vid\][^\[]*\[\/vid\]/g,'[video]').replace(/\[audio\][^\[]*\[\/audio\]/g,'[audio]').replace(/\[file\][^\[]*\[\/file\]/g,'[file]').replace(/\[trade\][^\[]*\[\/trade\]/g,'[trade]').trim();}
 
 let _searchTimer = null;
 

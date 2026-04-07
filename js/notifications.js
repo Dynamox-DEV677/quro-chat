@@ -101,6 +101,29 @@ export function clearGCUnread(channelKey){
   updateGCBadge(channelKey);
 }
 
+// ─── Live Trade Feed Subscription (global) ───
+var _tradeFeedSub=null;
+export async function subscribeTradeFeed(){
+  if(_tradeFeedSub){try{sb.removeChannel(_tradeFeedSub);}catch(e){/* cleanup */}_tradeFeedSub=null;}
+  if(!ME)return;
+  _tradeFeedSub=sb.channel('trade-feed-global')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'server_channel=eq.server:global:trade-feed'},function(payload){
+      var m=payload.new;
+      if(!m)return;
+      // Parse trade tag
+      var text=m.text||'';
+      if(text.indexOf('[trade]')!==0)return;
+      var inner=text.slice(7,text.indexOf('[/trade]'));
+      var tp=inner.split('|');
+      var action=tp[0]||'buy',sym=tp[1]||'',name=tp[2]||sym,shares=tp[3]||'0',price=tp[4]||'0';
+      var isBuy=action==='buy';
+      var who=escH(m.author||'Someone');
+      var msg=who+(isBuy?' bought ':' sold ')+shares+' '+sym+' @ \u20B9'+price;
+      notify(msg,isBuy?'success':'error');
+    })
+    .subscribe();
+}
+
 export async function subscribeGlobalMessages(){
   if(globalMsgSub){try{sb.removeChannel(globalMsgSub);}catch(e){/* cleanup */}globalMsgSub=null;}
   if(!ME)return;
