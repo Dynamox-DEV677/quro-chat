@@ -45,7 +45,7 @@ async function _loadGrantedAdmins() {
     var { data, error } = await sb.from('admin_config')
       .select('value')
       .eq('key', 'admin_users')
-      .single();
+      .maybeSingle();
     if (!error && data && data.value) {
       _grantedAdmins = data.value.split(',').map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
     } else {

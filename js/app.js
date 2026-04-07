@@ -233,7 +233,7 @@ if('serviceWorker' in navigator){
         return;
       }
       // Init admin panel if user is Dynamox
-      initAdmin();
+      await initAdmin();
       initDragDrop();
     } else {
       showLoading(false);
