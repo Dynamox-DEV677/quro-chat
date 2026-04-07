@@ -170,6 +170,7 @@
 [data-theme="light"] .lp-reset-bar{background:rgba(0,0,0,.02);border-bottom-color:rgba(0,0,0,.06)}
 [data-theme="light"] .lp-reset-label{color:rgba(0,0,0,.35)}
 [data-theme="light"] .lp-reset-label strong{color:rgba(0,0,0,.6)}
+[data-theme="light"] #lpStars{opacity:.15}
 [data-theme="light"] .lp-podium{background:#f0f0f0}
 [data-theme="light"] .lp-pod{background:#fff;border-color:rgba(0,0,0,.06)}
 [data-theme="light"] .lp-pod.gold{border-color:rgba(180,130,20,.2)}

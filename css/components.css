@@ -112,6 +112,8 @@
 /* ═══ TRADING LEADERBOARD PAGE ═══ */
 #leaderPage{position:fixed;inset:0;background:var(--bg);z-index:var(--z-popover);display:flex;flex-direction:column;transform:translateY(100%);transition:transform var(--dur-slow) var(--ease-out);overflow:hidden}
 #leaderPage.open{transform:translateY(0)}
+#lpStars{position:absolute;inset:0;pointer-events:none;z-index:0}
+#leaderPage .lp-header,#leaderPage .lp-podium,#leaderPage .lp-reset-bar,#leaderPage .lp-my-rank,#leaderPage .lp-body{position:relative;z-index:1}
 
 /* ── Header ── */
 .lp-header{display:flex;align-items:center;justify-content:space-between;padding:clamp(12px,3vw,18px) clamp(14px,4vw,28px);padding-top:calc(clamp(12px,3vw,18px) + var(--st));background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;gap:var(--sp-3)}
