@@ -1,7 +1,7 @@
 // ═══ PROFILE / CUSTOMIZATION ═══
 import { sb } from './config.js';
 import { ME } from './state.js';
-import { escH, setAvatarEl, getDecorCls, applyUserBarDecor, notify } from './utils.js';
+import { escH, setAvatarEl, getDecorCls, applyUserBarDecor, notify, stk_fmtIN } from './utils.js';
 import { buildMembers } from './members.js';
 import { buildDMList, openDM } from './dm.js';
 
@@ -124,10 +124,178 @@ export function openProfilePopup(user){
   var dmBtn=document.getElementById('ppDmBtn');
   if(user.id===ME.id){actEl.style.display='none';}
   else{actEl.style.display='flex';dmBtn.onclick=function(){closeProfilePopup();openDM(user);};}
+
+  // Reset trading sections to hidden (will show if data loads)
+  document.getElementById('ppPnlHero').style.display='none';
+  document.getElementById('ppStatsGrid').style.display='none';
+  document.getElementById('ppHoldingsSection').style.display='none';
+  document.getElementById('ppActivitySection').style.display='none';
+  document.getElementById('ppRankBadge').style.display='none';
+
   pp.classList.add('open');
+
+  // Async-load trading identity data
+  _loadTradingIdentity(user.id);
 }
 
 export function closeProfilePopup(){document.getElementById('profilePopup').classList.remove('open');}
+
+// ═══ Trading Identity Data Loader ═══
+async function _loadTradingIdentity(userId){
+  try{
+    // Fetch portfolio, holdings, transactions, and all portfolios (for rank) in parallel
+    var [pRes,hRes,txRes,allPRes,allHRes]=await Promise.all([
+      sb.from('stock_portfolios').select('cash_balance').eq('user_id',userId).maybeSingle(),
+      sb.from('stock_holdings').select('symbol,shares,avg_buy_price').eq('user_id',userId),
+      sb.from('stock_transactions').select('symbol,stock_name,type,shares,price,total,created_at').eq('user_id',userId).order('created_at',{ascending:false}).limit(50),
+      sb.from('stock_portfolios').select('user_id,cash_balance'),
+      sb.from('stock_holdings').select('user_id,symbol,shares,avg_buy_price')
+    ]);
+
+    var cash=pRes.data?parseFloat(pRes.data.cash_balance)||0:0;
+    var holdings=hRes.data||[];
+    var txns=txRes.data||[];
+
+    // If user has no portfolio at all, skip trading sections
+    if(!pRes.data&&!txns.length) return;
+
+    // ── Compute portfolio value ──
+    var investedVal=0,currentVal=0;
+    holdings.forEach(function(h){
+      var curPrice=(window.trdPrices&&window.trdPrices[h.symbol])?window.trdPrices[h.symbol].price:h.avg_buy_price;
+      investedVal+=h.shares*h.avg_buy_price;
+      currentVal+=h.shares*curPrice;
+    });
+    var totalVal=cash+currentVal;
+    var totalPnl=totalVal-100000;
+    var pnlPct=((totalPnl/100000)*100);
+    var pnlUp=totalPnl>=0;
+
+    // ── Show P&L hero ──
+    var pnlHero=document.getElementById('ppPnlHero');
+    var pnlValueEl=document.getElementById('ppPnlValue');
+    var pnlPctEl=document.getElementById('ppPnlPct');
+    pnlHero.style.display='';
+    var cls=totalPnl===0?'neutral':(pnlUp?'up':'down');
+    pnlValueEl.textContent=(pnlUp?'+':'')+'\u20B9'+stk_fmtIN(Math.abs(totalPnl));
+    pnlValueEl.className='pp-pnl-value '+cls;
+    pnlPctEl.textContent=(pnlUp?'+':'')+pnlPct.toFixed(2)+'%';
+    pnlPctEl.className='pp-pnl-pct '+cls;
+
+    // ── Compute stats ──
+    var wins=0,losses=0,bestProfit=-Infinity,bestTradeName='';
+    // Group sells to compute wins (sells above avg buy)
+    txns.forEach(function(t){
+      if(t.type==='sell'){
+        // Find avg buy from preceding buys of same symbol
+        var buyPrices=txns.filter(function(b){return b.symbol===t.symbol&&b.type==='buy'&&new Date(b.created_at)<new Date(t.created_at);});
+        var avgBuy=0;
+        if(buyPrices.length){var tS=0,tC=0;buyPrices.forEach(function(b){tS+=b.shares;tC+=b.shares*b.price;});avgBuy=tC/tS;}
+        else avgBuy=t.price; // no buy history — break even
+        var profit=(t.price-avgBuy)*t.shares;
+        if(profit>=0)wins++;else losses++;
+        if(profit>bestProfit){bestProfit=profit;bestTradeName=t.stock_name||t.symbol;}
+      }
+    });
+    var totalTrades=txns.length;
+    var sellCount=wins+losses;
+    var winRate=sellCount>0?Math.round((wins/sellCount)*100):0;
+
+    // ── Show stats grid ──
+    var statsGrid=document.getElementById('ppStatsGrid');
+    statsGrid.style.display='grid';
+    document.getElementById('ppWinRate').textContent=sellCount>0?winRate+'%':'--';
+    document.getElementById('ppWinRate').className='pp-stat-value'+(winRate>=50?' up':winRate>0?' down':'');
+    document.getElementById('ppTradeCount').textContent=totalTrades>0?totalTrades:'--';
+    var bestEl=document.getElementById('ppBestTrade');
+    if(bestProfit>-Infinity&&bestProfit!==0){
+      bestEl.textContent=bestTradeName;bestEl.className='pp-stat-value'+(bestProfit>0?' up':' down');
+    }else{bestEl.textContent='--';bestEl.className='pp-stat-value';}
+    document.getElementById('ppPortfolioVal').textContent='\u20B9'+stk_fmtIN(totalVal);
+
+    // ── Compute rank ──
+    var allHoldsByUser={};
+    (allHRes.data||[]).forEach(function(h){
+      if(!allHoldsByUser[h.user_id])allHoldsByUser[h.user_id]=[];
+      allHoldsByUser[h.user_id].push(h);
+    });
+    var allTotals=(allPRes.data||[]).map(function(p){
+      var c=parseFloat(p.cash_balance)||0;
+      var v=0;
+      (allHoldsByUser[p.user_id]||[]).forEach(function(h){
+        var cp=(window.trdPrices&&window.trdPrices[h.symbol])?window.trdPrices[h.symbol].price:h.avg_buy_price;
+        v+=h.shares*cp;
+      });
+      return{userId:p.user_id,total:c+v};
+    });
+    allTotals.sort(function(a,b){return b.total-a.total;});
+    var userRankIdx=allTotals.findIndex(function(e){return e.userId===userId;});
+    var totalTraders=allTotals.length;
+
+    // ── Show rank badge ──
+    if(totalTraders>0&&userRankIdx>=0){
+      var percentile=((userRankIdx+1)/totalTraders)*100;
+      var badgeEl=document.getElementById('ppRankBadge');
+      if(percentile<=1&&totalTraders>=5){
+        badgeEl.className='pp-rank-badge top1';badgeEl.innerHTML='\u2B50 Top 1%';badgeEl.style.display='';
+      }else if(percentile<=10&&totalTraders>=3){
+        badgeEl.className='pp-rank-badge top10';badgeEl.innerHTML='\u{1f3c6} Top 10%';badgeEl.style.display='';
+      }else if(percentile<=25&&totalTraders>=4){
+        badgeEl.className='pp-rank-badge top25';badgeEl.innerHTML='\u{1f4c8} Top 25%';badgeEl.style.display='';
+      }else if(userRankIdx<3){
+        badgeEl.className='pp-rank-badge top10';badgeEl.innerHTML='#'+(userRankIdx+1)+' Trader';badgeEl.style.display='';
+      }
+    }
+
+    // ── Mini holdings preview (top 3 by value) ──
+    if(holdings.length>0){
+      var sortedH=holdings.slice().sort(function(a,b){
+        var aP=(window.trdPrices&&window.trdPrices[a.symbol])?window.trdPrices[a.symbol].price:a.avg_buy_price;
+        var bP=(window.trdPrices&&window.trdPrices[b.symbol])?window.trdPrices[b.symbol].price:b.avg_buy_price;
+        return (b.shares*bP)-(a.shares*aP);
+      });
+      var top3=sortedH.slice(0,3);
+      var listHtml=top3.map(function(h){
+        var cp=(window.trdPrices&&window.trdPrices[h.symbol])?window.trdPrices[h.symbol].price:h.avg_buy_price;
+        var val=h.shares*cp;var cost=h.shares*h.avg_buy_price;var pl=val-cost;var plUp=pl>=0;
+        return '<div class="pp-hold-item">'+
+          '<div class="pp-hold-sym">'+escH(h.symbol)+'</div>'+
+          '<div class="pp-hold-shares">'+h.shares+' shares</div>'+
+          '<div class="pp-hold-pnl '+(plUp?'up':'down')+'">'+(plUp?'+':'')+'\u20B9'+stk_fmtIN(Math.abs(pl))+'</div></div>';
+      }).join('');
+      if(sortedH.length>3) listHtml+='<div class="pp-hold-more">+'+(sortedH.length-3)+' more</div>';
+      document.getElementById('ppHoldingsList').innerHTML=listHtml;
+      document.getElementById('ppHoldingsSection').style.display='';
+    }
+
+    // ── Recent activity (last 5 trades) ──
+    if(txns.length>0){
+      var recent=txns.slice(0,5);
+      document.getElementById('ppActivityList').innerHTML=recent.map(function(t){
+        var isBuy=t.type==='buy';
+        var d=new Date(t.created_at);
+        var ago=_timeAgo(d);
+        return '<div class="pp-act-item">'+
+          '<div class="pp-act-badge '+(isBuy?'buy':'sell')+'">'+(isBuy?'B':'S')+'</div>'+
+          '<div class="pp-act-info"><div class="pp-act-stock">'+escH(t.stock_name||t.symbol)+'</div>'+
+          '<div class="pp-act-detail">'+t.shares+' @ \u20B9'+stk_fmtIN(t.price)+'</div></div>'+
+          '<div class="pp-act-time">'+ago+'</div></div>';
+      }).join('');
+      document.getElementById('ppActivitySection').style.display='';
+    }
+  }catch(e){
+    console.warn('[Quro] Trading identity load failed:',e.message);
+  }
+}
+
+function _timeAgo(date){
+  var s=Math.floor((Date.now()-date.getTime())/1000);
+  if(s<60)return 'now';
+  var m=Math.floor(s/60);if(m<60)return m+'m';
+  var h=Math.floor(m/60);if(h<24)return h+'h';
+  var d=Math.floor(h/24);if(d<7)return d+'d';
+  return date.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+}
 
 // ═══ Font Picker ═══
 var _spSelectedFont='default';

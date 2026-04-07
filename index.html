@@ -390,16 +390,61 @@
   <div class="pp-card">
     <div class="pp-banner">
       <button class="pp-close" onclick="closeProfilePopup()" aria-label="Close profile">✕</button>
+      <div class="pp-rank-badge" id="ppRankBadge" style="display:none"></div>
       <div class="pp-avatar-wrap"><div class="pp-avatar" id="ppAvatar"><span id="ppAvatarLetter">?</span></div></div>
     </div>
     <div class="pp-body">
-      <div class="pp-name" id="ppName">Username</div>
-      <div class="pp-handle" id="ppHandle">@username</div>
+      <div class="pp-identity">
+        <div class="pp-name-row">
+          <div class="pp-name" id="ppName">Username</div>
+          <div class="pp-handle" id="ppHandle">@username</div>
+        </div>
+        <div class="pp-pnl-hero" id="ppPnlHero" style="display:none">
+          <div class="pp-pnl-value" id="ppPnlValue"></div>
+          <div class="pp-pnl-pct" id="ppPnlPct"></div>
+        </div>
+      </div>
       <div class="pp-email" id="ppEmail" style="display:none"></div>
       <div class="pp-plate" id="ppPlate"></div>
-      <div class="pp-divider"></div>
-      <div class="pp-about-title">About Me</div>
-      <div class="pp-about-text" id="ppAbout"></div>
+
+      <!-- Trading Stats -->
+      <div class="pp-stats-grid" id="ppStatsGrid" style="display:none">
+        <div class="pp-stat">
+          <div class="pp-stat-label">Win Rate</div>
+          <div class="pp-stat-value" id="ppWinRate">--</div>
+        </div>
+        <div class="pp-stat">
+          <div class="pp-stat-label">Trades</div>
+          <div class="pp-stat-value" id="ppTradeCount">--</div>
+        </div>
+        <div class="pp-stat">
+          <div class="pp-stat-label">Best Trade</div>
+          <div class="pp-stat-value" id="ppBestTrade">--</div>
+        </div>
+        <div class="pp-stat">
+          <div class="pp-stat-label">Portfolio</div>
+          <div class="pp-stat-value" id="ppPortfolioVal">--</div>
+        </div>
+      </div>
+
+      <!-- Mini Holdings Preview -->
+      <div class="pp-holdings-section" id="ppHoldingsSection" style="display:none">
+        <div class="pp-section-title">Top Holdings</div>
+        <div class="pp-holdings-list" id="ppHoldingsList"></div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="pp-activity-section" id="ppActivitySection" style="display:none">
+        <div class="pp-section-title">Recent Trades</div>
+        <div class="pp-activity-list" id="ppActivityList"></div>
+      </div>
+
+      <!-- About -->
+      <div class="pp-about-section" id="ppAboutSection">
+        <div class="pp-section-title">About Me</div>
+        <div class="pp-about-text" id="ppAbout"></div>
+      </div>
+
       <div class="pp-actions" id="ppActions">
         <button class="pp-dm-btn" id="ppDmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Send Message</button>
       </div>
