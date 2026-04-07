@@ -140,7 +140,7 @@ export async function stk_fetchQuotes(){
     var gotReal=false;
     (d.data||[]).forEach(function(q){
       if(q.regularMarketPrice){
-        stkQuotes[q.symbol]={price:q.regularMarketPrice,chg:q.regularMarketChange||0,pct:q.regularMarketChangePercent||0,high:q.regularMarketDayHigh,low:q.regularMarketDayLow,open:q.regularMarketOpen,vol:q.regularMarketVolume,w52h:q.fiftyTwoWeekHigh,w52l:q.fiftyTwoWeekLow};
+        stkQuotes[q.symbol]={price:q.regularMarketPrice,chg:q.regularMarketChange||0,pct:q.regularMarketChangePercent||0,high:q.regularMarketDayHigh,low:q.regularMarketDayLow,open:q.regularMarketOpen,vol:q.regularMarketVolume,w52h:q.fiftyTwoWeekHigh,w52l:q.fiftyTwoWeekLow,pts:q.closes&&q.closes.length>2?q.closes:undefined};
         gotReal=true;
       }
     });
@@ -216,11 +216,10 @@ export function stk_renderIndex(i,pts,price,chg,pct,idx){
 }
 
 export async function stk_loadIndices(){
-  // Show simulated data instantly
+  // Show base placeholder until real data arrives
   for(var i=0;i<STK_INDICES.length;i++){
     (function(idx,i){
-      var pts=stk_simPts(idx.b,75),price=pts[pts.length-1],chg=price-idx.b,pct=(chg/idx.b)*100;
-      stk_renderIndex(i,pts,price,chg,pct,idx);
+      stk_renderIndex(i,[idx.b],idx.b,0,0,idx);
     })(STK_INDICES[i],i);
   }
   // Fetch real index data via proxy
@@ -237,11 +236,11 @@ export async function stk_loadIndices(){
 }
 
 export async function stk_loadStocks(){
-  // Show simulated data instantly — no waiting for API
+  // Show base prices as placeholder until real data arrives
   STK_STOCKS.forEach(function(stk){
-    var pts=stk_simPts(stk.b,75);
-    var price=pts[pts.length-1],prev=pts[0],chg=price-prev,pct=(chg/prev)*100;
-    stkQuotes[stk.s]={price:price,chg:chg,pct:pct,high:Math.max.apply(null,pts),low:Math.min.apply(null,pts),open:pts[0],vol:Math.floor(Math.random()*5000000)+500000,w52h:stk.b*1.4,w52l:stk.b*.65,pts:pts};
+    if(!stkQuotes[stk.s]){
+      stkQuotes[stk.s]={price:stk.b,chg:0,pct:0,high:stk.b,low:stk.b,open:stk.b,vol:0,w52h:stk.b*1.3,w52l:stk.b*.7,pts:[stk.b]};
+    }
   });
   stk_renderGrid();
   stk_updateLivePill();
@@ -251,45 +250,31 @@ export async function stk_loadStocks(){
     _stkHasRealData=true;
     stk_renderGrid();
     stk_updateLivePill();
-    // Also update trading prices with real data
-    STK_STOCKS.forEach(function(stk){
-      var q=stkQuotes[stk.s];
-      if(q&&q.price&&window.trdPrices&&window.trdPrices[stk.s]){
-        window.trdPrices[stk.s].price=q.price;
-        window.trdPrices[stk.s].prev=q.price-(q.chg||0);
-        var hist=window.trdHistory&&window.trdHistory[stk.s];
-        if(hist)hist[hist.length-1]=q.price;
-      }
-    });
+    // Sync real prices to trading module
+    _syncTradingPrices();
   }
 }
 
-// ─── Auto-refresh live prices every 10 seconds ───
+// ─── Auto-refresh live prices every 3 seconds ───
 var _stkRefreshCycle=0;
 export function stk_startLiveRefresh(){
   if(_stkLiveRefreshInt)return;
   _stkRefreshCycle=0;
   _stkLiveRefreshInt=setInterval(async function(){
-    if(!document.getElementById('stocksPage').classList.contains('open'))return;
+    // Run if stocks page OR trading page is open
+    var stocksOpen=document.getElementById('stocksPage')&&document.getElementById('stocksPage').classList.contains('open');
+    var tradingOpen=document.getElementById('tradingPage')&&document.getElementById('tradingPage').classList.contains('open');
+    if(!stocksOpen&&!tradingOpen)return;
     _stkRefreshCycle++;
     var gotReal=await stk_fetchQuotes();
     if(gotReal){
       _stkHasRealData=true;
-      stk_renderGrid();
-      stk_updateLivePill();
-      // Sync trading prices too
-      STK_STOCKS.forEach(function(stk){
-        var q=stkQuotes[stk.s];
-        if(q&&q.price&&window.trdPrices&&window.trdPrices[stk.s]){
-          window.trdPrices[stk.s].price=q.price;
-          window.trdPrices[stk.s].prev=q.price-(q.chg||0);
-          var hist=window.trdHistory&&window.trdHistory[stk.s];
-          if(hist){hist.push(q.price);if(hist.length>80)hist.shift();}
-        }
-      });
+      if(stocksOpen){stk_renderGrid();stk_updateLivePill();}
+      // Sync real prices to trading module
+      _syncTradingPrices();
     }
-    // Refresh indices every 3rd cycle (9s) to reduce API load
-    if(_stkRefreshCycle%3===0){
+    // Refresh indices every 3rd cycle (9s)
+    if(_stkRefreshCycle%3===0&&stocksOpen){
       for(var i=0;i<STK_INDICES.length;i++){
         (function(idx,i){
           stk_fetchChart(idx.s).then(function(data){
@@ -302,6 +287,29 @@ export function stk_startLiveRefresh(){
       }
     }
   },3000);
+}
+
+function _syncTradingPrices(){
+  STK_STOCKS.forEach(function(stk){
+    var q=stkQuotes[stk.s];
+    if(q&&q.price&&window.trdPrices){
+      if(!window.trdPrices[stk.s]){
+        window.trdPrices[stk.s]={price:q.price,prev:q.price-(q.chg||0),name:stk.n,sec:stk.sec,base:stk.b};
+      }else{
+        window.trdPrices[stk.s].price=q.price;
+        window.trdPrices[stk.s].prev=q.price-(q.chg||0);
+      }
+      if(window.trdHistory){
+        if(!window.trdHistory[stk.s])window.trdHistory[stk.s]=[];
+        var hist=window.trdHistory[stk.s];
+        // Only push if price actually changed
+        if(hist.length===0||hist[hist.length-1]!==q.price){
+          hist.push(q.price);
+          if(hist.length>80)hist.shift();
+        }
+      }
+    }
+  });
 }
 
 export function stk_stopLiveRefresh(){
@@ -372,7 +380,7 @@ export function stk_renderGrid(){
       var q=stkQuotes[stk.s];
       if(!q)return;
       var up=q.chg>=0;
-      var pts=q.pts||stk_simPts(stk.b,30);
+      var pts=q.pts||[stk.b,stk.b];
       var cv=document.getElementById('spark_'+stk.s.replace(/[^a-zA-Z0-9]/g,'_'));
       if(cv)stk_draw(cv,pts,up,36);
     });
@@ -779,23 +787,25 @@ export async function stk_loadDetailChart(sym,range){
     }).catch(function(){});
   })(sym,range,intMap[range]);
 
-  // Real-time: update current (last) candle every 1.5s
+  // Real-time: re-fetch chart data every 3s to update last candle with real price
   if(range==='1d'){
     stkLiveInterval=setInterval(function(){
       if(!stkCurrentCandles.length)return;
-      var last=stkCurrentCandles[stkCurrentCandles.length-1];
-      var delta=last.c*0.004*(Math.random()-0.49);
-      last.c=Math.max(stkCurrentBase*0.35,last.c+delta);
-      if(last.c>last.h)last.h=last.c;
-      if(last.c<last.l)last.l=last.c;
-      last.v=(last.v||0)+Math.floor(Math.random()*8000);
-      drawCandlestick(cv,stkCurrentCandles);
-      updateStkdOHLC(stkCurrentCandles);
-      var priceEl=document.getElementById('stkdPrice');
-      if(priceEl)priceEl.textContent='\u20B9'+stk_fmtIN(last.c);
-      var up=last.c>=(stkCurrentCandles[0]?stkCurrentCandles[0].o:last.c);
-      var arEl=document.getElementById('stkdArrow');if(arEl){arEl.textContent=up?'▲':'▼';arEl.style.color=up?'#26a69a':'#ef5350';}
-    },1500);
+      // Use real price from stkQuotes if available
+      var q=stkQuotes[sym];
+      if(q&&q.price){
+        var last=stkCurrentCandles[stkCurrentCandles.length-1];
+        last.c=q.price;
+        if(last.c>last.h)last.h=last.c;
+        if(last.c<last.l)last.l=last.c;
+        drawCandlestick(cv,stkCurrentCandles);
+        updateStkdOHLC(stkCurrentCandles);
+        var priceEl=document.getElementById('stkdPrice');
+        if(priceEl)priceEl.textContent='\u20B9'+stk_fmtIN(last.c);
+        var up=last.c>=(stkCurrentCandles[0]?stkCurrentCandles[0].o:last.c);
+        var arEl=document.getElementById('stkdArrow');if(arEl){arEl.textContent=up?'▲':'▼';arEl.style.color=up?'#26a69a':'#ef5350';}
+      }
+    },3000);
   }
 }
 

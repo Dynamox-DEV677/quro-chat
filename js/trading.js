@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════
 import { sb } from './config.js';
 import { ME } from './state.js';
-import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair } from './stocks.js';
+import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair, stk_startLiveRefresh, stk_fetchQuotes } from './stocks.js';
 import { escH, notify } from './utils.js';
 import { qConfirm } from './modal.js';
 
@@ -23,28 +23,21 @@ var _portfolioLoaded = false;
 window.trdPrices = trdPrices;
 window.trdHistory = trdHistory;
 
-// ─── Init prices from simulated base ───
+// ─── Init prices — use base as placeholder until real data arrives ───
 export function trd_initPrices() {
   STK_STOCKS.forEach(function(stk) {
-    var pts = stk_simPts(stk.b, 80);
-    trdPrices[stk.s] = { price: pts[pts.length - 1], prev: pts[0], name: stk.n, sec: stk.sec, base: stk.b };
-    trdHistory[stk.s] = pts.slice();
+    if (!trdPrices[stk.s]) {
+      trdPrices[stk.s] = { price: stk.b, prev: stk.b, name: stk.n, sec: stk.sec, base: stk.b };
+      trdHistory[stk.s] = [stk.b];
+    }
   });
 }
 
-// ─── Live ticker (updates every 1.2s) ───
+// ─── Live ticker — UI refresh only, no fake price mutations ───
+// Real prices come from stocks.js stk_fetchQuotes() every 3s
 export function trd_startTicker() {
   trd_initPrices();
   trdTickerInt = setInterval(function() {
-    STK_STOCKS.forEach(function(stk) {
-      var p = trdPrices[stk.s];
-      if (!p) return;
-      var delta = p.price * (Math.random() - 0.495) * 0.007;
-      p.price = Math.max(p.base * 0.4, p.price + delta);
-      var hist = trdHistory[stk.s];
-      hist.push(p.price);
-      if (hist.length > 80) hist.shift();
-    });
     trd_renderWatchlist();
     if (trdSelected) {
       trd_updateStockHd(trdSelected);
@@ -71,6 +64,10 @@ export function openTradingPage() {
   var navBtn = document.getElementById('navTrading');
   if (navBtn) navBtn.classList.add('active');
   if (!trdTickerInt) trd_startTicker();
+  // Start real-time Yahoo Finance price feed (3s interval)
+  stk_startLiveRefresh();
+  // Also do an immediate fetch so prices are real from the start
+  stk_fetchQuotes();
   trd_loadPortfolio();
 }
 
