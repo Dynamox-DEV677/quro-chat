@@ -37,7 +37,28 @@ export function applyUserBarDecor(){
 
 export function getDecorCls(decorId){var d=DECOR_LIST.find(function(x){return x.id===decorId;});return d?d.cls:'';}
 
-export function notify(msg,type='info'){const box=document.getElementById('notifBox');const el=document.createElement('div');el.className='notif '+type;el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),350);},3000);}
+export function notify(msg,type='info'){
+  var box=document.getElementById('notifBox');if(!box)return;
+  var el=document.createElement('div');
+  el.className='notif '+type;
+  // Icon based on type
+  var icons={
+    success:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+    error:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    warning:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  var icon=icons[type]||icons.info;
+  el.innerHTML='<span class="notif-icon">'+icon+'</span><span class="notif-text">'+escH(msg)+'</span>';
+  // Progress bar for auto-dismiss
+  var bar=document.createElement('div');bar.className='notif-progress';el.appendChild(bar);
+  box.appendChild(el);
+  // Dismiss timeout
+  var dur=type==='error'?4000:3000;
+  setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove();},300);},dur);
+  // Click to dismiss
+  el.addEventListener('click',function(){el.classList.add('out');setTimeout(function(){el.remove();},300);});
+}
 
 export function decorRingHTML(decorId){
   if(!decorId||decorId==='none')return '';

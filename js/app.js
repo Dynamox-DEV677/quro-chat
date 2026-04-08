@@ -6,7 +6,7 @@ import { sb, EMOJIS } from './config.js';
 import * as State from './state.js';
 import { escH, getMsgKey, showLoading, isMobile, setAvatarEl, stk_fmtIN, applyUserBarDecor, getDecorCls, notify } from './utils.js';
 import { authErr, authOk, clearAuth, updateRegLetter, doRegister, doLogin, loadAndEnterApp, initApp, doLogout } from './auth.js';
-import { openDrawer, closeDrawer, syncDrawer, handleSidebarToggle, updateSidebarToggleIcon, goHome, mobileNavTo } from './navigation.js';
+import { openDrawer, closeDrawer, syncDrawer, handleSidebarToggle, updateSidebarToggleIcon, goHome, mobileNavTo, syncMobileNav, navigateBack, navPush, navPop, navClear, navStackPushRaw, getActiveOverlay, setActiveOverlay } from './navigation.js';
 import { loadServersIntoBar, openServerBrowser, closeServerBrowser, srvBrowserOverlayClick, loadAllServers, joinServer, createServer, pickServer, pickServerById, addServer, checkServerOwnership, openServerSettings, closeServerSettings, saveServerSettings, uploadServerIcon, copyInviteLink, leaveServer, checkInviteLink, showInviteModal, closeInviteModal } from './servers.js';
 import { loadServerChannels, openChannel, addChannel, closeAddChModal, selChType, confirmAddChannel, joinVoiceChannel, leaveVoiceChannel } from './channels.js';
 import { _stopPoll, subscribeAndRender, fetchAndRenderMessages, appendMessage, fetchMyMsgCount, sendMsg, inputKey, growInput, renderMsgContent, _plainText, searchMsgs, openSearch, closeSearch, scrollToMsg } from './messaging.js';
@@ -18,7 +18,7 @@ import { _gcCleanup } from './calls-gc.js';
 import { _subscribeCallSignals, acceptIncoming, declineIncoming } from './calls-incoming.js';
 import { toggleMute, toggleCallVideo, toggleSpeaker, toggleScreenShare, stopScreenShare, minimizeCall, reopenCall } from './calls-controls.js';
 import { openSettings, closeSettings, spNavTo, spShowNav, toggleDarkMode, changePassword, toggleNotifSound, toggleNotifDesktop, requestNotifPermission } from './settings.js';
-import { saveNameplate, saveAbout, buildBannerGrid, saveBanner, getBannerStyle, uploadBannerImage, openProfilePopup, closeProfilePopup, syncFontPicker, pickFont, saveNameFont, buildColorGrid, syncColorPicker, pickColor, saveNameColor, buildDecorGrid, selectDecor, saveDecor, pickProfilePic, applyProfilePic, saveContactEmail, unlinkEmail, syncEmailSection } from './profile.js';
+import { saveNameplate, saveAbout, buildBannerGrid, saveBanner, getBannerStyle, uploadBannerImage, openProfilePopup, closeProfilePopup, syncFontPicker, pickFont, saveNameFont, buildColorGrid, syncColorPicker, pickColor, saveNameColor, buildDecorGrid, selectDecor, saveDecor, pickProfilePic, applyProfilePic, saveContactEmail, unlinkEmail, syncEmailSection, shareProfile, closeShareOverlay, downloadShareCard, nativeShareCard } from './profile.js';
 import { playNotifSound, showDesktopNotif, updateServerBadge, clearServerUnread, clearDMUnread, clearGCUnread, subscribeGlobalMessages } from './notifications.js';
 import { _clearTypingChannel, _setupTypingChannel, _renderTyping, _onInputTyping } from './typing.js';
 import { setReply, clearReply, editMsg, deleteMsg, showReactPicker, closeReactPicker, doReact, renderMsgReactions } from './reactions.js';
@@ -28,7 +28,7 @@ import { initDragDrop } from './drag-drop.js';
 import { openFriendsPage, closeFriendsPage, fpSwitchTab, fpRender, fpOpenDM } from './friends.js';
 import { openLeaderPage, closeLeaderPage, loadLeaderboard, lpSwitchPeriod } from './leaderboard.js';
 import { openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail, changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks, stk_startLiveRefresh } from './stocks.js';
-import { openTradingPage, closeTradingPage, trd_execute, trd_select, trd_setTab, trd_setMax, trd_setQty, trd_showBottom, trd_filterWatch, trd_updateOrder, trd_resetPortfolio, closeTrdConfirm, confirmTrdExec } from './trading.js';
+import { openTradingPage, closeTradingPage, openTradeFromChat, openTradeFromStocks, trd_execute, trd_select, trd_setTab, trd_setMax, trd_setQty, trd_showBottom, trd_filterWatch, trd_updateOrder, trd_resetPortfolio, closeTrdConfirm, confirmTrdExec } from './trading.js';
 import { initSplash } from './splash.js';
 import { startAuthBubbles, stopAuthBubbles } from './auth-bubbles.js';
 import { qConfirm, qPrompt, qAlert } from './modal.js';
@@ -43,6 +43,8 @@ Object.assign(window, {
   doLogin, doRegister, doLogout, updateRegLetter,
   // Navigation
   goHome, closeDrawer, handleSidebarToggle, mobileNavTo,
+  syncMobileNav, navigateBack, navPush, navPop, navClear, navStackPushRaw, getActiveOverlay, setActiveOverlay,
+  _navStackPushRaw: navStackPushRaw,
   // Servers
   openServerBrowser, closeServerBrowser, srvBrowserOverlayClick,
   joinServer, createServer, addServer,
@@ -74,6 +76,7 @@ Object.assign(window, {
   pickFont, saveNameFont, pickColor, saveNameColor,
   selectDecor, saveDecor, pickProfilePic, applyProfilePic,
   saveContactEmail, unlinkEmail,
+  shareProfile, closeShareOverlay, downloadShareCard, nativeShareCard,
   // Notifications
   notify,
   // Typing
@@ -93,7 +96,7 @@ Object.assign(window, {
   openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail,
   changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks,
   // Trading
-  openTradingPage, closeTradingPage, trd_execute, trd_select,
+  openTradingPage, closeTradingPage, openTradeFromChat, openTradeFromStocks, trd_execute, trd_select,
   trd_setTab, trd_setMax, trd_setQty, trd_showBottom,
   trd_filterWatch, trd_updateOrder, trd_resetPortfolio,
   closeTrdConfirm, confirmTrdExec,

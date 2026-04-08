@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════
 import { sb } from './config.js';
 import { ME, chatMode, curChannel, curServer, curDMUser, curGroupChat } from './state.js';
-import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair, stk_startLiveRefresh, stk_fetchQuotes } from './stocks.js';
+import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair, stk_startLiveRefresh, stk_stopLiveRefresh } from './stocks.js';
 import { escH, notify, getMsgKey } from './utils.js';
 import { qConfirm } from './modal.js';
 
@@ -55,7 +55,8 @@ export function trd_stopTicker() {
 }
 
 // ─── Open / Close ───
-export function openTradingPage() {
+// silent=true when called from mobileNavTo (nav already handled)
+export function openTradingPage(silent) {
   document.getElementById('tradingPage').classList.add('open');
   document.body.classList.add('trading-open');
   var srvBtn = document.getElementById('srvTradingBtn');
@@ -64,23 +65,65 @@ export function openTradingPage() {
   var navBtn = document.getElementById('navTrading');
   if (navBtn) navBtn.classList.add('active');
   if (!trdTickerInt) trd_startTicker();
-  // Start real-time Yahoo Finance price feed (3s interval)
+  // Start real-time Yahoo Finance price feed (3s interval + immediate first fetch)
   stk_startLiveRefresh();
-  // Also do an immediate fetch so prices are real from the start
-  stk_fetchQuotes();
   trd_loadPortfolio();
+  // Sync mobile nav to show Trade as active
+  if (!silent && typeof window.syncMobileNav === 'function') window.syncMobileNav('trade');
+  if (typeof window.setActiveOverlay === 'function') window.setActiveOverlay('trade');
 }
 
-export function closeTradingPage() {
+// ─── Open trade from chat ($SYMBOL tap) ───
+export function openTradeFromChat(sym) {
+  // Push 'chat' onto nav stack so closing trade returns to chat
+  if (typeof window.navPush === 'function') window.navPush('trade');
+  openTradingPage();
+  // Small delay so the page slide-up renders before selecting stock
+  setTimeout(function() { trd_select(sym); }, 80);
+}
+
+// ─── Open trade from stocks page ($SYMBOL tap on stock detail) ───
+export function openTradeFromStocks(sym) {
+  // Push 'stocks' BEFORE closing it (so the nav stack knows to return to stocks)
+  _navStack_pushRaw('stocks');
+  // Close stocks detail + stocks page (silent — we handle nav ourselves)
+  if (typeof window.closeStkDetail === 'function') window.closeStkDetail(null, true);
+  if (typeof window.closeStocksPanel === 'function') window.closeStocksPanel(true);
+  // Small delay for the stocks page close animation to start
+  setTimeout(function() {
+    openTradingPage();
+    setTimeout(function() { trd_select(sym); }, 80);
+  }, 100);
+}
+
+// Helper: push a raw value onto the nav stack (bypasses current-state detection)
+function _navStack_pushRaw(val) {
+  if (typeof window._navStackPushRaw === 'function') window._navStackPushRaw(val);
+}
+
+// silent=true when called from _closeOverlaySilent in navigation.js
+export function closeTradingPage(silent) {
   document.getElementById('tradingPage').classList.remove('open');
   document.body.classList.remove('trading-open');
   var srvBtn = document.getElementById('srvTradingBtn');
   if (srvBtn) srvBtn.classList.remove('active');
   trd_stopTicker();
-  if (window.appMode === 'home') {
-    document.querySelectorAll('.sb-nav-item').forEach(function(n) { n.classList.remove('active'); });
-    var navHome = document.getElementById('navHome');
-    if (navHome) navHome.classList.add('active');
+  stk_stopLiveRefresh(); // Clean up price feed (smart: won't stop if stocks panel still open)
+  if (typeof window.setActiveOverlay === 'function') window.setActiveOverlay(null);
+
+  if (silent) return; // navigation.js handles nav state
+
+  // Stack-aware: navigate back to where we came from
+  if (typeof window.navigateBack === 'function') {
+    window.navigateBack();
+  } else {
+    // Fallback: restore home nav state
+    if (window.appMode === 'home') {
+      document.querySelectorAll('.sb-nav-item').forEach(function(n) { n.classList.remove('active'); });
+      var navHome = document.getElementById('navHome');
+      if (navHome) navHome.classList.add('active');
+    }
+    if (typeof window.syncMobileNav === 'function') window.syncMobileNav('chats');
   }
 }
 
@@ -145,12 +188,17 @@ export function trd_updateSummary() {
   var pnlStr = pnl === 0 ? '\u20B90' : (up ? '+' : '') + '\u20B9' + stk_fmtIN(Math.abs(pnl)) + ' (' + (up ? '+' : '') + pnlPct.toFixed(2) + '%)';
   var pnlCls = pnl === 0 ? '' : (up ? 'up' : 'down');
 
-  // Top bar stats
+  // Top bar stats (with flash-on-change)
   _setText('trdTotalVal', totalStr);
   _setText('trdCash', cashStr);
   _setText('trdInvested', investedStr);
   var pnlEl = document.getElementById('trdPnL');
-  if (pnlEl) { pnlEl.textContent = pnlStr; pnlEl.className = 'trd-ts-val ' + pnlCls; }
+  if (pnlEl) {
+    var prevPnlText = pnlEl.textContent;
+    pnlEl.textContent = pnlStr;
+    pnlEl.className = 'trd-ts-val ' + pnlCls;
+    if (prevPnlText && prevPnlText !== pnlStr) _flashEl(pnlEl, up);
+  }
 
   // Order panel portfolio card (always visible)
   _setText('trdPcTotal', totalStr);
@@ -160,7 +208,8 @@ export function trd_updateSummary() {
   if (pcPnl) { pcPnl.textContent = pnlStr; pcPnl.className = 'trd-pc-val ' + pnlCls; }
 }
 
-// ─── Watchlist ───
+// ─── Watchlist — smart update with price flash ───
+var _wlPrevPrices = {};
 export function trd_renderWatchlist() {
   var list = document.getElementById('trdWatchlist');
   if (!list) return;
@@ -169,29 +218,79 @@ export function trd_renderWatchlist() {
     return s.n.toLowerCase().includes(filter) || s.s.toLowerCase().includes(filter);
   }) : STK_STOCKS;
 
-  list.innerHTML = stocks.map(function(stk) {
+  // If list is empty or stock count changed, do full render
+  var existingItems = list.querySelectorAll('.trd-wl-item');
+  if (existingItems.length !== stocks.length || _wlForceRender) {
+    _wlForceRender = false;
+    _wlPrevPrices = {};
+    list.innerHTML = stocks.map(function(stk) {
+      var p = trdPrices[stk.s];
+      if (!p) return '';
+      var chg = p.price - p.prev;
+      var pct = (chg / p.prev * 100);
+      var up = chg >= 0;
+      var held = trdPortfolio.holdings[stk.s] && trdPortfolio.holdings[stk.s].shares > 0;
+      var active = trdSelected === stk.s;
+      _wlPrevPrices[stk.s] = p.price;
+      return '<div class="trd-wl-item' + (active ? ' active' : '') + '" data-sym="' + stk.s + '" onclick="trd_select(\'' + stk.s + '\')">' +
+        '<div class="trd-wl-left">' +
+        '<div class="trd-wl-sym">' + escH(stk.s) + (held ? '<span class="held-dot"></span>' : '') + '</div>' +
+        '<div class="trd-wl-name">' + escH(stk.n) + '</div></div>' +
+        '<div class="trd-wl-right">' +
+        '<div class="trd-wl-price">\u20B9' + stk_fmtIN(p.price) + '</div>' +
+        '<div class="trd-wl-chg ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + pct.toFixed(2) + '%</div></div></div>';
+    }).join('');
+    return;
+  }
+
+  // Smart update — only update changed prices, flash on change
+  stocks.forEach(function(stk, i) {
     var p = trdPrices[stk.s];
-    if (!p) return '';
+    if (!p) return;
+    var el = existingItems[i];
+    if (!el) return;
     var chg = p.price - p.prev;
     var pct = (chg / p.prev * 100);
     var up = chg >= 0;
     var held = trdPortfolio.holdings[stk.s] && trdPortfolio.holdings[stk.s].shares > 0;
     var active = trdSelected === stk.s;
-    return '<div class="trd-wl-item' + (active ? ' active' : '') + '" onclick="trd_select(\'' + stk.s + '\')">' +
-      '<div class="trd-wl-left">' +
-      '<div class="trd-wl-sym">' + escH(stk.s) + (held ? '<span class="held-dot"></span>' : '') + '</div>' +
-      '<div class="trd-wl-name">' + escH(stk.n) + '</div></div>' +
-      '<div class="trd-wl-right">' +
-      '<div class="trd-wl-price">\u20B9' + stk_fmtIN(p.price) + '</div>' +
-      '<div class="trd-wl-chg ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + pct.toFixed(2) + '%</div></div></div>';
-  }).join('');
+
+    // Update active state
+    el.classList.toggle('active', active);
+
+    // Update price + flash if changed
+    var priceEl = el.querySelector('.trd-wl-price');
+    var chgEl = el.querySelector('.trd-wl-chg');
+    if (priceEl) {
+      var newPriceStr = '\u20B9' + stk_fmtIN(p.price);
+      if (priceEl.textContent !== newPriceStr) {
+        priceEl.textContent = newPriceStr;
+        // Flash the whole row
+        var prevP = _wlPrevPrices[stk.s];
+        if (prevP !== undefined && prevP !== p.price) {
+          var went = p.price > prevP;
+          el.classList.remove('wl-tick-up', 'wl-tick-down');
+          void el.offsetWidth;
+          el.classList.add(went ? 'wl-tick-up' : 'wl-tick-down');
+          setTimeout(function() { el.classList.remove('wl-tick-up', 'wl-tick-down'); }, 800);
+        }
+        _wlPrevPrices[stk.s] = p.price;
+      }
+    }
+    if (chgEl) {
+      chgEl.textContent = (up ? '+' : '') + pct.toFixed(2) + '%';
+      chgEl.className = 'trd-wl-chg ' + (up ? 'up' : 'down');
+    }
+  });
 }
+var _wlForceRender = true;
 
 var _wlFilterTimer = 0;
 export function trd_filterWatch(q) {
   clearTimeout(_wlFilterTimer);
   _wlFilterTimer = setTimeout(function() {
     trdWlFilter = q.trim().toLowerCase();
+    _wlForceRender = true;
     trd_renderWatchlist();
   }, 120);
 }
@@ -381,19 +480,26 @@ export function trd_execute() {
   if (!trdSelected || !ME) return;
   var p = trdPrices[trdSelected];
   if (!p) return;
-  var qty = parseFloat(document.getElementById('trdQtyInput')?.value) || 0;
-  if (qty <= 0) { notify('Enter a valid quantity', 'error'); return; }
+  var qtyInput = document.getElementById('trdQtyInput');
+  var qty = parseFloat(qtyInput?.value) || 0;
+  if (qty <= 0) {
+    notify('Enter a valid quantity', 'error');
+    _shakeInput(qtyInput);
+    return;
+  }
   var total = qty * p.price;
 
   // Pre-validate
   if (trdTab === 'buy' && total > trdPortfolio.cash) {
     notify('Insufficient funds — you need \u20B9' + stk_fmtIN(total - trdPortfolio.cash) + ' more', 'error');
+    _shakeInput(qtyInput);
     return;
   }
   if (trdTab === 'sell') {
     var h = trdPortfolio.holdings[trdSelected];
     if (!h || qty > h.shares) {
       notify('Not enough shares to sell', 'error');
+      _shakeInput(qtyInput);
       return;
     }
   }
@@ -455,12 +561,41 @@ async function _doExecuteTrade(action, symbol, shares, price) {
   // Broadcast trade to chat feed
   _broadcastTrade(action, symbol, shares, price, stk ? stk.n : symbol, tradePnl);
 
+  // Show success celebration
+  _showTradeSuccess(action);
+
   // Refresh all UI
   trd_updateSummary();
   trd_renderWatchlist();
   trd_updateStockHd(symbol);
   trd_updateOrder();
   trd_renderBottom();
+}
+
+// ─── Input shake on validation error ───
+function _shakeInput(el) {
+  if (!el) return;
+  el.classList.remove('shake-error');
+  void el.offsetWidth; // force reflow to restart animation
+  el.classList.add('shake-error');
+  setTimeout(function() { el.classList.remove('shake-error'); }, 400);
+}
+
+// ─── Trade success celebration ───
+function _showTradeSuccess(action) {
+  // 1. Flash overlay with checkmark
+  var overlay = document.createElement('div');
+  overlay.className = 'trade-success-overlay ' + action;
+  overlay.innerHTML = '<div class="trade-success-check ' + action + '"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>';
+  document.body.appendChild(overlay);
+  setTimeout(function() { overlay.remove(); }, 700);
+
+  // 2. Pulse the execute button
+  var btn = document.getElementById('trdExecBtn');
+  if (btn) {
+    btn.classList.add('success-' + action);
+    setTimeout(function() { btn.classList.remove('success-' + action); }, 600);
+  }
 }
 
 // ─── Broadcast trade as special chat message ───
@@ -539,7 +674,11 @@ export function trd_renderHoldingsLive() {
   var syms = Object.keys(trdPortfolio.holdings).filter(function(s) { return trdPortfolio.holdings[s].shares > 0; });
 
   if (!syms.length) {
-    body.innerHTML = '<div class="trd-empty-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>No holdings yet. Pick a stock and buy!</div>';
+    body.innerHTML = '<div class="trd-empty-msg">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>' +
+      '<div class="trd-empty-title">No holdings yet</div>' +
+      '<div class="trd-empty-sub">Pick a stock from the watchlist and place your first trade</div>' +
+      '</div>';
     return;
   }
 
@@ -565,14 +704,22 @@ export async function trd_renderHistory() {
   if (!body) return;
   if (!ME || !ME.id) { body.innerHTML = '<div class="trd-empty-msg">Not logged in</div>'; return; }
 
-  body.innerHTML = '<div class="trd-empty-msg" style="font-size:9px;letter-spacing:1px;padding:var(--sp-4)">LOADING\u2026</div>';
+  body.innerHTML = '<div style="padding:var(--sp-2) 0">' +
+    '<div class="trd-skeleton-row"><div class="skeleton skeleton-badge"></div><div style="flex:1"><div class="skeleton skeleton-text w-70"></div><div class="skeleton skeleton-text w-40"></div></div><div class="skeleton skeleton-text" style="width:60px"></div></div>' +
+    '<div class="trd-skeleton-row"><div class="skeleton skeleton-badge"></div><div style="flex:1"><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-50"></div></div><div class="skeleton skeleton-text" style="width:60px"></div></div>' +
+    '<div class="trd-skeleton-row"><div class="skeleton skeleton-badge"></div><div style="flex:1"><div class="skeleton skeleton-text w-70"></div><div class="skeleton skeleton-text w-40"></div></div><div class="skeleton skeleton-text" style="width:60px"></div></div>' +
+    '</div>';
 
   try {
     var res = await sb.from('stock_transactions').select('*').eq('user_id', ME.id).order('created_at', { ascending: false }).limit(50);
     var txns = res.data || [];
 
     if (!txns.length) {
-      body.innerHTML = '<div class="trd-empty-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>No transactions yet</div>';
+      body.innerHTML = '<div class="trd-empty-msg">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>' +
+        '<div class="trd-empty-title">No transactions yet</div>' +
+        '<div class="trd-empty-sub">Your buy and sell history will appear here</div>' +
+        '</div>';
       return;
     }
 
@@ -588,7 +735,11 @@ export async function trd_renderHistory() {
     }).join('');
   } catch (e) {
     console.warn('[Quro] history load:', e.message);
-    body.innerHTML = '<div class="trd-empty-msg">Failed to load history</div>';
+    body.innerHTML = '<div class="trd-empty-msg">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' +
+      '<div class="trd-empty-title">Failed to load</div>' +
+      '<div class="trd-empty-sub">Check your connection and try again</div>' +
+      '</div>';
   }
 }
 
@@ -708,9 +859,37 @@ function trd_drawMiniChart() {
 }
 
 // ─── Helpers ───
+// ─── Animated text set — flashes green/red when value changes ───
+var _prevValues = {};
 function _setText(id, text) {
   var el = document.getElementById(id);
-  if (el) el.textContent = text;
+  if (!el) return;
+  var prev = _prevValues[id];
+  if (prev !== undefined && prev !== text) {
+    // Value changed — flash it
+    var grew = _compareCurrency(text, prev);
+    el.textContent = text;
+    _flashEl(el, grew);
+  } else {
+    el.textContent = text;
+  }
+  _prevValues[id] = text;
+}
+
+// Compare two currency strings to determine if value went up
+function _compareCurrency(newStr, oldStr) {
+  var nv = parseFloat((newStr || '').replace(/[^\d.\-]/g, '')) || 0;
+  var ov = parseFloat((oldStr || '').replace(/[^\d.\-]/g, '')) || 0;
+  return nv >= ov;
+}
+
+// Apply flash animation to an element
+function _flashEl(el, isUp) {
+  if (!el) return;
+  el.classList.remove('val-flash-up', 'val-flash-down');
+  void el.offsetWidth; // force reflow
+  el.classList.add(isUp ? 'val-flash-up' : 'val-flash-down');
+  setTimeout(function() { el.classList.remove('val-flash-up', 'val-flash-down'); }, 700);
 }
 
 function _findStock(sym) {
@@ -718,5 +897,33 @@ function _findStock(sym) {
     if (STK_STOCKS[i].s === sym) return STK_STOCKS[i];
   }
   return null;
+}
+
+// ─── Live Trade Ticker ───
+var _tickerMax = 4;
+export function trd_pushTicker(who, action, sym, shares, price) {
+  var ticker = document.getElementById('trdLiveTicker');
+  if (!ticker) return;
+  var isBuy = action === 'buy';
+  var item = document.createElement('div');
+  item.className = 'trd-live-ticker-item';
+  item.innerHTML =
+    '<span class="tick-user">' + escH(who) + '</span>' +
+    '<span class="tick-action ' + (isBuy ? 'buy' : 'sell') + '">' + (isBuy ? 'BUY' : 'SELL') + '</span>' +
+    '<span>' + escH(sym) + '</span>' +
+    '<span class="tick-dot"></span>' +
+    '<span>' + shares + ' @ \u20B9' + price + '</span>';
+  // Keep max items
+  while (ticker.children.length >= _tickerMax) {
+    ticker.removeChild(ticker.firstChild);
+  }
+  ticker.appendChild(item);
+  ticker.classList.add('active');
+  // Auto-hide after 15s if no new items
+  clearTimeout(ticker._hideTimer);
+  ticker._hideTimer = setTimeout(function() {
+    ticker.classList.remove('active');
+    setTimeout(function() { ticker.innerHTML = ''; }, 400);
+  }, 15000);
 }
 

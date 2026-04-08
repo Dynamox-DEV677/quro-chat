@@ -2,6 +2,7 @@
 import { sb } from './config.js';
 import { ME, chatMode, curDMUser, curGroupChat, curServer, curChannel, appMode, notifSound, notifDesktop } from './state.js';
 import { escH } from './utils.js';
+import { trd_pushTicker } from './trading.js';
 
 export function notify(msg,type='info'){
   const box=document.getElementById('notifBox');
@@ -120,6 +121,8 @@ export async function subscribeTradeFeed(){
       var who=escH(m.author||'Someone');
       var msg=who+(isBuy?' bought ':' sold ')+shares+' '+sym+' @ \u20B9'+price;
       notify(msg,isBuy?'success':'error');
+      // Push to live trade ticker on trading page
+      trd_pushTicker(m.author||'Someone', action, sym, shares, price);
     })
     .subscribe();
 }

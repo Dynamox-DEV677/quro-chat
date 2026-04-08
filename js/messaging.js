@@ -9,6 +9,29 @@ import { _setupTypingChannel } from './typing.js';
 import { clearReply, renderMsgReactions, setReply, editMsg, deleteMsg, showReactPicker } from './reactions.js';
 import { openProfilePopup } from './profile.js';
 import { buildDMList } from './dm.js';
+import { STK_STOCKS } from './stocks.js';
+
+// ── Stock symbol lookup for $TICKER detection ──
+var _stkSymMap=null;
+function _getStkSymMap(){
+  if(_stkSymMap) return _stkSymMap;
+  _stkSymMap={};
+  for(var i=0;i<STK_STOCKS.length;i++){
+    var ticker=STK_STOCKS[i].s.replace('.NS','');
+    _stkSymMap[ticker]=STK_STOCKS[i].s;
+  }
+  return _stkSymMap;
+}
+// Replace $TICKER patterns in escaped HTML with clickable spans
+function _linkifyStockSymbols(html){
+  var map=_getStkSymMap();
+  return html.replace(/\$([A-Z]{2,20})/g,function(match,ticker){
+    if(map[ticker]){
+      return '<span class="chat-stock-sym" onclick="window.openTradeFromChat(\''+map[ticker]+'\')">' + match + '</span>';
+    }
+    return match;
+  });
+}
 
 // ── Perf: track rendered message IDs in a Set instead of DOM queries ──
 var _renderedMsgIds=new Set();
@@ -260,7 +283,7 @@ export function renderMsgContent(raw){
     }
     rem=rem.slice(end+bestTag.close.length);
   }
-  return result;
+  return _linkifyStockSymbols(result);
 }
 
 export function _plainText(raw){return (raw||'').replace(/^\[reply\][^\[]*\[\/reply\]/,'').replace(/\[img\][^\[]*\[\/img\]/g,'[image]').replace(/\[vid\][^\[]*\[\/vid\]/g,'[video]').replace(/\[audio\][^\[]*\[\/audio\]/g,'[audio]').replace(/\[file\][^\[]*\[\/file\]/g,'[file]').replace(/\[trade\][^\[]*\[\/trade\]/g,'[trade]').trim();}

@@ -1,5 +1,6 @@
 // navigation.js -- Drawer, sidebar toggle, home, mobile nav
 // Mobile-first: drawer is the primary view on phones
+// ═══ Navigation Stack — "back" always returns to previous screen ═══
 
 import { sb } from './config.js';
 import {
@@ -17,6 +18,65 @@ import { clearReply } from './reactions.js';
 import { openChannel } from './channels.js';
 import { closeMobileMembers } from './members.js';
 import { openStocksPanel } from './stocks.js';
+
+// ═══ Navigation Stack ═══
+// Tracks where the user "came from" so close operations return correctly.
+// Stack entries are tab names: 'chats', 'chat', 'trade', 'stocks', 'leaderboard', 'settings', 'profile'
+var _navStack = [];
+var _activeOverlay = null; // currently open full-screen overlay name (or null)
+
+export function getActiveOverlay() { return _activeOverlay; }
+export function setActiveOverlay(name) {
+  _activeOverlay = name;
+  // Sync body class so CSS can hide mobile nav when overlays are open
+  if (name) {
+    document.body.classList.add('overlay-open');
+  } else {
+    document.body.classList.remove('overlay-open');
+  }
+}
+
+export function navPush(destination) {
+  // Push current state before navigating away
+  var current = _activeOverlay || (isDrawerOpen() ? 'chats' : 'chat');
+  // Don't push if we're going to the same place
+  if (current === destination) return;
+  // Limit stack depth to prevent memory leaks
+  if (_navStack.length > 10) _navStack.splice(0, _navStack.length - 10);
+  _navStack.push(current);
+}
+
+export function navPop() {
+  return _navStack.length > 0 ? _navStack.pop() : null;
+}
+
+export function navClear() {
+  _navStack = [];
+}
+
+// Push a specific value directly (used when the caller knows exactly what to push)
+export function navStackPushRaw(val) {
+  if (_navStack.length > 10) _navStack.splice(0, _navStack.length - 10);
+  _navStack.push(val);
+}
+
+/* ─── Mobile nav active state sync ─── */
+export function syncMobileNav(activeTab) {
+  if (!isMobile()) return;
+  document.querySelectorAll('.mob-nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  var idMap = {
+    chats: 'mnChats', chat: 'mnChats', home: 'mnChats',
+    trade: 'mnTrade',
+    leaderboard: 'mnLeaderboard',
+    profile: 'mnProfile',
+    settings: 'mnSettings',
+    stocks: 'mnChats',       // stocks isn't a bottom nav tab, highlight chats
+    friends: 'mnChats'       // friends isn't a bottom nav tab, highlight chats
+  };
+  var btnId = idMap[activeTab] || 'mnChats';
+  var btn = document.getElementById(btnId);
+  if (btn) btn.classList.add('active');
+}
 
 /* ─── Drawer open / close ─── */
 export function openDrawer(){
@@ -124,61 +184,101 @@ export function goBackToNav(){
   goHome();
 }
 
+/* ─── Close a specific overlay silently (no nav stack manipulation) ─── */
+function _closeOverlaySilent(name) {
+  if (name === 'trade') {
+    var tp = document.getElementById('tradingPage');
+    if (tp && tp.classList.contains('open') && typeof window.closeTradingPage === 'function') window.closeTradingPage(true);
+  } else if (name === 'stocks') {
+    var sp = document.getElementById('stocksPage');
+    if (sp && sp.classList.contains('open') && typeof window.closeStocksPanel === 'function') window.closeStocksPanel(true);
+  } else if (name === 'leaderboard') {
+    var lp = document.getElementById('leaderPage');
+    if (lp && lp.classList.contains('open') && typeof window.closeLeaderPage === 'function') window.closeLeaderPage(true);
+  } else if (name === 'settings') {
+    var st = document.getElementById('settingsPanel');
+    if (st && st.classList.contains('open') && typeof window.closeSettings === 'function') window.closeSettings();
+  } else if (name === 'friends') {
+    if (typeof window.closeFriendsPage === 'function') window.closeFriendsPage(true);
+  } else if (name === 'profile') {
+    var pp = document.getElementById('profilePopup');
+    if (pp && pp.style.display !== 'none' && pp.style.display !== '') {
+      if (typeof window.closeProfilePopup === 'function') window.closeProfilePopup();
+    }
+  }
+}
+
 /* ─── Close all overlay pages ─── */
-function _closeAllOverlays(){
-  var tp=document.getElementById('tradingPage');
-  if(tp&&tp.classList.contains('open')&&typeof window.closeTradingPage==='function')window.closeTradingPage();
-  var sp=document.getElementById('stocksPage');
-  if(sp&&sp.classList.contains('open')&&typeof window.closeStocksPanel==='function')window.closeStocksPanel();
-  var lp=document.getElementById('leaderPage');
-  if(lp&&lp.classList.contains('open')&&typeof window.closeLeaderPage==='function')window.closeLeaderPage();
-  var st=document.getElementById('settingsPanel');
-  if(st&&st.classList.contains('open')&&typeof window.closeSettings==='function')window.closeSettings();
-  var pp=document.getElementById('profilePopup');
-  if(pp&&pp.style.display!=='none'&&pp.style.display!=='')if(typeof window.closeProfilePopup==='function')window.closeProfilePopup();
+function _closeAllOverlays(except){
+  var overlays = ['trade', 'stocks', 'leaderboard', 'settings', 'friends', 'profile'];
+  for (var i = 0; i < overlays.length; i++) {
+    if (overlays[i] !== except) _closeOverlaySilent(overlays[i]);
+  }
+  setActiveOverlay(except || null);
+}
+
+/* ─── Navigate back (stack-aware) ─── */
+export function navigateBack() {
+  var prev = navPop();
+  if (prev) {
+    mobileNavTo(prev, true); // skipStack=true to avoid re-pushing
+  } else {
+    // Default: go to chats
+    mobileNavTo('chats', true);
+  }
 }
 
 /* ─── Mobile navigation ─── */
-export function mobileNavTo(tab){
+export function mobileNavTo(tab, skipStack){
   closeMobileMembers();
-  document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
 
-  // Map tab names to button IDs
-  var idMap={chats:'mnChats',trade:'mnTrade',leaderboard:'mnLeaderboard',profile:'mnProfile',settings:'mnSettings',home:'mnChats',chat:'mnChats'};
-  var btnId=idMap[tab]||('mn'+tab.charAt(0).toUpperCase()+tab.slice(1));
-  var btn=document.getElementById(btnId);
-  if(btn)btn.classList.add('active');
+  // Push current state to stack before navigating (unless skipStack)
+  if (!skipStack && _activeOverlay && _activeOverlay !== tab) {
+    navPush(tab); // this pushes current _activeOverlay
+  }
 
-  // Close overlays before opening new one
-  _closeAllOverlays();
+  // Close ALL overlays except the one we're opening
+  var isOverlay = ['trade', 'stocks', 'leaderboard', 'settings', 'friends', 'profile'].indexOf(tab) >= 0;
+  _closeAllOverlays(isOverlay ? tab : null);
+
+  // Sync mobile nav highlight
+  syncMobileNav(tab);
 
   if(tab==='chats'||tab==='home'){
+    setActiveOverlay(null);
+    navClear(); // reset stack when going home
     openDrawer();
     var ds=document.getElementById('drawerScroll');
     if(ds)ds.scrollTop=0;
   }
   else if(tab==='chat'){
+    setActiveOverlay(null);
     closeDrawer();
   }
   else if(tab==='trade'){
     closeDrawer();
-    if(typeof window.openTradingPage==='function')window.openTradingPage();
+    setActiveOverlay('trade');
+    if(typeof window.openTradingPage==='function')window.openTradingPage(true); // silent=true
   }
   else if(tab==='leaderboard'){
     closeDrawer();
+    setActiveOverlay('leaderboard');
     if(typeof window.openLeaderPage==='function')window.openLeaderPage();
   }
   else if(tab==='profile'){
     closeDrawer();
+    setActiveOverlay('profile');
     if(typeof window.openProfilePopup==='function'&&ME)window.openProfilePopup(ME);
   }
   else if(tab==='settings'){
     closeDrawer();
+    setActiveOverlay('settings');
     if(typeof window.openSettings==='function')window.openSettings();
   }
   // Legacy
   else if(tab==='stocks'){
     closeDrawer();
+    setActiveOverlay('stocks');
     openStocksPanel();
   }
   else if(tab==='members'){

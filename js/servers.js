@@ -109,12 +109,16 @@ export function srvBrowserOverlayClick(e){if(e.target===document.getElementById(
 
 export async function loadAllServers(){
   var body=document.getElementById('srvbBody');
-  body.innerHTML='<div class="srvb-empty">Loading\u2026</div>';
+  body.innerHTML='<div style="padding:var(--sp-2) 0">' +
+    '<div class="skeleton-row"><div class="skeleton" style="width:42px;height:42px;border-radius:var(--r-lg);flex-shrink:0"></div><div style="flex:1"><div class="skeleton skeleton-text w-70"></div><div class="skeleton skeleton-text w-40"></div></div><div class="skeleton" style="width:52px;height:28px;border-radius:var(--r-lg)"></div></div>' +
+    '<div class="skeleton-row"><div class="skeleton" style="width:42px;height:42px;border-radius:var(--r-lg);flex-shrink:0"></div><div style="flex:1"><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-50"></div></div><div class="skeleton" style="width:52px;height:28px;border-radius:var(--r-lg)"></div></div>' +
+    '<div class="skeleton-row"><div class="skeleton" style="width:42px;height:42px;border-radius:var(--r-lg);flex-shrink:0"></div><div style="flex:1"><div class="skeleton skeleton-text w-70"></div><div class="skeleton skeleton-text w-40"></div></div><div class="skeleton" style="width:52px;height:28px;border-radius:var(--r-lg)"></div></div>' +
+    '</div>';
   var srvRes=await sb.from('servers').select('id,name,icon,description');
   var myRes=ME?await sb.from('server_members').select('server_id').eq('user_id',ME.id):{data:[]};
   var joined=new Set((myRes.data||[]).map(function(m){return m.server_id;}));
   var servers=srvRes.data||[];
-  if(!servers.length){body.innerHTML='<div class="srvb-empty">No servers yet.<br>Create the first one below!</div>';return;}
+  if(!servers.length){body.innerHTML='<div class="empty-state" style="padding:var(--sp-8) var(--sp-5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><h3>No servers yet</h3><p>Create the first server and invite your friends</p></div>';return;}
   body.innerHTML=servers.map(function(srv){
     var isJoined=joined.has(srv.id);
     var ico=srv.icon?'<img src="'+escH(srv.icon)+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px">':escH((srv.name||'?').charAt(0).toUpperCase());

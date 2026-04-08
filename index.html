@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
 <title>Quro</title>
+<link rel="dns-prefetch" href="https://eplikcdnwxhpsvjhxtup.supabase.co">
+<link rel="preconnect" href="https://eplikcdnwxhpsvjhxtup.supabase.co" crossorigin>
 <meta name="google-site-verification" content="frO6g98lIXIiwUjRx5d0IhX9nP1XQ7Eqm_lT169XAt0" />
 <meta name="description" content="Quro is a free real-time chat platform with live Indian stock market data, paper trading simulator, and direct messaging. Join servers, trade virtually with ₹1L, and chat with friends.">
 <meta name="keywords" content="quro, chat app, discord alternative, paper trading, indian stocks, nifty 50, real-time chat, free chat platform">
@@ -153,7 +155,7 @@
         <div id="gcList"></div>
         <div id="dmList"></div>
         <div id="dmSkeleton" class="dm-skeleton"><div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:70%"></div><div class="skeleton skeleton-text" style="width:40%"></div></div></div><div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:55%"></div><div class="skeleton skeleton-text" style="width:35%"></div></div></div><div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:65%"></div><div class="skeleton skeleton-text" style="width:45%"></div></div></div></div>
-        <div id="dmEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>No conversations yet</h3><p>Start a DM or join a server to meet people!</p></div>
+        <div id="dmEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>No conversations yet</h3><p>Start a DM or join a server to meet people</p><button class="empty-cta" onclick="openUserSearch()">Find People</button></div>
       </div>
     </div>
     <!-- SERVER: Channels -->
@@ -391,6 +393,7 @@
     <div class="pp-banner">
       <button class="pp-close" onclick="closeProfilePopup()" aria-label="Close profile">✕</button>
       <div class="pp-rank-badge" id="ppRankBadge" style="display:none"></div>
+      <div class="pp-tier-badge" id="ppTierBadge" style="display:none"></div>
       <div class="pp-avatar-wrap"><div class="pp-avatar" id="ppAvatar"><span id="ppAvatarLetter">?</span></div></div>
     </div>
     <div class="pp-body">
@@ -448,7 +451,21 @@
       <div class="pp-actions" id="ppActions">
         <button class="pp-dm-btn" id="ppDmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Send Message</button>
       </div>
+      <button class="pp-share-btn" id="ppShareBtn" onclick="shareProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share Profile</button>
+
+      <!-- Hidden share card canvas -->
+      <canvas id="ppShareCanvas" width="1080" height="1080" style="display:none"></canvas>
     </div>
+  </div>
+</div>
+
+<!-- Share Profile Preview Overlay -->
+<div class="pp-share-overlay" id="shareOverlay" onclick="if(event.target===this)closeShareOverlay()">
+  <button class="pp-share-close" onclick="closeShareOverlay()">&#x2715;</button>
+  <div class="pp-share-preview"><img id="sharePreviewImg" alt="Profile Card"></div>
+  <div class="pp-share-actions">
+    <button class="pp-share-action-btn primary" onclick="downloadShareCard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Save Image</button>
+    <button class="pp-share-action-btn secondary" onclick="nativeShareCard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
   </div>
 </div>
 
@@ -522,7 +539,7 @@
           <div id="spSecAppearance" class="sp-section-anchor">
             <div class="sp-section">
               <div class="sp-section-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg><div class="sp-section-title">Appearance</div></div>
-              <div class="sp-row"><span class="sp-label">Dark Mode</span><div class="toggle on" id="darkModeToggle" onclick="toggleDarkMode()"></div></div>
+              <div class="sp-row"><span class="sp-label">Dark Mode <span class="sp-beta-tag">Beta</span></span><div class="toggle on" id="darkModeToggle" onclick="toggleDarkMode()"></div></div>
               <div class="sp-row"><span class="sp-label">Compact View</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
             </div>
           </div>
@@ -899,6 +916,8 @@
     </div>
     <button class="trd-close-btn" onclick="closeTradingPage()" aria-label="Close">✕</button>
   </div>
+  <!-- Live trade ticker -->
+  <div class="trd-live-ticker" id="trdLiveTicker"></div>
 
   <!-- Body -->
   <div class="trd-body">
@@ -1114,6 +1133,12 @@
       <div class="stkd-loader" id="stkdLoader">LOADING…</div>
     </div>
     <div class="stkd-stats" id="stkdStats"></div>
+    <div class="stkd-trade-bar">
+      <button class="stkd-trade-btn" id="stkdTradeBtn" aria-label="Trade this stock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Trade
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1140,7 +1165,7 @@
 <div id="leaderPage">
   <canvas id="lpStars"></canvas>
   <div class="lp-header">
-    <span class="lp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:-3px"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Leaderboard</span>
+    <span class="lp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:-3px"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> <span class="lp-live-dot"></span>Leaderboard</span>
     <div class="lp-header-actions">
       <div class="lp-period-tabs">
         <button class="lp-period-tab active" onclick="lpSwitchPeriod('weekly')" id="lpTabWeekly">Weekly</button>

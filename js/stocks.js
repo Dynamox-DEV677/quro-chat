@@ -104,39 +104,44 @@ export function stk_draw(cv,pts,up,h){
   ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.lineJoin='round';ctx.stroke();
 }
 
+// ═══════════════════════════════════════════════════════════
+// STOCK FETCH ENGINE v3 — unkillable poll, schedule-first design
+// ═══════════════════════════════════════════════════════════
+
 var _stkProxyUrl=SUPABASE_URL+'/functions/v1/stock-proxy';
-var _stkLiveRefreshInt=null;
 var _stkHasRealData=false;
+var _pollTimer=null;
+var _pollCycle=0;
+var _pollStarted=false;
 
-export async function stk_fetchChart(sym,range,interval){
-  try{
-    var r=await fetch(_stkProxyUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON},body:JSON.stringify({action:'chart',symbol:sym,range:range||'1d',interval:interval||'5m'})});
-    var d=await r.json();
-    if(!d.ok)throw new Error(d.error);
-    return{closes:d.closes,price:d.price,prev:d.prev};
-  }catch(e){console.warn('stk_fetchChart proxy fail:',e);return null;}
+// ─── Core fetch with 10s timeout + 1 auto-retry on network error ───
+function _stkFetchOnce(body){
+  var ctrl=new AbortController();
+  var tid=setTimeout(function(){try{ctrl.abort();}catch(e){}},10000);
+  return fetch(_stkProxyUrl,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON},
+    body:JSON.stringify(body),
+    signal:ctrl.signal
+  }).then(function(r){clearTimeout(tid);return r.json();})
+    .catch(function(e){clearTimeout(tid);throw e;});
+}
+function _stkFetch(body){
+  return _stkFetchOnce(body).catch(function(e){
+    // Auto-retry once after 500ms on network error
+    console.warn('[stk] fetch failed, retrying in 500ms:',e.message);
+    return new Promise(function(resolve){setTimeout(resolve,500);}).then(function(){
+      return _stkFetchOnce(body);
+    });
+  });
 }
 
-export function stk_updateLivePill(){
-  var pill=document.getElementById('stkLivePill');
-  var dot=document.getElementById('stkLiveDot');
-  var txt=document.getElementById('stkLiveText');
-  if(!pill)return;
-  if(_stkHasRealData){
-    pill.classList.remove('simulated');
-    txt.textContent='LIVE';
-  }else{
-    pill.classList.add('simulated');
-    txt.textContent='SIMULATED';
-  }
-}
+// ─── Fetch functions (used by poll + initial load + detail charts) ───
 
-export async function stk_fetchQuotes(){
-  try{
-    var syms=STK_STOCKS.map(function(s){return s.s;}).join(',');
-    var r=await fetch(_stkProxyUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON},body:JSON.stringify({action:'quotes',symbols:syms})});
-    var d=await r.json();
-    if(!d.ok)throw new Error(d.error);
+export function stk_fetchQuotes(){
+  var syms=STK_STOCKS.map(function(s){return s.s;}).join(',');
+  return _stkFetch({action:'quotes',symbols:syms}).then(function(d){
+    if(!d||!d.ok)return false;
     var gotReal=false;
     (d.data||[]).forEach(function(q){
       if(q.regularMarketPrice){
@@ -145,17 +150,30 @@ export async function stk_fetchQuotes(){
       }
     });
     return gotReal;
-  }catch(e){console.warn('stk_fetchQuotes proxy fail:',e);return false;}
+  }).catch(function(e){console.warn('[stk] quotes fail:',e.message);return false;});
 }
 
-export async function stk_fetchIndexQuotes(){
-  try{
-    var syms=STK_INDICES.map(function(s){return s.s;}).join(',');
-    var r=await fetch(_stkProxyUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON},body:JSON.stringify({action:'quotes',symbols:syms})});
-    var d=await r.json();
-    if(!d.ok)throw new Error(d.error);
+export function stk_fetchChart(sym,range,interval){
+  return _stkFetch({action:'chart',symbol:sym,range:range||'1d',interval:interval||'5m'}).then(function(d){
+    if(!d||!d.ok)return null;
+    return{closes:d.closes,price:d.price,prev:d.prev};
+  }).catch(function(e){console.warn('[stk] chart fail:',sym,e.message);return null;});
+}
+
+export function stk_fetchIndexQuotes(){
+  var syms=STK_INDICES.map(function(s){return s.s;}).join(',');
+  return _stkFetch({action:'quotes',symbols:syms}).then(function(d){
+    if(!d||!d.ok)return[];
     return d.data||[];
-  }catch(e){console.warn('stk_fetchIndexQuotes proxy fail:',e);return[];}
+  }).catch(function(e){console.warn('[stk] index fail:',e.message);return[];});
+}
+
+export function stk_updateLivePill(){
+  var pill=document.getElementById('stkLivePill');
+  var txt=document.getElementById('stkLiveText');
+  if(!pill)return;
+  if(_stkHasRealData){pill.classList.remove('simulated');txt.textContent='LIVE';}
+  else{pill.classList.add('simulated');txt.textContent='SIMULATED';}
 }
 
 export function openStocksPanel(){
@@ -163,31 +181,44 @@ export function openStocksPanel(){
   document.getElementById('srvStocksBtn').classList.add('active');
   document.querySelectorAll('.sb-nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('navStocks').classList.add('active');
+  if(typeof window.setActiveOverlay==='function') window.setActiveOverlay('stocks');
+  if(typeof window.syncMobileNav==='function') window.syncMobileNav('stocks');
 
-  // Check Indian market hours
+  // Check Indian market hours — show overlay but still load last-known data
   var status=getMarketStatusInfo();
   var overlay=document.getElementById('stkMarketClosed');
   if(!status.open){
     if(overlay) overlay.classList.add('show');
     _updateMarketClosedUI('stkMarketClosed',status);
-    stk_stopLiveRefresh();
-    return;
+  } else {
+    if(overlay) overlay.classList.remove('show');
   }
-  if(overlay) overlay.classList.remove('show');
+  // Always load data & start poll — even when market is closed,
+  // last-known prices are needed for trading page portfolio values
   stk_loadAll();
-  stk_startLiveRefresh();
+  _pollStart();
 }
 
-export function closeStocksPanel(){
+// silent=true when called from navigation.js _closeOverlaySilent
+export function closeStocksPanel(silent){
   document.getElementById('stocksPage').classList.remove('open');
   document.getElementById('srvStocksBtn').classList.remove('active');
-  stk_stopLiveRefresh();
-  var mn=document.getElementById('mnChats');
-  if(mn)mn.classList.add('active');
-  if(window.appMode==='home'){document.querySelectorAll('.sb-nav-item').forEach(function(n){n.classList.remove('active');});document.getElementById('navHome').classList.add('active');}
+  // poll auto-detects via DOM — no manual stop needed
+  if(typeof window.setActiveOverlay==='function') window.setActiveOverlay(null);
+
+  if(silent) return; // navigation.js handles nav state
+
+  // Stack-aware: navigate back
+  if(typeof window.navigateBack==='function'){
+    window.navigateBack();
+  } else {
+    if(typeof window.syncMobileNav==='function') window.syncMobileNav('chats');
+    if(window.appMode==='home'){document.querySelectorAll('.sb-nav-item').forEach(function(n){n.classList.remove('active');});document.getElementById('navHome').classList.add('active');}
+  }
 }
 
 export function mobileOpenStocks(){
+  if(typeof window.navPush==='function') window.navPush('stocks');
   var btns=document.querySelectorAll('.mob-nav-btn');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
   var msBtn=document.getElementById('mnChats');if(msBtn)msBtn.classList.remove('active');
@@ -255,65 +286,100 @@ export async function stk_loadStocks(){
   }
 }
 
-// ─── Auto-refresh live prices every 3 seconds ───
-var _stkRefreshCycle=0;
-export function stk_startLiveRefresh(){
-  if(_stkLiveRefreshInt)return;
-  _stkRefreshCycle=0;
-  _stkLiveRefreshInt=setInterval(async function(){
-    // Run if stocks page OR trading page is open
-    var stocksOpen=document.getElementById('stocksPage')&&document.getElementById('stocksPage').classList.contains('open');
-    var tradingOpen=document.getElementById('tradingPage')&&document.getElementById('tradingPage').classList.contains('open');
-    if(!stocksOpen&&!tradingOpen)return;
-    _stkRefreshCycle++;
-    var gotReal=await stk_fetchQuotes();
-    if(gotReal){
-      _stkHasRealData=true;
-      if(stocksOpen){stk_renderGrid();stk_updateLivePill();}
-      // Sync real prices to trading module
-      _syncTradingPrices();
-    }
-    // Refresh indices every 3rd cycle (9s)
-    if(_stkRefreshCycle%3===0&&stocksOpen){
-      for(var i=0;i<STK_INDICES.length;i++){
-        (function(idx,i){
-          stk_fetchChart(idx.s).then(function(data){
-            if(data&&data.closes&&data.closes.length>=2){
-              var prev=data.prev,ch=data.price-prev,pc=(ch/prev)*100;
-              stk_renderIndex(i,data.closes,data.price,ch,pc,idx);
-            }
-          });
-        })(STK_INDICES[i],i);
-      }
-    }
-  },3000);
+// ═══════════════════════════════════════════════════════════
+// UNKILLABLE POLL — schedule-first, DOM-checked, never breaks
+// ═══════════════════════════════════════════════════════════
+// Design: schedule next tick BEFORE doing work. Use .then()/.catch()
+// (not async/await) so no rejected promise can ever kill the chain.
+// Check DOM state each tick — no mutable flags that can get stale.
+
+function _pollStart(){
+  if(_pollStarted)return;
+  _pollStarted=true;
+  _pollTick();// first tick fires immediately
 }
 
+function _pollTick(){
+  // ── STEP 1: always schedule next tick FIRST — chain can NEVER break ──
+  if(_pollTimer)clearTimeout(_pollTimer);
+  _pollTimer=setTimeout(_pollTick,3000);
+
+  // ── STEP 2: check if any page needs price data (via DOM, not flags) ──
+  var sp=document.getElementById('stocksPage');
+  var tp=document.getElementById('tradingPage');
+  var stocksOpen=sp&&sp.classList.contains('open');
+  var tradingOpen=tp&&tp.classList.contains('open');
+  if(!stocksOpen&&!tradingOpen)return;// nobody listening, skip
+
+  _pollCycle++;
+
+  // ── STEP 3: fetch quotes (fire-and-forget, errors swallowed) ──
+  stk_fetchQuotes().then(function(gotReal){
+    if(!gotReal)return;
+    _stkHasRealData=true;
+    // Re-check DOM — page may have closed during fetch
+    var sp2=document.getElementById('stocksPage');
+    if(sp2&&sp2.classList.contains('open')){
+      stk_renderGrid();
+      stk_updateLivePill();
+    }
+    _syncTradingPrices();
+  }).catch(function(){/* next tick retries */});
+
+  // ── STEP 4: refresh indices every 3rd cycle (~9s) if stocks page open ──
+  if(_pollCycle%3===0&&stocksOpen){
+    for(var i=0;i<STK_INDICES.length;i++){
+      (function(idx,j){
+        stk_fetchChart(idx.s).then(function(data){
+          if(data&&data.closes&&data.closes.length>=2){
+            var prev=data.prev,ch=data.price-prev,pc=(ch/prev)*100;
+            stk_renderIndex(j,data.closes,data.price,ch,pc,idx);
+          }
+        }).catch(function(){});
+      })(STK_INDICES[i],i);
+    }
+  }
+}
+
+// ─── Visibility change: instant refetch when user returns to tab ───
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden&&_pollStarted){
+    // Kill pending timer and fire NOW
+    if(_pollTimer)clearTimeout(_pollTimer);
+    _pollTick();
+  }
+});
+
+// ─── Sync prices to trading module ───
 function _syncTradingPrices(){
   STK_STOCKS.forEach(function(stk){
     var q=stkQuotes[stk.s];
-    if(q&&q.price&&window.trdPrices){
+    if(!q||!q.price)return;
+    if(window.trdPrices){
       if(!window.trdPrices[stk.s]){
         window.trdPrices[stk.s]={price:q.price,prev:q.price-(q.chg||0),name:stk.n,sec:stk.sec,base:stk.b};
       }else{
         window.trdPrices[stk.s].price=q.price;
         window.trdPrices[stk.s].prev=q.price-(q.chg||0);
       }
-      if(window.trdHistory){
-        if(!window.trdHistory[stk.s])window.trdHistory[stk.s]=[];
-        var hist=window.trdHistory[stk.s];
-        // Only push if price actually changed
-        if(hist.length===0||hist[hist.length-1]!==q.price){
-          hist.push(q.price);
-          if(hist.length>80)hist.shift();
-        }
+    }
+    if(window.trdHistory){
+      if(!window.trdHistory[stk.s])window.trdHistory[stk.s]=[];
+      var hist=window.trdHistory[stk.s];
+      if(hist.length===0||hist[hist.length-1]!==q.price){
+        hist.push(q.price);
+        if(hist.length>80)hist.shift();
       }
     }
   });
 }
 
+// ─── Public API (trading.js calls these) ───
+export function stk_startLiveRefresh(){
+  _pollStart();// just ensures poll is running — it checks DOM each tick
+}
 export function stk_stopLiveRefresh(){
-  if(_stkLiveRefreshInt){clearInterval(_stkLiveRefreshInt);_stkLiveRefreshInt=null;}
+  // intentional no-op — poll checks DOM state, stops fetching when no page open
 }
 
 export function stkFilter(f,btn){
@@ -395,7 +461,7 @@ export async function stk_showDetail(sym,name,price,chg,pct,sector){
   document.getElementById('stkdPrice').textContent=stk_fmtIN(price);
   var up=chg>=0;
   document.getElementById('stkdArrow').textContent=up?'▲':'▼';
-  document.getElementById('stkdArrow').style.color=up?'#3da87a':'#e05050';
+  document.getElementById('stkdArrow').style.color=up?'var(--up)':'var(--down)';
   document.getElementById('stkdChg').textContent=(up?'+':'')+Number(chg).toFixed(2);
   document.getElementById('stkdChg').className='stkd-chg '+(up?'up':'down');
   document.getElementById('stkdPct').textContent='('+(up?'+':'')+Number(pct).toFixed(2)+'%)';
@@ -403,6 +469,14 @@ export async function stk_showDetail(sym,name,price,chg,pct,sector){
   var ranges=document.querySelectorAll('.stkd-range');
   for(var i=0;i<ranges.length;i++)ranges[i].classList.toggle('active',i===0);
   document.getElementById('stkdStats').innerHTML='';
+  // Wire up the "Trade" button with current symbol
+  var tradeBtn=document.getElementById('stkdTradeBtn');
+  if(tradeBtn){
+    tradeBtn.onclick=function(){
+      if(typeof window.openTradeFromStocks==='function') window.openTradeFromStocks(sym);
+    };
+    tradeBtn.textContent='Trade '+name;
+  }
   stk_loadDetailChart(sym,'1d');
 }
 
@@ -721,8 +795,7 @@ export function updateStkdOHLC(candles){
 
 export async function stk_fetchOHLC(sym,range,interval){
   try{
-    var r=await fetch(_stkProxyUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON},body:JSON.stringify({action:'chart',symbol:sym,range:range||'1d',interval:interval||'5m'})});
-    var d=await r.json();
+    var d=await _stkFetch({action:'chart',symbol:sym,range:range||'1d',interval:interval||'5m'});
     if(!d.ok||!d.closes||d.closes.length<2)return null;
     // Convert closes array to OHLC candles (approximate from close-only data)
     var candles=[];
@@ -802,8 +875,10 @@ export async function stk_loadDetailChart(sym,range){
         updateStkdOHLC(stkCurrentCandles);
         var priceEl=document.getElementById('stkdPrice');
         if(priceEl)priceEl.textContent='\u20B9'+stk_fmtIN(last.c);
-        var up=last.c>=(stkCurrentCandles[0]?stkCurrentCandles[0].o:last.c);
-        var arEl=document.getElementById('stkdArrow');if(arEl){arEl.textContent=up?'▲':'▼';arEl.style.color=up?'#26a69a':'#ef5350';}
+        var up=q.chg>=0;
+        var arEl=document.getElementById('stkdArrow');if(arEl){arEl.textContent=up?'▲':'▼';arEl.style.color=up?'var(--up)':'var(--down)';}
+        var chgEl=document.getElementById('stkdChg');if(chgEl){chgEl.textContent=(up?'+':'')+Number(q.chg).toFixed(2);chgEl.className='stkd-chg '+(up?'up':'down');}
+        var pctEl=document.getElementById('stkdPct');if(pctEl){pctEl.textContent='('+(up?'+':'')+Number(q.pct).toFixed(2)+'%)';pctEl.className='stkd-chg '+(up?'up':'down');}
       }
     },3000);
   }

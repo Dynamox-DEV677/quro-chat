@@ -37,6 +37,16 @@
   --error:#e53e3e;
   --info:#4299e1;
 
+  /* ── Trading semantic (P&L, badges) ── */
+  --up:#3da87a;
+  --up-dim:rgba(61,168,122,.12);
+  --up-subtle:rgba(61,168,122,.06);
+  --down:#e05050;
+  --down-dim:rgba(224,80,80,.12);
+  --down-subtle:rgba(224,80,80,.06);
+  --accent-blue:rgba(88,101,242,.8);
+  --accent-blue-dim:rgba(88,101,242,.1);
+
   /* ── Surfaces (elevation layers) ── */
   --surface-0:rgba(255,255,255,.02);
   --surface-1:rgba(255,255,255,.035);
@@ -80,9 +90,10 @@
   --tracking-caps:0.06em;
 
   /* ── Spacing (4px grid) ── */
-  --sp-0:2px; --sp-1:4px;  --sp-2:8px;  --sp-3:12px; --sp-4:16px;
+  --sp-0:2px; --sp-1:4px;  --sp-px:6px; --sp-2:8px; --sp-2h:10px;
+  --sp-3:12px; --sp-3h:14px; --sp-4:16px;
   --sp-5:20px; --sp-6:24px; --sp-7:28px; --sp-8:32px;
-  --sp-10:40px;--sp-12:48px;--sp-16:64px;
+  --sp-9:36px; --sp-10:40px;--sp-12:48px;--sp-16:64px;
 
   /* ── Radius — clean, consistent ── */
   --r-xs:4px;
@@ -109,6 +120,7 @@
   --ease-in-out:cubic-bezier(.45,0,.55,1);
   --ease-spring:cubic-bezier(.34,1.56,.64,1);
   --ease-expo:cubic-bezier(.19,1,.22,1);
+  --ease-bounce:cubic-bezier(.175,.885,.32,1.275);
   --dur-fast:100ms;
   --dur-normal:180ms;
   --dur-slow:280ms;
@@ -139,6 +151,9 @@
   --shadow-md:0 4px 12px rgba(0,0,0,.08);--shadow-lg:0 8px 24px rgba(0,0,0,.1);
   --shadow-inset:inset 0 1px 0 rgba(255,255,255,.7);
   --primary-dim:rgba(56,161,105,.1);--primary-glow:rgba(56,161,105,.15);--primary-subtle:rgba(56,161,105,.04);
+  --up:#2d8a62;--up-dim:rgba(45,138,98,.1);--up-subtle:rgba(45,138,98,.05);
+  --down:#c94040;--down-dim:rgba(201,64,64,.1);--down-subtle:rgba(201,64,64,.05);
+  --accent-blue:rgba(88,101,242,.85);--accent-blue-dim:rgba(88,101,242,.08);
 }
 
 /* ── Base ── */
@@ -173,7 +188,7 @@ body{
 
 /* ── Shared transitions — targeted properties only ── */
 a{transition:color var(--dur-fast) var(--ease-out),opacity var(--dur-fast)}
-button{transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast),opacity var(--dur-fast),transform var(--dur-fast) var(--ease-out)}
+button{transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast),opacity var(--dur-fast),transform var(--dur-normal) var(--ease-spring)}
 input,textarea,select{transition:border-color var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast)}
 
 /* ── Button base ── */
@@ -186,10 +201,11 @@ input,textarea,select{transition:border-color var(--dur-fast) var(--ease-out),bo
   letter-spacing:var(--tracking-wide);
   cursor:pointer;min-height:40px;
   box-shadow:var(--shadow-sm);
-  transition:background var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast),transform var(--dur-fast) var(--ease-out);
+  transition:background var(--dur-normal) var(--ease-out),box-shadow var(--dur-normal),transform var(--dur-normal) var(--ease-spring);
+  will-change:transform;
 }
 .btn-primary:hover{background:var(--primary-hover);box-shadow:var(--shadow-md),var(--shadow-glow);transform:translateY(-1px)}
-.btn-primary:active{transform:translateY(0) scale(.98)}
+.btn-primary:active{animation:btnPress 200ms var(--ease-spring);transform:scale(.95);transition-duration:80ms}
 
 /* ── Input base ── */
 .form-input{
@@ -213,9 +229,9 @@ input,textarea,select{transition:border-color var(--dur-fast) var(--ease-out),bo
 .toggle::after{
   content:'';position:absolute;width:16px;height:16px;
   background:#fff;border-radius:50%;top:2px;left:2px;
-  transition:left var(--dur-slow) var(--ease-out);box-shadow:var(--shadow-xs);
+  transition:left var(--dur-slow) var(--ease-spring),box-shadow var(--dur-slow);box-shadow:var(--shadow-xs);
 }
-.toggle.on::after{left:20px}
+.toggle.on::after{left:20px;box-shadow:var(--shadow-sm),0 0 8px var(--primary-glow)}
 
 /* ── Keyframes ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -233,7 +249,128 @@ input,textarea,select{transition:border-color var(--dur-fast) var(--ease-out),bo
 @keyframes bubblePop{0%{transform:scale(.93)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
 @keyframes softFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
-/* ── Skeleton loading ── */
+/* ── Premium micro-interaction keyframes ── */
+@keyframes btnPress{0%{transform:scale(1)}40%{transform:scale(.94)}100%{transform:scale(1)}}
+@keyframes btnBounce{0%{transform:scale(.92)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes msgSlideIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes cardReveal{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes listItemIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes subtlePulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes badgePop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes rippleOut{from{transform:scale(.5);opacity:.4}to{transform:scale(2.5);opacity:0}}
+
+/* ── Trade success celebration ── */
+@keyframes tradeSuccess{
+  0%{transform:scale(1);box-shadow:none}
+  20%{transform:scale(1.02)}
+  40%{box-shadow:0 0 0 4px var(--up-dim)}
+  60%{transform:scale(1);box-shadow:0 0 0 8px transparent}
+  100%{transform:scale(1);box-shadow:none}
+}
+@keyframes tradeSuccessSell{
+  0%{transform:scale(1);box-shadow:none}
+  20%{transform:scale(1.02)}
+  40%{box-shadow:0 0 0 4px var(--down-dim)}
+  60%{transform:scale(1);box-shadow:0 0 0 8px transparent}
+  100%{transform:scale(1);box-shadow:none}
+}
+@keyframes checkDraw{
+  from{stroke-dashoffset:24}to{stroke-dashoffset:0}
+}
+@keyframes successFlash{
+  0%{opacity:0}
+  20%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes tradeCardSlide{
+  from{opacity:0;transform:translateY(16px) scale(.95)}
+  to{opacity:1;transform:none}
+}
+@keyframes pageSlideIn{
+  from{transform:translateY(100%) scale(.98);opacity:.8}
+  to{transform:none;opacity:1}
+}
+@keyframes pageSlideOut{
+  from{transform:none;opacity:1}
+  to{transform:translateY(40px) scale(.98);opacity:0}
+}
+@keyframes notifSlideIn{
+  from{opacity:0;transform:translateX(30px) scale(.95)}
+  to{opacity:1;transform:none}
+}
+@keyframes notifCountdown{
+  from{width:100%}to{width:0}
+}
+@keyframes shakeError{
+  0%,100%{transform:translateX(0)}
+  20%,60%{transform:translateX(-4px)}
+  40%,80%{transform:translateX(4px)}
+}
+
+/* ── Trade success overlay styles ── */
+.trade-success-overlay{
+  position:fixed;inset:0;z-index:var(--z-toast);
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  animation:successFlash 600ms var(--ease-out) forwards;
+}
+.trade-success-overlay.buy{background:radial-gradient(circle at center,rgba(61,168,122,.12) 0%,transparent 70%)}
+.trade-success-overlay.sell{background:radial-gradient(circle at center,rgba(224,80,80,.12) 0%,transparent 70%)}
+.trade-success-check{
+  width:64px;height:64px;
+  border-radius:var(--r-full);
+  display:flex;align-items:center;justify-content:center;
+  animation:btnBounce 400ms var(--ease-spring) both;
+}
+.trade-success-check.buy{background:var(--up-dim);border:2px solid var(--up)}
+.trade-success-check.sell{background:var(--down-dim);border:2px solid var(--down)}
+.trade-success-check svg{width:28px;height:28px}
+.trade-success-check.buy svg{stroke:var(--up)}
+.trade-success-check.sell svg{stroke:var(--down)}
+.trade-success-check svg path{
+  stroke-dasharray:24;stroke-dashoffset:24;
+  animation:checkDraw 350ms var(--ease-out) 100ms forwards;
+}
+
+/* ── Enhanced notification entrance ── */
+.notif{animation:notifSlideIn .25s var(--ease-out) both}
+
+/* ── Trade card entrance in chat ── */
+.msg-trade{animation:tradeCardSlide .35s var(--ease-out) both}
+
+/* ── Error shake for inputs ── */
+.shake-error{animation:shakeError 350ms var(--ease-out)}
+
+/* ── Accessibility: reduce motion ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:0.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+
+/* ── Empty state ── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:var(--sp-12) var(--sp-6);text-align:center;gap:var(--sp-3);
+  animation:fadeUp .4s var(--ease-out) both;
+}
+.empty-state svg{width:44px;height:44px;stroke:var(--text-faint);stroke-width:1.5;margin-bottom:var(--sp-2)}
+.empty-state h3{font-size:var(--text-lg);font-weight:var(--weight-semi);color:var(--text-secondary);letter-spacing:var(--tracking-tight)}
+.empty-state p{font-size:var(--text-sm);color:var(--muted);max-width:260px;line-height:var(--leading-relaxed)}
+.empty-state .empty-cta{
+  margin-top:var(--sp-3);padding:var(--sp-2h) var(--sp-5);
+  background:var(--primary);color:#fff;border:none;border-radius:var(--r-lg);
+  font-family:var(--font);font-size:var(--text-sm);font-weight:var(--weight-semi);
+  cursor:pointer;transition:background var(--dur-fast),transform var(--dur-normal) var(--ease-spring),box-shadow var(--dur-fast);
+  box-shadow:var(--shadow-sm);
+}
+.empty-state .empty-cta:hover{background:var(--primary-hover);box-shadow:var(--shadow-md),var(--shadow-glow);transform:translateY(-1px)}
+.empty-state .empty-cta:active{transform:scale(.96)}
+
+/* ── Enhanced skeleton loading ── */
 .skeleton{
   background:var(--surface-2);
   border-radius:var(--r-md);
@@ -241,14 +378,12 @@ input,textarea,select{transition:border-color var(--dur-fast) var(--ease-out),bo
 }
 .skeleton-text{height:11px;margin-bottom:7px;border-radius:var(--r-xs)}
 .skeleton-text:last-child{width:60%}
+.skeleton-text.w-40{width:40%}.skeleton-text.w-50{width:50%}.skeleton-text.w-70{width:70%}.skeleton-text.w-80{width:80%}.skeleton-text.w-full{width:100%}
 .skeleton-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0}
 .skeleton-row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
-
-/* ── Empty state ── */
-.empty-state{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:var(--sp-12) var(--sp-6);text-align:center;gap:var(--sp-3);
+.skeleton-card{
+  background:var(--surface-1);border:1px solid var(--border2);border-radius:var(--r-lg);
+  padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-2);
 }
-.empty-state svg{width:44px;height:44px;stroke:var(--text-faint);stroke-width:1.5;margin-bottom:var(--sp-2)}
-.empty-state h3{font-size:var(--text-lg);font-weight:var(--weight-semi);color:var(--text-secondary);letter-spacing:var(--tracking-tight)}
-.empty-state p{font-size:var(--text-sm);color:var(--muted);max-width:260px;line-height:var(--leading-relaxed)}
+.skeleton-badge{width:24px;height:24px;border-radius:var(--r-sm);flex-shrink:0}
+.skeleton-bar{height:8px;border-radius:var(--r-xs)}

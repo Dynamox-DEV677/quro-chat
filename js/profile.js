@@ -131,6 +131,10 @@ export function openProfilePopup(user){
   document.getElementById('ppHoldingsSection').style.display='none';
   document.getElementById('ppActivitySection').style.display='none';
   document.getElementById('ppRankBadge').style.display='none';
+  var _tierBdg=document.getElementById('ppTierBadge');if(_tierBdg)_tierBdg.style.display='none';
+  // Reset avatar glow classes
+  var _avEl=document.getElementById('ppAvatar');
+  if(_avEl)_avEl.className=_avEl.className.replace(/\s*glow-\w+/g,'');
 
   pp.classList.add('open');
 
@@ -244,6 +248,26 @@ async function _loadTradingIdentity(userId){
         badgeEl.className='pp-rank-badge top25';badgeEl.innerHTML='\u{1f4c8} Top 25%';badgeEl.style.display='';
       }else if(userRankIdx<3){
         badgeEl.className='pp-rank-badge top10';badgeEl.innerHTML='#'+(userRankIdx+1)+' Trader';badgeEl.style.display='';
+      }
+    }
+
+    // ── Tier system — based on P&L percentage ──
+    // Bronze: any activity | Silver: +1% | Gold: +5% | Platinum: +25% | Diamond: +100%
+    var tierBadge=document.getElementById('ppTierBadge');
+    var ppAv=document.getElementById('ppAvatar');
+    if(tierBadge){
+      var tierCls='',tierLabel='',glowCls='';
+      if(pnlPct>=100){tierCls='tier-diamond';tierLabel='\u{1f48e} Diamond';glowCls='glow-diamond';}
+      else if(pnlPct>=25){tierCls='tier-platinum';tierLabel='\u2b50 Platinum';glowCls='glow-platinum';}
+      else if(pnlPct>=5){tierCls='tier-gold';tierLabel='\u{1f451} Gold';glowCls='glow-gold';}
+      else if(pnlPct>=1){tierCls='tier-silver';tierLabel='\u{1f4a0} Silver';}
+      else if(totalTrades>0){tierCls='tier-bronze';tierLabel='\u{1f6e1}\ufe0f Bronze';}
+      if(tierCls){
+        tierBadge.className='pp-tier-badge '+tierCls;
+        tierBadge.textContent=tierLabel;
+        tierBadge.style.display='';
+        // Add avatar glow for Gold+
+        if(glowCls&&ppAv){ppAv.className=ppAv.className.replace(/\s*glow-\w+/g,'')+' '+glowCls;}
       }
     }
 
@@ -479,6 +503,347 @@ export async function unlinkEmail(){
     notify('Email unlinked.','info');
     syncEmailSection();
   }catch(e){notify('Failed to unlink','error');}
+}
+
+// ═══ SHARE PROFILE — Canvas Image Card Generator ═══
+var _shareCardData = null; // holds current blob URL for download/share
+
+export function shareProfile() {
+  var btn = document.getElementById('ppShareBtn');
+  if (!btn) return;
+  btn.classList.add('generating');
+
+  // Gather data from the currently open profile popup
+  var username = (document.getElementById('ppName').textContent || '').trim();
+  var handle = (document.getElementById('ppHandle').textContent || '').trim();
+  var pnlValue = (document.getElementById('ppPnlValue').textContent || '').trim();
+  var pnlPct = (document.getElementById('ppPnlPct').textContent || '').trim();
+  var pnlEl = document.getElementById('ppPnlValue');
+  var pnlUp = pnlEl ? pnlEl.classList.contains('up') : true;
+  var winRate = (document.getElementById('ppWinRate').textContent || '--').trim();
+  var tradeCount = (document.getElementById('ppTradeCount').textContent || '--').trim();
+  var portfolioVal = (document.getElementById('ppPortfolioVal').textContent || '--').trim();
+  var rankBadge = document.getElementById('ppRankBadge');
+  var rankText = (rankBadge && rankBadge.style.display !== 'none') ? rankBadge.textContent.trim() : '';
+  var tierBadge = document.getElementById('ppTierBadge');
+  var tierText = (tierBadge && tierBadge.style.display !== 'none') ? tierBadge.textContent.trim() : '';
+  var tierCls = tierBadge ? tierBadge.className.replace('pp-tier-badge', '').trim() : '';
+
+  // Get avatar image if available
+  var avEl = document.getElementById('ppAvatar');
+  var avImg = avEl ? avEl.querySelector('img') : null;
+  var avLetter = avImg ? null : (document.getElementById('ppAvatarLetter').textContent || '?');
+
+  // Load avatar image first if it exists, then render
+  if (avImg && avImg.src) {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      _renderShareCard({
+        username, handle, pnlValue, pnlPct, pnlUp,
+        winRate, tradeCount, portfolioVal,
+        rankText, tierText, tierCls, avImg: img, avLetter: null
+      });
+      btn.classList.remove('generating');
+    };
+    img.onerror = function() {
+      _renderShareCard({
+        username, handle, pnlValue, pnlPct, pnlUp,
+        winRate, tradeCount, portfolioVal,
+        rankText, tierText, tierCls, avImg: null, avLetter: avLetter
+      });
+      btn.classList.remove('generating');
+    };
+    img.src = avImg.src;
+  } else {
+    _renderShareCard({
+      username, handle, pnlValue, pnlPct, pnlUp,
+      winRate, tradeCount, portfolioVal,
+      rankText, tierText, tierCls, avImg: null, avLetter: avLetter
+    });
+    btn.classList.remove('generating');
+  }
+}
+
+function _renderShareCard(d) {
+  var canvas = document.getElementById('ppShareCanvas');
+  if (!canvas) return;
+  var W = 1080, H = 1080;
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  // ── Background — deep dark gradient ──
+  var bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#080810');
+  bg.addColorStop(0.5, '#0c0c1a');
+  bg.addColorStop(1, '#0a0a14');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Subtle grid pattern ──
+  ctx.strokeStyle = 'rgba(255,255,255,0.015)';
+  ctx.lineWidth = 1;
+  for (var i = 0; i < W; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke(); }
+  for (var j = 0; j < H; j += 40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(W, j); ctx.stroke(); }
+
+  // ── Ambient glow orbs ──
+  var glow1 = ctx.createRadialGradient(200, 200, 0, 200, 200, 350);
+  glow1.addColorStop(0, d.pnlUp ? 'rgba(61,168,122,0.08)' : 'rgba(224,80,80,0.08)');
+  glow1.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow1;
+  ctx.fillRect(0, 0, W, H);
+
+  var glow2 = ctx.createRadialGradient(880, 850, 0, 880, 850, 400);
+  glow2.addColorStop(0, 'rgba(64,128,224,0.05)');
+  glow2.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Top accent line ──
+  var accent = ctx.createLinearGradient(0, 0, W, 0);
+  accent.addColorStop(0, 'rgba(61,168,122,0)');
+  accent.addColorStop(0.3, d.pnlUp ? 'rgba(61,168,122,0.6)' : 'rgba(224,80,80,0.6)');
+  accent.addColorStop(0.7, d.pnlUp ? 'rgba(61,168,122,0.6)' : 'rgba(224,80,80,0.6)');
+  accent.addColorStop(1, 'rgba(61,168,122,0)');
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, 0, W, 3);
+
+  var y = 120;
+
+  // ── Avatar circle ──
+  var avX = W / 2, avY = y + 60, avR = 60;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(avX, avY, avR, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  if (d.avImg) {
+    ctx.drawImage(d.avImg, avX - avR, avY - avR, avR * 2, avR * 2);
+  } else {
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(avX - avR, avY - avR, avR * 2, avR * 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 48px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(d.avLetter || '?', avX, avY);
+  }
+  ctx.restore();
+
+  // Avatar ring
+  ctx.beginPath();
+  ctx.arc(avX, avY, avR + 3, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Tier glow ring
+  if (d.tierCls) {
+    var glowColor = 'rgba(255,255,255,0.1)';
+    if (d.tierCls.indexOf('diamond') >= 0) glowColor = 'rgba(185,242,255,0.4)';
+    else if (d.tierCls.indexOf('platinum') >= 0) glowColor = 'rgba(200,220,255,0.35)';
+    else if (d.tierCls.indexOf('gold') >= 0) glowColor = 'rgba(255,215,0,0.35)';
+    ctx.beginPath();
+    ctx.arc(avX, avY, avR + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  y = avY + avR + 32;
+
+  // ── Username ──
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 42px Inter, system-ui, sans-serif';
+  ctx.fillText(d.username, W / 2, y);
+  y += 52;
+
+  // ── Handle ──
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.font = '400 22px Inter, system-ui, sans-serif';
+  ctx.fillText(d.handle, W / 2, y);
+  y += 50;
+
+  // ── Tier + Rank badges ──
+  if (d.tierText || d.rankText) {
+    var badgeY = y;
+    var badges = [];
+    if (d.tierText) badges.push({ text: d.tierText, color: _tierColor(d.tierCls), bg: _tierBg(d.tierCls) });
+    if (d.rankText) badges.push({ text: d.rankText, color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' });
+    var totalWidth = 0;
+    ctx.font = '700 18px Inter, system-ui, sans-serif';
+    badges.forEach(function(b) { b.w = ctx.measureText(b.text).width + 40; totalWidth += b.w; });
+    totalWidth += (badges.length - 1) * 12;
+    var bx = (W - totalWidth) / 2;
+    badges.forEach(function(b) {
+      _roundRect(ctx, bx, badgeY, b.w, 36, 18);
+      ctx.fillStyle = b.bg;
+      ctx.fill();
+      ctx.strokeStyle = b.color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = b.color;
+      ctx.font = '700 16px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.text, bx + b.w / 2, badgeY + 10);
+      bx += b.w + 12;
+    });
+    y = badgeY + 56;
+  }
+
+  // ── P&L Hero — the showoff number ──
+  if (d.pnlValue) {
+    var pnlColor = d.pnlUp ? '#3da87a' : '#e05050';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = pnlColor;
+    ctx.font = '800 72px Inter, system-ui, sans-serif';
+    ctx.shadowColor = d.pnlUp ? 'rgba(61,168,122,0.3)' : 'rgba(224,80,80,0.3)';
+    ctx.shadowBlur = 40;
+    ctx.fillText(d.pnlValue, W / 2, y);
+    ctx.shadowBlur = 0;
+    y += 82;
+
+    // P&L percentage pill
+    if (d.pnlPct) {
+      var pctW = ctx.measureText(d.pnlPct).width + 48;
+      ctx.font = '700 24px Inter, system-ui, sans-serif';
+      pctW = ctx.measureText(d.pnlPct).width + 48;
+      var pctX = (W - pctW) / 2;
+      _roundRect(ctx, pctX, y, pctW, 40, 20);
+      ctx.fillStyle = d.pnlUp ? 'rgba(61,168,122,0.15)' : 'rgba(224,80,80,0.15)';
+      ctx.fill();
+      ctx.fillStyle = pnlColor;
+      ctx.textAlign = 'center';
+      ctx.fillText(d.pnlPct, W / 2, y + 10);
+      y += 64;
+    }
+  }
+
+  // ── Stats cards row ──
+  y += 10;
+  var stats = [
+    { label: 'WIN RATE', value: d.winRate },
+    { label: 'TRADES', value: d.tradeCount },
+    { label: 'PORTFOLIO', value: d.portfolioVal }
+  ];
+  var cardW = 280, cardH = 110, cardGap = 30;
+  var rowW = stats.length * cardW + (stats.length - 1) * cardGap;
+  var sx = (W - rowW) / 2;
+  stats.forEach(function(s) {
+    // Card bg
+    _roundRect(ctx, sx, y, cardW, cardH, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '700 13px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.label, sx + cardW / 2, y + 30);
+    // Value
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 32px Inter, system-ui, sans-serif';
+    ctx.fillText(s.value, sx + cardW / 2, y + 62);
+    sx += cardW + cardGap;
+  });
+  y += cardH + 50;
+
+  // ── Bottom branding ──
+  var brandY = H - 70;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.font = '600 18px Inter, system-ui, sans-serif';
+  ctx.fillText('QURO', W / 2, brandY);
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.font = '400 13px Inter, system-ui, sans-serif';
+  ctx.fillText('Chat \u00B7 Trade \u00B7 Compete', W / 2, brandY + 24);
+
+  // ── Bottom accent line ──
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, H - 3, W, 3);
+
+  // ── Convert to blob and show preview ──
+  canvas.toBlob(function(blob) {
+    if (_shareCardData) URL.revokeObjectURL(_shareCardData);
+    _shareCardData = URL.createObjectURL(blob);
+    var previewImg = document.getElementById('sharePreviewImg');
+    previewImg.src = _shareCardData;
+    document.getElementById('shareOverlay').classList.add('open');
+  }, 'image/png');
+}
+
+function _tierColor(cls) {
+  if (cls.indexOf('diamond') >= 0) return '#b9f2ff';
+  if (cls.indexOf('platinum') >= 0) return '#e0e8ff';
+  if (cls.indexOf('gold') >= 0) return '#ffd700';
+  if (cls.indexOf('silver') >= 0) return '#c0c0c0';
+  return '#cd7f32';
+}
+function _tierBg(cls) {
+  if (cls.indexOf('diamond') >= 0) return 'rgba(185,242,255,0.12)';
+  if (cls.indexOf('platinum') >= 0) return 'rgba(200,220,255,0.1)';
+  if (cls.indexOf('gold') >= 0) return 'rgba(255,215,0,0.1)';
+  if (cls.indexOf('silver') >= 0) return 'rgba(192,192,192,0.1)';
+  return 'rgba(180,130,80,0.1)';
+}
+
+function _roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+export function closeShareOverlay() {
+  document.getElementById('shareOverlay').classList.remove('open');
+}
+
+export function downloadShareCard() {
+  if (!_shareCardData) return;
+  var username = (document.getElementById('ppName').textContent || 'profile').trim();
+  var a = document.createElement('a');
+  a.href = _shareCardData;
+  a.download = 'quro-' + username.toLowerCase().replace(/[^a-z0-9]/g, '') + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  notify('Card saved!', 'success');
+}
+
+export function nativeShareCard() {
+  if (!_shareCardData) return;
+  var username = (document.getElementById('ppName').textContent || 'profile').trim();
+  // Use Web Share API if available
+  if (navigator.share && navigator.canShare) {
+    var canvas = document.getElementById('ppShareCanvas');
+    canvas.toBlob(function(blob) {
+      var file = new File([blob], 'quro-' + username.toLowerCase().replace(/[^a-z0-9]/g, '') + '.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: username + ' on Quro',
+          text: 'Check out my trading profile on Quro!',
+          files: [file]
+        }).catch(function() {});
+      } else {
+        // Fallback — just download
+        downloadShareCard();
+      }
+    }, 'image/png');
+  } else {
+    // No Web Share API — download instead
+    downloadShareCard();
+  }
 }
 
 export function syncEmailSection(){
