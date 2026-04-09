@@ -10,331 +10,283 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg: #050510;
-      --bg-card: #0a0a1a;
-      --bg-card-hover: #0f0f24;
-      --green: #00E59B;
-      --blue: #3B82F6;
-      --purple: #8B5CF6;
-      --text: #e4e4ef;
-      --text-muted: #8888a4;
-      --border: #1a1a2e;
-      --radius: 14px;
-      --radius-lg: 20px;
+      --bg: #030308;
+      --bg-card: rgba(12,12,28,0.7);
+      --green: #00F5A0;
+      --green-dim: rgba(0,245,160,0.08);
+      --blue: #4F8EF7;
+      --purple: #A855F7;
+      --pink: #EC4899;
+      --text: #eeeef5;
+      --text-muted: #7a7a9a;
+      --border: rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.03);
+      --radius: 16px;
     }
-
     html { scroll-behavior: smooth; }
-
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
-
     a { color: inherit; text-decoration: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
+    /* ========== CURSOR GLOW ========== */
+    .cursor-glow {
+      position: fixed; width: 600px; height: 600px;
+      border-radius: 50%; pointer-events: none; z-index: 0;
+      background: radial-gradient(circle, rgba(0,245,160,0.06), transparent 70%);
+      transform: translate(-50%,-50%); transition: left 0.3s ease, top 0.3s ease;
+      will-change: left, top;
     }
 
-    /* ========== PARTICLES CANVAS ========== */
-    #particles {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
-      pointer-events: none;
+    /* ========== PARTICLES ========== */
+    #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+    /* ========== ANIMATED MESH BG ========== */
+    .mesh-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5;
+      background:
+        radial-gradient(ellipse 50% 80% at 20% 50%, rgba(0,245,160,0.05), transparent),
+        radial-gradient(ellipse 60% 60% at 80% 20%, rgba(79,142,247,0.05), transparent),
+        radial-gradient(ellipse 40% 50% at 60% 80%, rgba(168,85,247,0.04), transparent);
+      animation: mesh-drift 12s ease-in-out infinite alternate;
+    }
+    @keyframes mesh-drift {
+      0% { background-position: 0% 0%, 100% 0%, 50% 100%; }
+      100% { background-position: 20% 20%, 80% 30%, 40% 70%; }
     }
 
-    /* ========== GRID BACKGROUND ========== */
+    /* ========== GRID ========== */
     .grid-bg {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background-image:
-        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-      background-size: 80px 80px;
-      pointer-events: none;
-      z-index: 0;
-      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
-      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black 10%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black 10%, transparent 70%);
     }
 
-    /* ========== SVG ICON BASE ========== */
-    .icon-wrap {
-      width: 48px; height: 48px;
-      border-radius: 12px;
+    /* ========== ICON SYSTEM ========== */
+    .icon-box {
+      width: 52px; height: 52px; border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
-      position: relative;
+      margin-bottom: 18px; position: relative; backdrop-filter: blur(8px);
+    }
+    .icon-box svg { width: 24px; height: 24px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-box.green { background: rgba(0,245,160,0.1); border: 1px solid rgba(0,245,160,0.15); }
+    .icon-box.green svg { stroke: var(--green); }
+    .icon-box.blue { background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.15); }
+    .icon-box.blue svg { stroke: var(--blue); }
+    .icon-box.purple { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.15); }
+    .icon-box.purple svg { stroke: var(--purple); }
+    .icon-box.pink { background: rgba(236,72,153,0.1); border: 1px solid rgba(236,72,153,0.15); }
+    .icon-box.pink svg { stroke: var(--pink); }
+    .icon-box.amber { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.15); }
+    .icon-box.amber svg { stroke: #f59e0b; }
+
+    /* ========== GLOW CARD ========== */
+    .glow-card {
+      position: relative; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      backdrop-filter: blur(12px); transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
       overflow: hidden;
     }
-    .icon-wrap::before {
-      content: '';
-      position: absolute; inset: 0;
-      border-radius: 12px;
-      opacity: 0.12;
+    .glow-card::before {
+      content: ''; position: absolute; inset: -1px; border-radius: var(--radius);
+      background: conic-gradient(from var(--angle, 0deg), transparent 60%, var(--green) 78%, var(--blue) 88%, transparent 100%);
+      opacity: 0; transition: opacity 0.4s; z-index: -1;
+      animation: rotate-border 4s linear infinite;
     }
-    .icon-wrap svg { width: 24px; height: 24px; position: relative; z-index: 1; }
-    .icon-green { background: rgba(0,229,155,0.1); }
-    .icon-green::before { background: var(--green); }
-    .icon-green svg { stroke: var(--green); fill: none; }
-    .icon-blue { background: rgba(59,130,246,0.1); }
-    .icon-blue::before { background: var(--blue); }
-    .icon-blue svg { stroke: var(--blue); fill: none; }
-    .icon-purple { background: rgba(139,92,246,0.1); }
-    .icon-purple::before { background: var(--purple); }
-    .icon-purple svg { stroke: var(--purple); fill: none; }
-    .icon-red { background: rgba(239,68,68,0.1); }
-    .icon-red::before { background: #ef4444; }
-    .icon-red svg { stroke: #ef4444; fill: none; }
-    .icon-amber { background: rgba(245,158,11,0.1); }
-    .icon-amber::before { background: #f59e0b; }
-    .icon-amber svg { stroke: #f59e0b; fill: none; }
+    .glow-card:hover::before { opacity: 1; }
+    .glow-card:hover { transform: translateY(-8px); border-color: transparent; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    @keyframes rotate-border { to { --angle: 360deg; } }
 
     /* ========== NAVBAR ========== */
     .navbar {
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 1000; padding: 20px 0;
-      transition: all 0.3s ease;
-      background: rgba(5,5,16,0.5);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 18px 0; transition: all 0.35s ease;
+      background: rgba(3,3,8,0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     }
-    .navbar.scrolled {
-      padding: 12px 0;
-      box-shadow: 0 1px 30px rgba(0,229,155,0.05);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
+    .navbar.scrolled { padding: 10px 0; box-shadow: 0 2px 40px rgba(0,245,160,0.04); border-bottom: 1px solid var(--border); }
     .navbar .container { display: flex; align-items: center; justify-content: space-between; }
     .nav-logo {
-      font-size: 1.6rem; font-weight: 800;
-      background: linear-gradient(135deg, var(--green), var(--blue));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; letter-spacing: -0.5px;
+      font-size: 1.7rem; font-weight: 900; letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--green), var(--blue), var(--purple));
+      background-size: 200% 200%; animation: gradient-shift 3s ease infinite;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
-    .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.2s; }
+    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+    .nav-links a { font-size: 0.88rem; font-weight: 500; color: var(--text-muted); transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
 
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 24px; border-radius: 50px;
-      font-weight: 600; font-size: 0.9rem; font-family: inherit;
-      cursor: pointer; transition: all 0.25s ease; border: none; text-decoration: none;
+      padding: 11px 26px; border-radius: 50px; font-weight: 600;
+      font-size: 0.88rem; font-family: inherit; cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1); border: none;
     }
     .btn-primary {
-      background: var(--green); color: #050510;
-      box-shadow: 0 0 20px rgba(0,229,155,0.2);
+      background: linear-gradient(135deg, var(--green), #00D68F);
+      color: #030308; box-shadow: 0 0 24px rgba(0,245,160,0.25);
     }
-    .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0,229,155,0.4); }
-    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
-    .btn-outline:hover { border-color: var(--green); color: var(--green); transform: scale(1.05); }
+    .btn-primary:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 0 40px rgba(0,245,160,0.4); }
+    .btn-outline { background: rgba(255,255,255,0.04); color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); transform: scale(1.04); background: rgba(0,245,160,0.04); }
 
-    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
-    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s ease; }
-
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
     .mobile-menu {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(5,5,16,0.97); z-index: 999;
-      flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+      display: none; position: fixed; inset: 0; background: rgba(3,3,8,0.97);
+      z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 36px;
     }
     .mobile-menu.active { display: flex; }
-    .mobile-menu a { font-size: 1.4rem; font-weight: 600; color: var(--text-muted); transition: color 0.2s; }
+    .mobile-menu a { font-size: 1.5rem; font-weight: 700; color: var(--text-muted); }
     .mobile-menu a:hover { color: var(--green); }
-    .mobile-close { position: absolute; top: 24px; right: 24px; background: none; border: none; color: var(--text); font-size: 2rem; cursor: pointer; }
-
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .hamburger { display: flex; }
-    }
+    .mobile-close { position: absolute; top: 24px; right: 24px; background: none; border: none; color: var(--text); font-size: 2.2rem; cursor: pointer; }
+    @media (max-width: 768px) { .nav-links { display: none; } .hamburger { display: flex; } }
 
     /* ========== HERO ========== */
-    .hero {
-      position: relative; min-height: 100vh;
-      display: flex; align-items: center;
-      padding: 120px 0 80px; overflow: hidden; z-index: 1;
-    }
-    .hero-orb {
-      position: absolute; border-radius: 50%;
-      filter: blur(120px); opacity: 0.35; pointer-events: none;
-    }
-    .hero-orb-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, var(--green), transparent 70%);
-      top: -10%; right: -5%; animation: float 8s ease-in-out infinite;
-    }
-    .hero-orb-2 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, var(--blue), transparent 70%);
-      bottom: 0; left: -10%; animation: float 10s ease-in-out infinite reverse;
-    }
-    .hero-orb-3 {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, var(--purple), transparent 70%);
-      top: 40%; left: 50%; animation: float 12s ease-in-out infinite 2s;
-    }
-    .hero .container {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 60px; align-items: center; position: relative; z-index: 1;
-    }
+    .hero { position: relative; min-height: 100vh; display: flex; align-items: center; padding: 120px 0 80px; z-index: 1; overflow: hidden; }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(140px); pointer-events: none; }
+    .hero-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, var(--green), transparent 70%); top: -15%; right: -8%; opacity: 0.3; animation: orb-float 10s ease-in-out infinite; }
+    .hero-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, var(--blue), transparent 70%); bottom: -10%; left: -12%; opacity: 0.25; animation: orb-float 13s ease-in-out infinite reverse; }
+    .hero-orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, var(--purple), transparent 70%); top: 30%; left: 45%; opacity: 0.2; animation: orb-float 16s ease-in-out infinite 3s; }
+    @keyframes orb-float { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(20px,-30px) scale(1.05); } 66% { transform: translate(-15px,20px) scale(0.95); } }
+
+    .hero .container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 16px; border-radius: 50px;
-      background: rgba(0,229,155,0.08); border: 1px solid rgba(0,229,155,0.15);
-      font-size: 0.78rem; font-weight: 600; color: var(--green);
-      margin-bottom: 20px; animation: fadeInUp 0.8s ease-out;
+      padding: 7px 18px; border-radius: 50px;
+      background: rgba(0,245,160,0.06); border: 1px solid rgba(0,245,160,0.12);
+      font-size: 0.76rem; font-weight: 600; color: var(--green);
+      margin-bottom: 24px; animation: fadeInUp 0.6s ease-out;
     }
-    .hero-badge .pulse-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--green); animation: pulse-dot 2s ease-in-out infinite;
-    }
-    .hero-content { max-width: 560px; }
+    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s ease-in-out infinite; }
     .hero-title {
-      font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900;
-      line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 20px;
-      animation: fadeInUp 0.8s ease-out 0.1s both;
+      font-size: clamp(2.8rem, 5.5vw, 4.5rem); font-weight: 900;
+      line-height: 1.05; letter-spacing: -2px; margin-bottom: 24px;
+      animation: fadeInUp 0.7s ease-out 0.1s both;
     }
     .hero-title .gradient {
-      background: linear-gradient(135deg, var(--green) 0%, var(--blue) 50%, var(--purple) 100%);
+      background: linear-gradient(135deg, var(--green) 0%, var(--blue) 40%, var(--purple) 80%);
       background-size: 200% 200%; animation: gradient-shift 4s ease infinite;
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .hero-subtitle {
-      font-size: 1.15rem; color: var(--text-muted); line-height: 1.7;
-      margin-bottom: 36px; max-width: 480px;
-      animation: fadeInUp 0.8s ease-out 0.2s both;
+      font-size: 1.15rem; color: var(--text-muted); line-height: 1.75;
+      margin-bottom: 40px; max-width: 500px;
+      animation: fadeInUp 0.7s ease-out 0.2s both;
     }
-    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.8s ease-out 0.3s both; }
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.7s ease-out 0.3s both; }
 
-    .hero-mockup { position: relative; perspective: 1000px; animation: fadeInUp 1s ease-out 0.4s both; }
+    /* ─ Hero Mockup ─ */
+    .hero-mockup { perspective: 1200px; animation: fadeInUp 0.9s ease-out 0.4s both; }
     .browser-frame {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,229,155,0.06);
-      transform: rotateY(-5deg) rotateX(2deg); transition: transform 0.5s ease;
+      background: rgba(10,10,24,0.8); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px; overflow: hidden; backdrop-filter: blur(16px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,245,160,0.04), inset 0 1px 0 rgba(255,255,255,0.04);
+      transform: rotateY(-4deg) rotateX(2deg); transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
     }
-    .browser-frame:hover { transform: rotateY(0deg) rotateX(0deg); }
-    .browser-bar { display: flex; align-items: center; gap: 8px; padding: 14px 18px; background: #0d0d20; border-bottom: 1px solid var(--border); }
+    .browser-frame:hover { transform: rotateY(0) rotateX(0) scale(1.02); }
+    .browser-bar { display: flex; align-items: center; gap: 8px; padding: 14px 18px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); }
     .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .browser-dot:nth-child(1) { background: #ff5f56; }
-    .browser-dot:nth-child(2) { background: #ffbd2e; }
-    .browser-dot:nth-child(3) { background: #27c93f; }
-    .browser-url {
-      flex: 1; margin-left: 12px; padding: 6px 14px;
-      background: rgba(255,255,255,0.04); border-radius: 6px;
-      font-size: 0.75rem; color: var(--text-muted);
-    }
-    .browser-content { padding: 24px; min-height: 300px; display: flex; flex-direction: column; gap: 12px; }
-    .mock-sidebar { display: flex; gap: 16px; height: 220px; }
-    .mock-channels { width: 60px; background: #0d0d1f; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; padding: 10px 6px; align-items: center; }
-    .mock-channel-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--green), var(--blue)); opacity: 0.6; }
-    .mock-channel-icon:first-child { opacity: 1; }
-    .mock-channel-icon:nth-child(2) { background: #1a1a2e; }
-    .mock-channel-icon:nth-child(3) { background: #1a1a2e; }
-    .mock-chat-area { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: flex-end; }
-    .mock-msg { display: flex; gap: 10px; align-items: flex-start; }
-    .mock-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
-    .mock-bubble { background: rgba(255,255,255,0.04); padding: 8px 14px; border-radius: 10px; font-size: 0.75rem; color: var(--text-muted); max-width: 220px; }
-    .mock-input { margin-top: 8px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; font-size: 0.72rem; color: #555; }
-
-    /* Typing animation in mockup */
-    .typing-dots { display: inline-flex; gap: 3px; align-items: center; padding: 4px 0; }
-    .typing-dots span {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--text-muted); animation: typing-bounce 1.4s ease-in-out infinite;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    .browser-dot:nth-child(1) { background: #ff5f56; } .browser-dot:nth-child(2) { background: #ffbd2e; } .browser-dot:nth-child(3) { background: #27c93f; }
+    .browser-url { flex: 1; margin-left: 12px; padding: 6px 14px; background: rgba(255,255,255,0.04); border-radius: 8px; font-size: 0.73rem; color: var(--text-muted); }
+    .browser-content { padding: 20px; min-height: 280px; }
+    .mock-sidebar { display: flex; gap: 14px; height: 210px; }
+    .mock-channels { width: 54px; background: rgba(0,0,0,0.25); border-radius: 10px; display: flex; flex-direction: column; gap: 8px; padding: 10px 6px; align-items: center; }
+    .mock-channel-icon { width: 34px; height: 34px; border-radius: 10px; }
+    .mock-channel-icon:nth-child(1) { background: linear-gradient(135deg, var(--green), var(--blue)); }
+    .mock-channel-icon:nth-child(2) { background: rgba(255,255,255,0.04); }
+    .mock-channel-icon:nth-child(3) { background: rgba(255,255,255,0.04); }
+    .mock-chat-area { flex: 1; display: flex; flex-direction: column; gap: 8px; justify-content: flex-end; }
+    .mock-msg { display: flex; gap: 8px; align-items: flex-start; animation: msg-slide 0.5s ease-out both; }
+    .mock-msg:nth-child(1) { animation-delay: 0.6s; } .mock-msg:nth-child(2) { animation-delay: 1.2s; } .mock-msg:nth-child(3) { animation-delay: 1.8s; } .mock-msg:nth-child(4) { animation-delay: 2.4s; }
+    @keyframes msg-slide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .mock-avatar { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; }
+    .mock-bubble { background: rgba(255,255,255,0.04); padding: 7px 12px; border-radius: 10px; font-size: 0.72rem; color: var(--text-muted); max-width: 200px; }
+    .typing-dots { display: inline-flex; gap: 3px; padding: 2px 0; }
+    .typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); animation: typing 1.4s ease-in-out infinite; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; } .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+    .mock-input { margin-top: 6px; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; font-size: 0.7rem; color: #444; }
 
     @media (max-width: 768px) {
       .hero .container { grid-template-columns: 1fr; text-align: center; }
-      .hero-content { max-width: 100%; }
       .hero-subtitle { max-width: 100%; }
       .hero-buttons { justify-content: center; }
       .hero-mockup { display: none; }
-      .hero-badge { margin: 0 auto 20px; }
+      .hero-badge { margin: 0 auto 24px; }
     }
 
-    /* ========== SECTIONS BASE ========== */
-    section { padding: 100px 0; position: relative; z-index: 1; }
+    /* ========== MARQUEE ========== */
+    .marquee-section { padding: 20px 0; overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); z-index: 1; position: relative; }
+    .marquee-track { display: flex; gap: 48px; animation: marquee 30s linear infinite; width: max-content; }
+    .marquee-item { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    .marquee-item .up { color: var(--green); } .marquee-item .down { color: #ef4444; }
+    .m-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* ========== SECTIONS ========== */
+    section { padding: 110px 0; position: relative; z-index: 1; }
     .section-label {
-      display: inline-block; font-size: 0.78rem; font-weight: 600;
-      color: var(--green); text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 12px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; font-weight: 700; color: var(--green);
+      text-transform: uppercase; letter-spacing: 3px; margin-bottom: 14px;
     }
-    .section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
-    .section-subtitle { font-size: 1.1rem; color: var(--text-muted); max-width: 560px; line-height: 1.7; }
-    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-label::before { content: ''; width: 24px; height: 1px; background: var(--green); }
+    .section-title { font-size: clamp(2rem, 4.2vw, 3rem); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 16px; }
+    .section-subtitle { font-size: 1.08rem; color: var(--text-muted); max-width: 560px; line-height: 1.75; }
+    .section-header { text-align: center; margin-bottom: 72px; }
     .section-header .section-subtitle { margin: 0 auto; }
+    .section-header .section-label { justify-content: center; }
 
     /* ========== PROBLEM ========== */
     .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .problem-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 36px 28px;
-      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-    }
-    .problem-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(239,68,68,0.25);
-      box-shadow: 0 12px 40px rgba(239,68,68,0.06);
-    }
+    .problem-card { padding: 40px 30px; }
     .problem-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
-    .problem-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; }
+    .problem-card p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; }
     @media (max-width: 768px) { .problem-grid { grid-template-columns: 1fr; } }
 
     /* ========== SOLUTION ========== */
-    .solution { background: linear-gradient(180deg, transparent, rgba(0,229,155,0.015), transparent); }
+    .solution { background: linear-gradient(180deg, transparent, rgba(0,245,160,0.012), transparent); }
     .solution-highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px; }
-    .solution-item { text-align: center; padding: 32px 20px; }
-    .solution-item .icon-wrap { margin: 0 auto 16px; width: 56px; height: 56px; border-radius: 16px; }
-    .solution-item .icon-wrap svg { width: 28px; height: 28px; }
-    .solution-item h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-    .solution-item p { color: var(--text-muted); font-size: 0.9rem; }
-
+    .solution-item { text-align: center; padding: 36px 20px; }
+    .solution-item .icon-box { margin: 0 auto 18px; width: 60px; height: 60px; border-radius: 18px; }
+    .solution-item .icon-box svg { width: 28px; height: 28px; }
+    .solution-item h3 { font-size: 1.08rem; font-weight: 700; margin-bottom: 8px; }
+    .solution-item p { color: var(--text-muted); font-size: 0.88rem; }
     .gradient-divider {
-      height: 2px; margin: 48px auto 0; max-width: 300px;
-      background: linear-gradient(90deg, transparent, var(--green), var(--blue), transparent);
+      height: 2px; margin: 56px auto 0; max-width: 320px;
+      background: linear-gradient(90deg, transparent, var(--green), var(--blue), var(--purple), transparent);
       border-radius: 2px; animation: glow-line 3s ease-in-out infinite;
     }
+    .stats-row { display: flex; justify-content: center; gap: 56px; flex-wrap: wrap; margin-top: 56px; }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-size: 3rem; font-weight: 900; letter-spacing: -1.5px;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
     @media (max-width: 768px) { .solution-highlights { grid-template-columns: 1fr; } }
 
     /* ========== FEATURES ========== */
     .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .feature-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 32px 28px;
+      padding: 36px 30px;
       border-left: 3px solid var(--green);
-      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-      position: relative; overflow: hidden;
     }
-    .feature-card::after {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--green), transparent);
-      opacity: 0; transition: opacity 0.4s;
-    }
-    .feature-card:hover::after { opacity: 1; }
     .feature-card:nth-child(even) { border-left-color: var(--blue); }
-    .feature-card:nth-child(even)::after { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
-    .feature-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 40px rgba(0,229,155,0.06);
-      border-color: rgba(0,229,155,0.15);
-    }
-    .feature-card:nth-child(even):hover {
-      box-shadow: 0 12px 40px rgba(59,130,246,0.06);
-      border-color: rgba(59,130,246,0.15);
-    }
+    .feature-card:nth-child(3n) { border-left-color: var(--purple); }
     .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-    .feature-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
-
+    .feature-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; }
     @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px) { .features-grid { grid-template-columns: 1fr; } }
 
@@ -343,172 +295,102 @@
     .demo-frame {
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: var(--radius); overflow: hidden;
-      animation: subtle-float 6s ease-in-out infinite;
-      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      animation: subtle-float 7s ease-in-out infinite;
+      transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
+      backdrop-filter: blur(12px);
     }
-    .demo-frame:nth-child(2) { animation-delay: -2s; }
-    .demo-frame:nth-child(3) { animation-delay: -4s; }
-    .demo-frame:hover { transform: translateY(-8px) !important; box-shadow: 0 16px 50px rgba(0,0,0,0.3); animation-play-state: paused; }
-
-    .demo-title-bar {
-      padding: 12px 16px; background: #0d0d1f; border-bottom: 1px solid var(--border);
-      font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
-      display: flex; align-items: center; gap: 8px;
-    }
+    .demo-frame:nth-child(2) { animation-delay: -2.3s; } .demo-frame:nth-child(3) { animation-delay: -4.6s; }
+    .demo-frame:hover { transform: translateY(-10px) scale(1.02) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation-play-state: paused; }
+    .demo-title-bar { padding: 12px 16px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
     .demo-title-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s ease-in-out infinite; }
     .demo-body { padding: 20px; min-height: 220px; }
-
-    .demo-chat-msg { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
-    .demo-chat-avatar { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; }
-    .demo-chat-bubble { background: rgba(255,255,255,0.04); padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
-    .demo-chat-name { font-size: 0.7rem; font-weight: 600; color: var(--green); margin-bottom: 2px; }
-
-    .demo-candle-row { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; margin-bottom: 16px; }
+    .demo-chat-msg { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+    .demo-chat-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; }
+    .demo-chat-bubble { background: rgba(255,255,255,0.035); padding: 7px 11px; border-radius: 8px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+    .demo-chat-name { font-size: 0.68rem; font-weight: 700; margin-bottom: 2px; }
+    .demo-chat-name.g { color: var(--green); } .demo-chat-name.b { color: var(--blue); } .demo-chat-name.p { color: var(--purple); }
+    .demo-candle-row { display: flex; align-items: flex-end; gap: 5px; height: 120px; margin-bottom: 14px; }
     .demo-candle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
-    .demo-candle-wick { width: 1px; background: #555; }
-    .demo-candle-body { width: 70%; border-radius: 2px; min-height: 8px; }
-    .demo-candle-body.green { background: var(--green); }
-    .demo-candle-body.red { background: #ef4444; }
-    .demo-stock-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
-    .demo-stock-name { font-weight: 700; color: var(--text); }
-    .demo-stock-price { color: var(--green); font-weight: 600; }
-
-    .demo-rank-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 12px; margin-bottom: 6px;
-      border-radius: 8px; background: rgba(255,255,255,0.02); font-size: 0.8rem;
-    }
-    .demo-rank-row:first-child { background: rgba(0,229,155,0.06); border: 1px solid rgba(0,229,155,0.1); }
-    .demo-rank-num { font-weight: 800; color: var(--green); min-width: 20px; }
+    .demo-candle-wick { width: 1px; background: #444; }
+    .demo-candle-body { width: 65%; border-radius: 2px; min-height: 6px; transition: height 0.3s; }
+    .demo-candle-body.green { background: var(--green); box-shadow: 0 0 6px rgba(0,245,160,0.2); }
+    .demo-candle-body.red { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.2); }
+    .demo-stock-info { display: flex; justify-content: space-between; font-size: 0.78rem; }
+    .demo-stock-name { font-weight: 700; } .demo-stock-price { color: var(--green); font-weight: 600; }
+    .demo-rank-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin-bottom: 5px; border-radius: 8px; background: rgba(255,255,255,0.015); font-size: 0.78rem; }
+    .demo-rank-row:first-child { background: rgba(0,245,160,0.05); border: 1px solid rgba(0,245,160,0.08); }
+    .demo-rank-num { font-weight: 800; min-width: 18px; }
+    .demo-rank-row:nth-child(1) .demo-rank-num { color: var(--green); }
     .demo-rank-row:nth-child(2) .demo-rank-num { color: var(--blue); }
     .demo-rank-row:nth-child(3) .demo-rank-num { color: var(--purple); }
-    .demo-rank-avatar { width: 24px; height: 24px; border-radius: 50%; }
-    .demo-rank-name { flex: 1; font-weight: 500; }
-    .demo-rank-pnl { font-weight: 700; }
-    .demo-rank-pnl.positive { color: var(--green); }
-
+    .demo-rank-avatar { width: 22px; height: 22px; border-radius: 50%; }
+    .demo-rank-name { flex: 1; font-weight: 500; } .demo-rank-pnl { font-weight: 700; color: var(--green); }
     @media (max-width: 768px) { .demo-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; } }
 
-    /* ========== WHY QURO ========== */
-    .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-    .why-item {
-      text-align: center; padding: 40px 24px;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-      position: relative; overflow: hidden;
-    }
-    .why-item::before {
-      content: ''; position: absolute; top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: conic-gradient(from 0deg, transparent, rgba(0,229,155,0.04), transparent, rgba(59,130,246,0.04), transparent);
-      animation: rotate-bg 8s linear infinite;
-      opacity: 0; transition: opacity 0.4s;
-    }
-    .why-item:hover::before { opacity: 1; }
-    .why-item:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,229,155,0.06); }
-    .why-item .icon-wrap { margin: 0 auto 16px; width: 56px; height: 56px; border-radius: 16px; }
-    .why-item .icon-wrap svg { width: 28px; height: 28px; }
-    .why-item h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; position: relative; }
-    .why-item p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; position: relative; }
+    /* ========== WHY ========== */
+    .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .why-card { text-align: center; padding: 44px 28px; }
+    .why-card .icon-box { margin: 0 auto 18px; width: 60px; height: 60px; border-radius: 18px; }
+    .why-card .icon-box svg { width: 28px; height: 28px; }
+    .why-card h3 { font-size: 1.08rem; font-weight: 700; margin-bottom: 10px; }
+    .why-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
     @media (max-width: 768px) { .why-grid { grid-template-columns: 1fr; } }
 
     /* ========== TECH ========== */
-    .tech-badges { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 40px; }
+    .tech-badges { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 44px; }
     .tech-badge {
-      padding: 12px 28px; background: var(--bg-card);
+      padding: 12px 28px; background: rgba(255,255,255,0.03);
       border: 1px solid var(--border); border-radius: 50px;
-      font-size: 0.9rem; font-weight: 600; color: var(--text);
-      transition: all 0.3s ease; position: relative; overflow: hidden;
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+      transition: all 0.35s ease; position: relative; overflow: hidden;
     }
     .tech-badge::before {
-      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
-      transition: left 0.5s;
+      content: ''; position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
+      background: linear-gradient(90deg, transparent 25%, rgba(0,245,160,0.06) 50%, transparent 75%);
+      transition: left 0.6s;
     }
     .tech-badge:hover::before { left: 100%; }
-    .tech-badge:hover {
-      border-color: var(--green); box-shadow: 0 0 20px rgba(0,229,155,0.1);
-      transform: translateY(-2px);
-    }
-
-    /* ========== MARQUEE ========== */
-    .marquee-section {
-      padding: 40px 0; overflow: hidden;
-      border-top: 1px solid rgba(255,255,255,0.03);
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      z-index: 1; position: relative;
-    }
-    .marquee-track {
-      display: flex; gap: 48px; animation: marquee 25s linear infinite;
-      width: max-content;
-    }
-    .marquee-item {
-      font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
-      white-space: nowrap; display: flex; align-items: center; gap: 8px;
-    }
-    .marquee-item .m-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
+    .tech-badge:hover { border-color: var(--green); box-shadow: 0 0 24px rgba(0,245,160,0.1); transform: translateY(-3px); }
 
     /* ========== CTA ========== */
-    .cta { text-align: center; padding: 120px 0; overflow: hidden; }
+    .cta { text-align: center; padding: 140px 0; overflow: hidden; }
     .cta::before {
-      content: ''; position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(0,229,155,0.08), rgba(59,130,246,0.04), transparent 70%);
-      pointer-events: none; animation: pulse-glow 4s ease-in-out infinite;
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,245,160,0.07), rgba(79,142,247,0.04), transparent 65%);
+      pointer-events: none; animation: pulse-glow 5s ease-in-out infinite;
     }
-    .cta-title {
-      font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900;
-      letter-spacing: -1.5px; margin-bottom: 16px; position: relative;
-    }
-    .cta-subtitle { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 40px; position: relative; }
-    .btn-cta { padding: 16px 40px; font-size: 1.1rem; position: relative; animation: glow-pulse 3s ease-in-out infinite; }
+    .cta-title { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 16px; position: relative; }
+    .cta-subtitle { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 44px; position: relative; }
+    .btn-cta { padding: 18px 48px; font-size: 1.15rem; position: relative; animation: glow-pulse 3s ease-in-out infinite; }
 
     /* ========== FOOTER ========== */
-    .footer { padding: 32px 0; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+    .footer { padding: 36px 0; border-top: 1px solid var(--border); position: relative; z-index: 1; }
     .footer .container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-    .footer-left { font-size: 0.85rem; color: var(--text-muted); }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { font-size: 0.85rem; color: var(--text-muted); transition: color 0.2s; }
+    .footer-left { font-size: 0.82rem; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { font-size: 0.82rem; color: var(--text-muted); transition: color 0.2s; }
     .footer-links a:hover { color: var(--green); }
 
-    /* ========== ANIMATIONS ========== */
+    /* ========== KEYFRAMES ========== */
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
-    @keyframes subtle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-    @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(0,229,155,0.2); } 50% { box-shadow: 0 0 40px rgba(0,229,155,0.45); } }
-    @keyframes glow-line { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-    @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.7); } }
-    @keyframes pulse-glow { 0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; } 50% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; } }
+    @keyframes subtle-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes glow-pulse { 0%,100% { box-shadow: 0 0 20px rgba(0,245,160,0.2); } 50% { box-shadow: 0 0 50px rgba(0,245,160,0.45); } }
+    @keyframes glow-line { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.6); } }
+    @keyframes pulse-glow { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.7; } 50% { transform: translate(-50%,-50%) scale(1.2); opacity: 1; } }
     @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    @keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
-    @keyframes rotate-bg { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-    @keyframes counter-glow { 0%, 100% { text-shadow: 0 0 8px rgba(0,229,155,0.3); } 50% { text-shadow: 0 0 20px rgba(0,229,155,0.6); } }
 
-    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.7s cubic-bezier(0.16,1,0.3,1); }
+    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16,1,0.3,1); }
     .reveal.visible { opacity: 1; transform: translateY(0); }
-    .stagger-child { opacity: 0; transform: translateY(24px); transition: all 0.6s cubic-bezier(0.16,1,0.3,1); }
+    .stagger-child { opacity: 0; transform: translateY(24px); transition: all 0.7s cubic-bezier(0.16,1,0.3,1); }
     .stagger-child.visible { opacity: 1; transform: translateY(0); }
-
-    /* Stats counter row */
-    .stats-row {
-      display: flex; justify-content: center; gap: 64px; flex-wrap: wrap;
-      margin-top: 48px; padding: 32px 0;
-    }
-    .stat-item { text-align: center; }
-    .stat-num {
-      font-size: 2.5rem; font-weight: 900; letter-spacing: -1px;
-      background: linear-gradient(135deg, var(--green), var(--blue));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      animation: counter-glow 3s ease-in-out infinite;
-    }
-    .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
   </style>
 </head>
 <body>
 
+  <div class="cursor-glow" id="cursorGlow"></div>
+  <div class="mesh-bg"></div>
   <div class="grid-bg"></div>
   <canvas id="particles"></canvas>
 
@@ -520,32 +402,29 @@
         <li><a href="#features">Features</a></li>
         <li><a href="#why">Why Quro</a></li>
         <li><a href="#tech">Tech</a></li>
-        <li><a href="https://quro-daily-9.vercel.app" class="btn btn-primary" target="_blank" rel="noopener">Open App</a></li>
+        <li><a href="https://quro-daily-9.vercel.app" class="btn btn-primary" target="_blank">Open App</a></li>
       </ul>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      <button class="hamburger" id="hamburgerBtn"><span></span><span></span><span></span></button>
     </div>
   </nav>
-
   <div class="mobile-menu" id="mobileMenu">
-    <button class="mobile-close" id="mobileClose" aria-label="Close menu">&times;</button>
+    <button class="mobile-close" id="mobileClose">&times;</button>
     <a href="#features" class="mobile-link">Features</a>
     <a href="#why" class="mobile-link">Why Quro</a>
     <a href="#tech" class="mobile-link">Tech</a>
-    <a href="https://quro-daily-9.vercel.app" class="btn btn-primary" target="_blank" rel="noopener">Open App</a>
+    <a href="https://quro-daily-9.vercel.app" class="btn btn-primary" target="_blank">Open App</a>
   </div>
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-orb hero-orb-1"></div><div class="hero-orb hero-orb-2"></div><div class="hero-orb hero-orb-3"></div>
     <div class="container">
       <div class="hero-content">
-        <div class="hero-badge"><span class="pulse-dot"></span> Now Live — Join Free</div>
+        <div class="hero-badge"><span class="pulse-dot"></span> Now Live — Start Free</div>
         <h1 class="hero-title"><span class="gradient">Trade Together.</span><br>Chat Smarter.</h1>
         <p class="hero-subtitle">Quro is a social trading app where you can chat, simulate trades, and compete with friends — all in one place.</p>
         <div class="hero-buttons">
-          <a href="https://quro-daily-9.vercel.app" class="btn btn-primary" target="_blank" rel="noopener">
+          <a href="https://quro-daily-9.vercel.app" class="btn btn-primary" target="_blank">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             Open App
           </a>
@@ -554,19 +433,14 @@
       </div>
       <div class="hero-mockup">
         <div class="browser-frame">
-          <div class="browser-bar">
-            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
-            <div class="browser-url">quro-daily-9.vercel.app</div>
-          </div>
+          <div class="browser-bar"><div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-url">quro-daily-9.vercel.app</div></div>
           <div class="browser-content">
             <div class="mock-sidebar">
-              <div class="mock-channels">
-                <div class="mock-channel-icon"></div><div class="mock-channel-icon"></div><div class="mock-channel-icon"></div>
-              </div>
+              <div class="mock-channels"><div class="mock-channel-icon"></div><div class="mock-channel-icon"></div><div class="mock-channel-icon"></div></div>
               <div class="mock-chat-area">
                 <div class="mock-msg"><div class="mock-avatar" style="background:var(--green)"></div><div><div class="mock-bubble">Just bought RELIANCE at 2450!</div></div></div>
-                <div class="mock-msg"><div class="mock-avatar" style="background:var(--blue)"></div><div><div class="mock-bubble">Nice entry. Watching INFY for breakout.</div></div></div>
-                <div class="mock-msg"><div class="mock-avatar" style="background:var(--purple)"></div><div><div class="mock-bubble">Leaderboard updated - you're #2!</div></div></div>
+                <div class="mock-msg"><div class="mock-avatar" style="background:var(--blue)"></div><div><div class="mock-bubble">Nice entry. Watching INFY breakout.</div></div></div>
+                <div class="mock-msg"><div class="mock-avatar" style="background:var(--purple)"></div><div><div class="mock-bubble">Leaderboard updated — you're #2!</div></div></div>
                 <div class="mock-msg"><div class="mock-avatar" style="background:var(--green)"></div><div><div class="mock-bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div></div></div>
                 <div class="mock-input">Type a message...</div>
               </div>
@@ -579,52 +453,46 @@
 
   <!-- MARQUEE -->
   <div class="marquee-section">
-    <div class="marquee-track" id="marqueeTrack">
-      <span class="marquee-item"><span class="m-dot"></span> RELIANCE +2.3%</span>
-      <span class="marquee-item"><span class="m-dot"></span> TCS -0.4%</span>
-      <span class="marquee-item"><span class="m-dot"></span> HDFCBANK +1.8%</span>
-      <span class="marquee-item"><span class="m-dot"></span> INFY +0.9%</span>
-      <span class="marquee-item"><span class="m-dot"></span> ICICIBANK +3.1%</span>
+    <div class="marquee-track">
+      <span class="marquee-item"><span class="m-dot"></span> RELIANCE <span class="up">+2.3%</span></span>
+      <span class="marquee-item"><span class="m-dot" style="background:#ef4444"></span> TCS <span class="down">-0.4%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> HDFCBANK <span class="up">+1.8%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> INFY <span class="up">+0.9%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> ICICIBANK <span class="up">+3.1%</span></span>
       <span class="marquee-item"><span class="m-dot"></span> NIFTY 50 22,450</span>
       <span class="marquee-item"><span class="m-dot"></span> SENSEX 73,800</span>
-      <span class="marquee-item"><span class="m-dot"></span> TATAMOTORS +4.2%</span>
-      <span class="marquee-item"><span class="m-dot"></span> BAJFINANCE -1.1%</span>
-      <span class="marquee-item"><span class="m-dot"></span> SBIN +2.7%</span>
-      <span class="marquee-item"><span class="m-dot"></span> RELIANCE +2.3%</span>
-      <span class="marquee-item"><span class="m-dot"></span> TCS -0.4%</span>
-      <span class="marquee-item"><span class="m-dot"></span> HDFCBANK +1.8%</span>
-      <span class="marquee-item"><span class="m-dot"></span> INFY +0.9%</span>
-      <span class="marquee-item"><span class="m-dot"></span> ICICIBANK +3.1%</span>
+      <span class="marquee-item"><span class="m-dot"></span> TATAMOTORS <span class="up">+4.2%</span></span>
+      <span class="marquee-item"><span class="m-dot" style="background:#ef4444"></span> BAJFINANCE <span class="down">-1.1%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> SBIN <span class="up">+2.7%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> RELIANCE <span class="up">+2.3%</span></span>
+      <span class="marquee-item"><span class="m-dot" style="background:#ef4444"></span> TCS <span class="down">-0.4%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> HDFCBANK <span class="up">+1.8%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> INFY <span class="up">+0.9%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> ICICIBANK <span class="up">+3.1%</span></span>
       <span class="marquee-item"><span class="m-dot"></span> NIFTY 50 22,450</span>
       <span class="marquee-item"><span class="m-dot"></span> SENSEX 73,800</span>
-      <span class="marquee-item"><span class="m-dot"></span> TATAMOTORS +4.2%</span>
-      <span class="marquee-item"><span class="m-dot"></span> BAJFINANCE -1.1%</span>
-      <span class="marquee-item"><span class="m-dot"></span> SBIN +2.7%</span>
+      <span class="marquee-item"><span class="m-dot"></span> TATAMOTORS <span class="up">+4.2%</span></span>
+      <span class="marquee-item"><span class="m-dot" style="background:#ef4444"></span> BAJFINANCE <span class="down">-1.1%</span></span>
+      <span class="marquee-item"><span class="m-dot"></span> SBIN <span class="up">+2.7%</span></span>
     </div>
   </div>
 
   <!-- PROBLEM -->
   <section class="problem">
     <div class="container">
-      <div class="section-header reveal">
-        <p class="section-label">The Problem</p>
-        <h2 class="section-title">The Problem with Trading Today</h2>
-      </div>
+      <div class="section-header reveal"><p class="section-label">The Problem</p><h2 class="section-title">The Problem with Trading Today</h2></div>
       <div class="problem-grid">
-        <div class="problem-card stagger-child">
-          <div class="icon-wrap icon-red"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="7" y1="8" x2="7" y2="12"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="17" y1="9" x2="17" y2="12"/></svg></div>
-          <h3>Scattered Tools</h3>
-          <p>Traders juggle between chat apps, trading platforms, and research tools</p>
+        <div class="glow-card problem-card stagger-child">
+          <div class="icon-box pink"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <h3>Scattered Tools</h3><p>Traders juggle between chat apps, trading platforms, and research tools</p>
         </div>
-        <div class="problem-card stagger-child">
-          <div class="icon-wrap icon-amber"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/></svg></div>
-          <h3>No Social Layer</h3>
-          <p>Trading alone is boring. There's no way to share wins or learn from peers</p>
+        <div class="glow-card problem-card stagger-child">
+          <div class="icon-box amber"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/></svg></div>
+          <h3>No Social Layer</h3><p>Trading alone is boring. There's no way to share wins or learn from peers</p>
         </div>
-        <div class="problem-card stagger-child">
-          <div class="icon-wrap icon-red"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div>
-          <h3>High Barriers</h3>
-          <p>Real trading requires capital and experience. Beginners get burned fast</p>
+        <div class="glow-card problem-card stagger-child">
+          <div class="icon-box pink"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div>
+          <h3>High Barriers</h3><p>Real trading requires capital and experience. Beginners get burned fast</p>
         </div>
       </div>
     </div>
@@ -633,35 +501,27 @@
   <!-- SOLUTION -->
   <section class="solution">
     <div class="container">
-      <div class="section-header reveal">
-        <p class="section-label">The Solution</p>
-        <h2 class="section-title">One App. Everything You Need.</h2>
-        <p class="section-subtitle">Quro brings chat, trading, and competition into a single seamless experience</p>
-      </div>
+      <div class="section-header reveal"><p class="section-label">The Solution</p><h2 class="section-title">One App. Everything You Need.</h2><p class="section-subtitle">Quro brings chat, trading, and competition into a single seamless experience</p></div>
       <div class="solution-highlights">
         <div class="solution-item stagger-child">
-          <div class="icon-wrap icon-green"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-          <h3>Chat while you trade</h3>
-          <p>Real-time messaging with your trading community</p>
+          <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Chat while you trade</h3><p>Real-time messaging with your community</p>
         </div>
         <div class="solution-item stagger-child">
-          <div class="icon-wrap icon-blue"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-          <h3>Track markets in real-time</h3>
-          <p>Live NSE prices, charts, and market data</p>
+          <div class="icon-box blue"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <h3>Track markets in real-time</h3><p>Live NSE prices, charts, and indices</p>
         </div>
         <div class="solution-item stagger-child">
-          <div class="icon-wrap icon-purple"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
-          <h3>Compete on leaderboards</h3>
-          <p>Weekly rankings, badges, and bragging rights</p>
+          <div class="icon-box purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+          <h3>Compete on leaderboards</h3><p>Weekly rankings, badges, and bragging rights</p>
         </div>
       </div>
       <div class="gradient-divider reveal"></div>
-      <!-- Stats -->
       <div class="stats-row reveal">
-        <div class="stat-item"><div class="stat-num" data-target="50">0</div><div class="stat-label">NSE Stocks</div></div>
-        <div class="stat-item"><div class="stat-num" data-target="10">0</div><div class="stat-label">Lakh Virtual Cash</div></div>
-        <div class="stat-item"><div class="stat-num" data-target="3">0</div><div class="stat-label">Second Refresh</div></div>
-        <div class="stat-item"><div class="stat-num" data-target="0">0</div><div class="stat-label">Cost</div></div>
+        <div class="stat-item"><div class="stat-num" data-target="50" data-suffix="+">0</div><div class="stat-label">NSE Stocks</div></div>
+        <div class="stat-item"><div class="stat-num" data-target="10" data-suffix="L">0</div><div class="stat-label">Virtual Cash</div></div>
+        <div class="stat-item"><div class="stat-num" data-target="3" data-suffix="s">0</div><div class="stat-label">Price Refresh</div></div>
+        <div class="stat-item"><div class="stat-num" data-target="0" data-suffix="Free">0</div><div class="stat-label">Forever</div></div>
       </div>
     </div>
   </section>
@@ -669,40 +529,31 @@
   <!-- FEATURES -->
   <section class="features" id="features">
     <div class="container">
-      <div class="section-header reveal">
-        <p class="section-label">Features</p>
-        <h2 class="section-title">Packed with Features</h2>
-      </div>
+      <div class="section-header reveal"><p class="section-label">Features</p><h2 class="section-title">Packed with Features</h2></div>
       <div class="features-grid">
-        <div class="feature-card stagger-child">
-          <div class="icon-wrap icon-green"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-          <h3>Real-Time Chat</h3>
-          <p>Discord-style servers, channels, and DMs. Chat with your trading community.</p>
+        <div class="glow-card feature-card stagger-child">
+          <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Real-Time Chat</h3><p>Discord-style servers, channels, and DMs. Chat with your trading community.</p>
         </div>
-        <div class="feature-card stagger-child">
-          <div class="icon-wrap icon-blue"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-          <h3>Paper Trading</h3>
-          <p>Practice with &#8377;10L virtual cash. Trade 50 NSE stocks with zero risk.</p>
+        <div class="glow-card feature-card stagger-child">
+          <div class="icon-box blue"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <h3>Paper Trading</h3><p>Practice with &#8377;10L virtual cash. Trade 50 NSE stocks with zero risk.</p>
         </div>
-        <div class="feature-card stagger-child">
-          <div class="icon-wrap icon-purple"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
-          <h3>Leaderboards</h3>
-          <p>Weekly rankings. See who's the best trader. FLIP animations on rank changes.</p>
+        <div class="glow-card feature-card stagger-child">
+          <div class="icon-box purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+          <h3>Leaderboards</h3><p>Weekly rankings. See who's the best trader. FLIP animations on rank changes.</p>
         </div>
-        <div class="feature-card stagger-child">
-          <div class="icon-wrap icon-blue"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-          <h3>Trading Profile</h3>
-          <p>Your portfolio IS your identity. Share your P&amp;L, win rate, and rank badge.</p>
+        <div class="glow-card feature-card stagger-child">
+          <div class="icon-box blue"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <h3>Trading Profile</h3><p>Your portfolio IS your identity. Share your P&amp;L, win rate, and rank badge.</p>
         </div>
-        <div class="feature-card stagger-child">
-          <div class="icon-wrap icon-green"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-          <h3>Live Market Data</h3>
-          <p>Real-time NSE stock prices, candlestick charts, and market indices.</p>
+        <div class="glow-card feature-card stagger-child">
+          <div class="icon-box green"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <h3>Live Market Data</h3><p>Real-time NSE stock prices, candlestick charts, and market indices.</p>
         </div>
-        <div class="feature-card stagger-child">
-          <div class="icon-wrap icon-blue"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-          <h3>Blazing Fast</h3>
-          <p>Built with vanilla JS. No frameworks. Instant load times on any device.</p>
+        <div class="glow-card feature-card stagger-child">
+          <div class="icon-box purple"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <h3>Blazing Fast</h3><p>Built with vanilla JS. No frameworks. Instant load times on any device.</p>
         </div>
       </div>
     </div>
@@ -711,49 +562,32 @@
   <!-- DEMO -->
   <section class="demo">
     <div class="container">
-      <div class="section-header reveal">
-        <p class="section-label">Preview</p>
-        <h2 class="section-title">See Quro in Action</h2>
-      </div>
+      <div class="section-header reveal"><p class="section-label">Preview</p><h2 class="section-title">See Quro in Action</h2></div>
       <div class="demo-grid">
         <div class="demo-frame stagger-child">
           <div class="demo-title-bar"><div class="dot"></div> Chat</div>
           <div class="demo-body">
-            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--green)"></div><div><div class="demo-chat-name">Arjun</div><div class="demo-chat-bubble">NIFTY broke 22k! Anyone else riding this?</div></div></div>
-            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--blue)"></div><div><div class="demo-chat-name">Priya</div><div class="demo-chat-bubble">Yep, long on HDFCBANK since morning. Up 2.3%</div></div></div>
-            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--purple)"></div><div><div class="demo-chat-name">Rahul</div><div class="demo-chat-bubble">Check leaderboard - Arjun is killing it!</div></div></div>
-            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--green)"></div><div><div class="demo-chat-name">Arjun</div><div class="demo-chat-bubble">Target is #1 by Friday.</div></div></div>
+            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--green)"></div><div><div class="demo-chat-name g">Arjun</div><div class="demo-chat-bubble">NIFTY broke 22k! Anyone riding this?</div></div></div>
+            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--blue)"></div><div><div class="demo-chat-name b">Priya</div><div class="demo-chat-bubble">Long HDFCBANK since morning. Up 2.3%</div></div></div>
+            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--purple)"></div><div><div class="demo-chat-name p">Rahul</div><div class="demo-chat-bubble">Check leaderboard — Arjun is killing it!</div></div></div>
+            <div class="demo-chat-msg"><div class="demo-chat-avatar" style="background:var(--green)"></div><div><div class="demo-chat-name g">Arjun</div><div class="demo-chat-bubble">Target is #1 by Friday.</div></div></div>
           </div>
         </div>
         <div class="demo-frame stagger-child">
           <div class="demo-title-bar"><div class="dot"></div> Trading</div>
           <div class="demo-body">
-            <div class="demo-candle-row">
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:18px"></div><div class="demo-candle-body green" style="height:30px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:12px"></div><div class="demo-candle-body red" style="height:22px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:20px"></div><div class="demo-candle-body green" style="height:40px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:8px"></div><div class="demo-candle-body red" style="height:18px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:15px"></div><div class="demo-candle-body green" style="height:35px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:22px"></div><div class="demo-candle-body green" style="height:50px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:10px"></div><div class="demo-candle-body red" style="height:25px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:16px"></div><div class="demo-candle-body green" style="height:45px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:14px"></div><div class="demo-candle-body green" style="height:38px"></div></div>
-              <div class="demo-candle"><div class="demo-candle-wick" style="height:18px"></div><div class="demo-candle-body green" style="height:55px"></div></div>
-            </div>
-            <div class="demo-stock-info">
-              <span class="demo-stock-name">RELIANCE</span>
-              <span class="demo-stock-price">&#8377;2,487.50 +1.8%</span>
-            </div>
+            <div class="demo-candle-row" id="candleRow"></div>
+            <div class="demo-stock-info"><span class="demo-stock-name">RELIANCE</span><span class="demo-stock-price" id="demoPrice">&#8377;2,487.50 +1.8%</span></div>
           </div>
         </div>
         <div class="demo-frame stagger-child">
           <div class="demo-title-bar"><div class="dot"></div> Leaderboard</div>
           <div class="demo-body">
-            <div class="demo-rank-row"><span class="demo-rank-num">1</span><div class="demo-rank-avatar" style="background:var(--green)"></div><span class="demo-rank-name">Arjun_trades</span><span class="demo-rank-pnl positive">+&#8377;45,200</span></div>
-            <div class="demo-rank-row"><span class="demo-rank-num">2</span><div class="demo-rank-avatar" style="background:var(--blue)"></div><span class="demo-rank-name">PriyaInvests</span><span class="demo-rank-pnl positive">+&#8377;38,750</span></div>
-            <div class="demo-rank-row"><span class="demo-rank-num">3</span><div class="demo-rank-avatar" style="background:var(--purple)"></div><span class="demo-rank-name">RahulNSE</span><span class="demo-rank-pnl positive">+&#8377;31,400</span></div>
-            <div class="demo-rank-row"><span class="demo-rank-num">4</span><div class="demo-rank-avatar" style="background:#f59e0b"></div><span class="demo-rank-name">MeghaBull</span><span class="demo-rank-pnl positive">+&#8377;28,100</span></div>
-            <div class="demo-rank-row"><span class="demo-rank-num">5</span><div class="demo-rank-avatar" style="background:#ef4444"></div><span class="demo-rank-name">VikramFx</span><span class="demo-rank-pnl positive">+&#8377;22,800</span></div>
+            <div class="demo-rank-row"><span class="demo-rank-num">1</span><div class="demo-rank-avatar" style="background:var(--green)"></div><span class="demo-rank-name">Arjun_trades</span><span class="demo-rank-pnl">+&#8377;45,200</span></div>
+            <div class="demo-rank-row"><span class="demo-rank-num">2</span><div class="demo-rank-avatar" style="background:var(--blue)"></div><span class="demo-rank-name">PriyaInvests</span><span class="demo-rank-pnl">+&#8377;38,750</span></div>
+            <div class="demo-rank-row"><span class="demo-rank-num">3</span><div class="demo-rank-avatar" style="background:var(--purple)"></div><span class="demo-rank-name">RahulNSE</span><span class="demo-rank-pnl">+&#8377;31,400</span></div>
+            <div class="demo-rank-row"><span class="demo-rank-num">4</span><div class="demo-rank-avatar" style="background:#f59e0b"></div><span class="demo-rank-name">MeghaBull</span><span class="demo-rank-pnl">+&#8377;28,100</span></div>
+            <div class="demo-rank-row"><span class="demo-rank-num">5</span><div class="demo-rank-avatar" style="background:var(--pink)"></div><span class="demo-rank-name">VikramFx</span><span class="demo-rank-pnl">+&#8377;22,800</span></div>
           </div>
         </div>
       </div>
@@ -763,25 +597,19 @@
   <!-- WHY QURO -->
   <section class="why" id="why">
     <div class="container">
-      <div class="section-header reveal">
-        <p class="section-label">Why Quro</p>
-        <h2 class="section-title">Built for the Next Generation of Traders</h2>
-      </div>
+      <div class="section-header reveal"><p class="section-label">Why Quro</p><h2 class="section-title">Built for the Next Generation</h2></div>
       <div class="why-grid">
-        <div class="why-item stagger-child">
-          <div class="icon-wrap icon-green"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-          <h3>Learn by Doing</h3>
-          <p>No tutorials. No courses. Just jump in and trade.</p>
+        <div class="glow-card why-card stagger-child">
+          <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+          <h3>Learn by Doing</h3><p>No tutorials. No courses. Just jump in and trade.</p>
         </div>
-        <div class="why-item stagger-child">
-          <div class="icon-wrap icon-blue"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <h3>Social &amp; Competitive</h3>
-          <p>Trading is more fun with friends. Compete, share, and grow together.</p>
+        <div class="glow-card why-card stagger-child">
+          <div class="icon-box blue"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Social &amp; Competitive</h3><p>Trading is more fun with friends. Compete, share, and grow together.</p>
         </div>
-        <div class="why-item stagger-child">
-          <div class="icon-wrap icon-purple"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
-          <h3>Zero to Trading in Seconds</h3>
-          <p>No sign-up hassle. No deposits. Start trading instantly.</p>
+        <div class="glow-card why-card stagger-child">
+          <div class="icon-box purple"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <h3>Zero to Trading in Seconds</h3><p>No sign-up hassle. No deposits. Start trading instantly.</p>
         </div>
       </div>
     </div>
@@ -790,17 +618,9 @@
   <!-- TECH -->
   <section class="tech" id="tech">
     <div class="container">
-      <div class="section-header reveal">
-        <p class="section-label">Under the Hood</p>
-        <h2 class="section-title">Built Different</h2>
-        <p class="section-subtitle">Modern web technologies. Zero compromises.</p>
-      </div>
+      <div class="section-header reveal"><p class="section-label">Under the Hood</p><h2 class="section-title">Built Different</h2><p class="section-subtitle">Modern web technologies. Zero compromises.</p></div>
       <div class="tech-badges reveal">
-        <span class="tech-badge">Vanilla JS</span>
-        <span class="tech-badge">Supabase</span>
-        <span class="tech-badge">Vercel</span>
-        <span class="tech-badge">Yahoo Finance API</span>
-        <span class="tech-badge">Web Components</span>
+        <span class="tech-badge">Vanilla JS</span><span class="tech-badge">Supabase</span><span class="tech-badge">Vercel</span><span class="tech-badge">Yahoo Finance API</span><span class="tech-badge">Web Components</span>
       </div>
     </div>
   </section>
@@ -810,124 +630,105 @@
     <div class="container">
       <h2 class="cta-title reveal">Start Trading with Your Friends</h2>
       <p class="cta-subtitle reveal">Join Quro — it's free, fast, and fun.</p>
-      <a href="https://quro-daily-9.vercel.app" class="btn btn-primary btn-cta reveal" target="_blank" rel="noopener">Launch Quro &rarr;</a>
+      <a href="https://quro-daily-9.vercel.app" class="btn btn-primary btn-cta reveal" target="_blank">Launch Quro &rarr;</a>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
       <div class="footer-left">&copy; 2025 Quro</div>
       <div class="footer-links">
-        <a href="https://github.com/Dynamox-DEV677/quro-chat" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://quro-daily-9.vercel.app" target="_blank" rel="noopener">App</a>
+        <a href="https://github.com/Dynamox-DEV677/quro-chat" target="_blank">GitHub</a>
+        <a href="https://quro-daily-9.vercel.app" target="_blank">App</a>
       </div>
     </div>
   </footer>
 
   <script>
+    // ─── Cursor glow follow ───
+    var glow=document.getElementById('cursorGlow');
+    var mx=0,my=0,gx=0,gy=0;
+    document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;});
+    (function glowLoop(){
+      gx+=(mx-gx)*0.08; gy+=(my-gy)*0.08;
+      glow.style.left=gx+'px'; glow.style.top=gy+'px';
+      requestAnimationFrame(glowLoop);
+    })();
+
     // ─── Particles ───
     (function(){
-      var c=document.getElementById('particles'),ctx=c.getContext('2d');
-      var w,h,pts=[];
-      function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
-      resize(); window.addEventListener('resize',resize);
-      for(var i=0;i<60;i++){
-        pts.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+0.5,
-          dx:(Math.random()-0.5)*0.3,dy:(Math.random()-0.5)*0.3,
-          o:Math.random()*0.4+0.1});
-      }
-      function draw(){
+      var c=document.getElementById('particles'),ctx=c.getContext('2d'),w,h,pts=[];
+      function resize(){w=c.width=innerWidth;h=c.height=innerHeight;}
+      resize();addEventListener('resize',resize);
+      for(var i=0;i<80;i++)pts.push({x:Math.random()*2000,y:Math.random()*2000,r:Math.random()*1.2+0.3,dx:(Math.random()-0.5)*0.25,dy:(Math.random()-0.5)*0.25,o:Math.random()*0.35+0.05});
+      (function draw(){
         ctx.clearRect(0,0,w,h);
         for(var i=0;i<pts.length;i++){
-          var p=pts[i];
-          p.x+=p.dx;p.y+=p.dy;
-          if(p.x<0)p.x=w;if(p.x>w)p.x=0;
-          if(p.y<0)p.y=h;if(p.y>h)p.y=0;
-          ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          ctx.fillStyle='rgba(0,229,155,'+p.o+')';ctx.fill();
+          var p=pts[i];p.x+=p.dx;p.y+=p.dy;
+          if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;
+          ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);ctx.fillStyle='rgba(0,245,160,'+p.o+')';ctx.fill();
         }
-        // Connect nearby particles
-        for(var i=0;i<pts.length;i++){
-          for(var j=i+1;j<pts.length;j++){
-            var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
-            var d=Math.sqrt(dx*dx+dy*dy);
-            if(d<120){
-              ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);
-              ctx.lineTo(pts[j].x,pts[j].y);
-              ctx.strokeStyle='rgba(0,229,155,'+(0.06*(1-d/120))+')';
-              ctx.lineWidth=0.5;ctx.stroke();
-            }
-          }
+        for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){
+          var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+          if(d<130){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(0,245,160,'+(0.05*(1-d/130))+')';ctx.lineWidth=0.5;ctx.stroke();}
         }
         requestAnimationFrame(draw);
+      })();
+    })();
+
+    // ─── Animated candles ───
+    (function(){
+      var row=document.getElementById('candleRow');if(!row)return;
+      function gen(){
+        row.innerHTML='';
+        for(var i=0;i<12;i++){
+          var up=Math.random()>0.38;
+          var wh=Math.floor(Math.random()*20+6);
+          var bh=Math.floor(Math.random()*45+10);
+          row.innerHTML+='<div class="demo-candle"><div class="demo-candle-wick" style="height:'+wh+'px"></div><div class="demo-candle-body '+(up?'green':'red')+'" style="height:'+bh+'px"></div></div>';
+        }
       }
-      draw();
+      gen();setInterval(gen,3000);
     })();
 
     // ─── Navbar scroll ───
-    var navbar=document.getElementById('navbar');
-    window.addEventListener('scroll',function(){
-      navbar.classList.toggle('scrolled',window.scrollY>50);
-    });
+    addEventListener('scroll',function(){document.getElementById('navbar').classList.toggle('scrolled',scrollY>50);});
 
     // ─── Mobile menu ───
-    var hamburgerBtn=document.getElementById('hamburgerBtn');
-    var mobileMenu=document.getElementById('mobileMenu');
-    var mobileClose=document.getElementById('mobileClose');
-    hamburgerBtn.addEventListener('click',function(){mobileMenu.classList.add('active');document.body.style.overflow='hidden';});
-    function closeMobile(){mobileMenu.classList.remove('active');document.body.style.overflow='';}
-    mobileClose.addEventListener('click',closeMobile);
+    document.getElementById('hamburgerBtn').addEventListener('click',function(){document.getElementById('mobileMenu').classList.add('active');document.body.style.overflow='hidden';});
+    function closeMobile(){document.getElementById('mobileMenu').classList.remove('active');document.body.style.overflow='';}
+    document.getElementById('mobileClose').addEventListener('click',closeMobile);
     document.querySelectorAll('.mobile-link').forEach(function(l){l.addEventListener('click',closeMobile);});
 
     // ─── Scroll reveal ───
-    var revealObs=new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}
-      });
-    },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
-    document.querySelectorAll('.reveal').forEach(function(el){revealObs.observe(el);});
+    var rObs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('visible');rObs.unobserve(x.target);}});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){rObs.observe(el);});
 
-    // ─── Stagger children ───
-    var staggerObs=new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if(e.isIntersecting){
-          var parent=e.target.parentElement;
-          var children=parent.querySelectorAll('.stagger-child');
-          children.forEach(function(child,i){
-            setTimeout(function(){child.classList.add('visible');},i*120);
-          });
-          staggerObs.unobserve(e.target);
-        }
-      });
-    },{threshold:0.1,rootMargin:'0px 0px -20px 0px'});
+    // ─── Stagger ───
+    var sObs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){var ch=x.target.parentElement.querySelectorAll('.stagger-child');ch.forEach(function(c,i){setTimeout(function(){c.classList.add('visible');},i*130);});sObs.unobserve(x.target);}});},{threshold:0.08});
     var seen=new Set();
-    document.querySelectorAll('.stagger-child').forEach(function(el){
-      var parent=el.parentElement;
-      if(!seen.has(parent)){seen.add(parent);staggerObs.observe(el);}
-    });
+    document.querySelectorAll('.stagger-child').forEach(function(el){var p=el.parentElement;if(!seen.has(p)){seen.add(p);sObs.observe(el);}});
 
-    // ─── Counter animation ───
-    var counterObs=new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if(e.isIntersecting){
-          var el=e.target;
-          var target=parseInt(el.getAttribute('data-target'));
-          var suffix=target===0?'Free':target===10?'L':'s';
-          if(target===50)suffix='+';
-          if(target===0){el.textContent='Free';counterObs.unobserve(el);return;}
-          var current=0;
-          var step=Math.max(1,Math.floor(target/30));
-          var timer=setInterval(function(){
-            current+=step;
-            if(current>=target){current=target;clearInterval(timer);}
-            el.textContent=current+(current===target?suffix:'');
-          },40);
-          counterObs.unobserve(el);
-        }
+    // ─── Counter ───
+    var cObs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){
+      var el=x.target,t=+el.dataset.target,s=el.dataset.suffix||'';
+      if(t===0){el.textContent=s;cObs.unobserve(el);return;}
+      var cur=0,step=Math.max(1,Math.floor(t/25));
+      var iv=setInterval(function(){cur+=step;if(cur>=t){cur=t;clearInterval(iv);}el.textContent=cur+s;},35);
+      cObs.unobserve(el);
+    }});},{threshold:0.5});
+    document.querySelectorAll('.stat-num').forEach(function(el){cObs.observe(el);});
+
+    // ─── 3D tilt on glow-cards ───
+    document.querySelectorAll('.glow-card').forEach(function(card){
+      card.addEventListener('mousemove',function(e){
+        var r=card.getBoundingClientRect();
+        var x=(e.clientX-r.left)/r.width-0.5;
+        var y=(e.clientY-r.top)/r.height-0.5;
+        card.style.transform='translateY(-8px) perspective(800px) rotateX('+(-y*6)+'deg) rotateY('+(x*6)+'deg)';
       });
-    },{threshold:0.5});
-    document.querySelectorAll('.stat-num').forEach(function(el){counterObs.observe(el);});
+      card.addEventListener('mouseleave',function(){card.style.transform='';});
+    });
   </script>
 </body>
 </html>
