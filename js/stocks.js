@@ -372,6 +372,8 @@ function _syncTradingPrices(){
       }
     }
   });
+  // Mark real update so trading ticker knows live data is flowing
+  if(typeof window._trdMarkRealUpdate==='function') window._trdMarkRealUpdate();
 }
 
 // ─── Public API (trading.js calls these) ───

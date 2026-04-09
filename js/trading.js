@@ -19,9 +19,13 @@ var trdWlFilter = '';
 var _pendingOrder = null;
 var _portfolioLoaded = false;
 
+var _lastRealUpdate = 0; // timestamp of last real price sync from stocks.js
+
 // Expose for cross-module access (stocks.js live refresh)
 window.trdPrices = trdPrices;
 window.trdHistory = trdHistory;
+// stocks.js calls this on every successful sync — tracks liveness
+window._trdMarkRealUpdate = function(){ _lastRealUpdate = Date.now(); };
 
 // ─── Init prices — use base as placeholder until real data arrives ───
 export function trd_initPrices() {
@@ -33,11 +37,16 @@ export function trd_initPrices() {
   });
 }
 
-// ─── Live ticker — UI refresh only, no fake price mutations ───
-// Real prices come from stocks.js stk_fetchQuotes() every 3s
+// ─── Live ticker — UI refresh + simulated fallback when live feed drops ───
+// Real prices come from stocks.js stk_fetchQuotes() every 3s.
+// If no real update for 6s+, simulate tiny price jitter so trading stays alive.
 export function trd_startTicker() {
   trd_initPrices();
   trdTickerInt = setInterval(function() {
+    // Fallback: simulate small price movements if live feed is stale (>6s)
+    if (Date.now() - _lastRealUpdate > 6000) {
+      _trdSimulatePrices();
+    }
     trd_renderWatchlist();
     if (trdSelected) {
       trd_updateStockHd(trdSelected);
@@ -48,6 +57,23 @@ export function trd_startTicker() {
     trd_updateSummary();
     if (trdBottomMode === 'hold') trd_renderHoldingsLive();
   }, 1200);
+}
+
+// Simulate tiny random price jitter on all stocks (±0.15% max)
+function _trdSimulatePrices() {
+  STK_STOCKS.forEach(function(stk) {
+    var p = trdPrices[stk.s];
+    if (!p || !p.price) return;
+    var drift = p.price * (Math.random() - 0.48) * 0.003;
+    p.price = Math.max(p.base * 0.5, p.price + drift);
+    // Push to history for chart
+    if (!trdHistory[stk.s]) trdHistory[stk.s] = [];
+    var hist = trdHistory[stk.s];
+    if (hist.length === 0 || hist[hist.length - 1] !== p.price) {
+      hist.push(p.price);
+      if (hist.length > 80) hist.shift();
+    }
+  });
 }
 
 export function trd_stopTicker() {
