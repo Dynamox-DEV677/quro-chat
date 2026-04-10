@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://huddle-pro-8.vercel.app/sitemap.xml
+Sitemap: https://quro-9.com/sitemap.xml
