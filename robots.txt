@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 Sitemap: https://quro-9.com/sitemap.xml
+Host: https://quro-9.com
