@@ -7,7 +7,7 @@ import {
   useVideoConfig,
 } from 'remotion';
 
-// 5s — Final CTA: "Join Quro" + quro-9.site
+// 5s — Final CTA: "Join Quro" + quro-9.com
 export const CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -126,7 +126,7 @@ export const CTA: React.FC = () => {
           transform: `translateY(${(1 - urlOpacity) * 20}px)`,
         }}
       >
-        quro-9.site
+        quro-9.com
       </div>
     </AbsoluteFill>
   );
