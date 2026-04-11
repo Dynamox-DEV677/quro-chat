@@ -1,0 +1,25 @@
+{
+  "name": "quro-promo",
+  "version": "1.0.0",
+  "description": "Quro — 30s promo video built with Remotion",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render QuroPromo out/quro-promo.mp4",
+    "build-hq": "remotion render QuroPromo out/quro-promo.mp4 --crf 16 --pixel-format yuv420p",
+    "build-gif": "remotion render QuroPromo out/quro-promo.gif --codec gif",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.200",
+    "@remotion/bundler": "4.0.200",
+    "@remotion/renderer": "4.0.200",
+    "remotion": "4.0.200",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "typescript": "5.4.5"
+  }
+}
