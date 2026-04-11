@@ -307,9 +307,11 @@ function _pollTick(){
   // ── STEP 2: check if any page needs price data (via DOM, not flags) ──
   var sp=document.getElementById('stocksPage');
   var tp=document.getElementById('tradingPage');
+  var lp=document.getElementById('leaderPage');
   var stocksOpen=sp&&sp.classList.contains('open');
   var tradingOpen=tp&&tp.classList.contains('open');
-  if(!stocksOpen&&!tradingOpen)return;// nobody listening, skip
+  var leaderOpen=lp&&lp.classList.contains('open');
+  if(!stocksOpen&&!tradingOpen&&!leaderOpen)return;// nobody listening, skip
 
   _pollCycle++;
 

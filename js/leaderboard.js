@@ -2,6 +2,7 @@
 import { sb } from './config.js';
 import { ME, appMode } from './state.js';
 import { escH, stk_fmtIN } from './utils.js';
+import { STK_STOCKS, stk_startLiveRefresh } from './stocks.js';
 
 var _lpPeriod = 'weekly'; // 'weekly' | 'alltime'
 var _lpPrevRanks = {}; // userId -> previous rank (for rank change indicators)
@@ -134,6 +135,17 @@ function _stopLpStars() {
   }
 }
 
+// ─── Seed window.trdPrices from stock base prices so leaderboard math works
+// even if user never opened the trading page (otherwise all pnl = 0) ───
+function _seedPricesFromBase() {
+  if (!window.trdPrices) window.trdPrices = {};
+  STK_STOCKS.forEach(function(stk) {
+    if (!window.trdPrices[stk.s]) {
+      window.trdPrices[stk.s] = { price: stk.b, prev: stk.b, name: stk.n, sec: stk.sec, base: stk.b };
+    }
+  });
+}
+
 export function openLeaderPage() {
   document.getElementById('leaderPage').classList.add('open');
   var srvBtn = document.getElementById('srvLeaderBtn');
@@ -145,6 +157,10 @@ export function openLeaderPage() {
   if (typeof window.syncMobileNav === 'function') window.syncMobileNav('leaderboard');
   _startLpStars();
   _lpFirstRender = true;
+  // Make sure trdPrices is populated so portfolio values render correctly
+  _seedPricesFromBase();
+  // Start the live price feed so portfolios reflect real market movement
+  try { stk_startLiveRefresh(); } catch(e) {}
   loadLeaderboard();
   // Auto-refresh every 8s for live competition feel
   if (_lpRefreshInt) clearInterval(_lpRefreshInt);
@@ -316,11 +332,17 @@ export async function loadLeaderboard() {
     // ── Sort by % return (descending) ──
     entries.sort(function(a, b) { return b.pctReturn - a.pctReturn; });
 
-    // For weekly: filter out users with 0 trades this week (they didn't participate)
+    // For weekly: prefer users who've actually traded this week, but fall back
+    // to full list if the RLS-restricted trade count is unreliable (stock_transactions
+    // SELECT may be locked to the current user, so other users show 0 trades).
     var displayEntries = entries;
     if (_lpPeriod === 'weekly') {
-      var active = entries.filter(function(e) { return e.trades > 0 || e.pnl !== 0; });
-      if (active.length > 0) displayEntries = active;
+      var hasAnyTrades = entries.some(function(e) { return e.trades > 0; });
+      if (hasAnyTrades) {
+        var active = entries.filter(function(e) { return e.trades > 0 || e.pnl !== 0; });
+        if (active.length > 0) displayEntries = active;
+      }
+      // else: RLS is hiding other users' trades — show everyone with a portfolio
     }
 
     if (!displayEntries.length) {
