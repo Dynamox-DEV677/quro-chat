@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Quro DM Mock</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#38a169;--bg:#09090b;--bg2:#111113;--bg3:#16161a;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);
+  --text:#f0f0f2;--text-secondary:rgba(255,255,255,.6);--muted:rgba(255,255,255,.34);--text-faint:rgba(255,255,255,.16);
+  --up:#3da87a;--up-dim:rgba(61,168,122,.12);--down:#e05050;--down-dim:rgba(224,80,80,.12);
+  --surface-0:rgba(255,255,255,.02);--surface-1:rgba(255,255,255,.035);
+  --font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:22px;overflow:hidden}
+.app{display:flex;height:100%;width:100%}
+.sidebar{width:90px;background:var(--bg);border-right:1px solid var(--border2);display:flex;flex-direction:column;align-items:center;padding:24px 0;gap:16px}
+.sb-icon{width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;cursor:pointer}
+.sb-icon.active{border:2px solid var(--primary);background:rgba(56,161,105,.08)}
+.sb-icon:not(.active){background:var(--surface-1);color:var(--text-secondary);border:2px solid transparent}
+.sb-sep{width:40px;height:2px;background:var(--border);border-radius:1px}
+
+.dm-list{width:330px;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden}
+.dl-header{padding:24px 24px 16px;display:flex;align-items:center;justify-content:space-between}
+.dl-title{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.dl-btn{width:36px;height:36px;border-radius:10px;background:var(--surface-1);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:20px}
+.dl-search{margin:0 16px 12px;padding:12px 18px;background:var(--surface-0);border:1px solid var(--border);border-radius:14px;color:var(--muted);font-size:18px;font-family:var(--font);outline:none}
+.dm-item{display:flex;align-items:center;gap:14px;padding:14px 24px;cursor:pointer;border-radius:10px;margin:2px 10px}
+.dm-item.active{background:rgba(56,161,105,.08)}
+.dm-item:not(.active):hover{background:var(--surface-0)}
+.dm-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex-shrink:0;position:relative}
+.dm-dot{position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;border:3px solid var(--bg2)}
+.dm-dot.on{background:#3da87a}
+.dm-dot.idle{background:#d69e2e}
+.dm-dot.off{background:#555}
+.dm-info{flex:1;min-width:0}
+.dm-name{font-size:20px;font-weight:600;color:var(--text)}
+.dm-last{font-size:16px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-time{font-size:14px;color:var(--text-faint);flex-shrink:0}
+.dm-unread{margin-left:auto;background:var(--primary);color:#fff;font-size:14px;font-weight:700;padding:2px 10px;border-radius:99px;min-width:28px;text-align:center}
+
+.chat-area{flex:1;display:flex;flex-direction:column;background:var(--bg)}
+.chat-top{padding:20px 28px;background:var(--bg2);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.ct-left{display:flex;align-items:center;gap:16px}
+.ct-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;position:relative}
+.ct-dot{position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;border:3px solid var(--bg2);background:#3da87a}
+.ct-name{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.ct-status{font-size:16px;color:var(--up)}
+.ct-actions{display:flex;gap:4px;background:var(--surface-0);border:1px solid var(--border);border-radius:14px;padding:4px}
+.ct-btn{width:44px;height:44px;border-radius:10px;background:transparent;border:none;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:22px}
+
+/* DM banner */
+.dm-banner{display:flex;flex-direction:column;align-items:center;padding:40px 24px 24px;text-align:center;border-bottom:1px solid var(--border2);margin-bottom:12px}
+.banner-av{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:32px;margin-bottom:16px;border:2px solid var(--border)}
+.banner-name{font-size:28px;font-weight:700;margin-bottom:6px}
+.banner-sub{font-size:18px;color:var(--muted)}
+
+.msgs-wrap{flex:1;overflow-y:auto;padding:0 28px 20px;display:flex;flex-direction:column;gap:4px}
+.msg{display:flex;gap:16px;padding:12px 16px;border-radius:12px}
+.msg-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;border:2px solid var(--border)}
+.msg-body{flex:1;min-width:0}
+.msg-meta{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.msg-author{font-weight:600;font-size:20px;color:var(--text-secondary)}
+.msg-time{font-size:15px;color:var(--text-faint)}
+.msg-text{font-size:22px;line-height:1.55;color:var(--text);padding:6px 16px;border-left:3px solid var(--border2);border-radius:0 8px 8px 0}
+.msg-own .msg-text{border-left-color:rgba(56,161,105,.12)}
+.chat-stock-sym{color:var(--primary);font-weight:600;background:var(--up-dim);padding:2px 8px;border-radius:6px}
+
+.input-area{padding:16px 28px 24px;background:var(--bg2);border-top:1px solid var(--border2)}
+.input-row{display:flex;gap:10px;align-items:flex-end}
+.msg-input{flex:1;padding:16px 24px;background:var(--surface-0);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:22px;font-family:var(--font);outline:none;min-height:56px}
+.msg-input::placeholder{color:var(--text-faint)}
+.tool-btn{width:52px;height:52px;border-radius:14px;background:var(--surface-0);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.send-btn{width:56px;height:56px;border-radius:14px;background:var(--primary);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 8px rgba(56,161,105,.3)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sb-icon active" style="background:linear-gradient(135deg,rgba(56,161,105,.25),rgba(56,161,105,.08))">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3da87a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-icon" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">T</div>
+    <div class="sb-icon" style="background:linear-gradient(135deg,#A855F7,#EC4899)">N</div>
+  </div>
+
+  <div class="dm-list">
+    <div class="dl-header">
+      <div class="dl-title">Messages</div>
+      <div class="dl-btn">✏️</div>
+    </div>
+    <input class="dl-search" placeholder="🔍  Search people" readonly>
+    <div class="dm-item active">
+      <div class="dm-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A<div class="dm-dot on"></div></div>
+      <div class="dm-info"><div class="dm-name">Arjun</div><div class="dm-last">Check $RELIANCE, breakout!</div></div>
+      <div class="dm-time">now</div>
+    </div>
+    <div class="dm-item">
+      <div class="dm-av" style="background:linear-gradient(135deg,#FFD93D,#FF9130)">R<div class="dm-dot on"></div></div>
+      <div class="dm-info"><div class="dm-name">Rahul</div><div class="dm-last">That trade was 🔥</div></div>
+      <div class="dm-time">2m</div>
+    </div>
+    <div class="dm-item">
+      <div class="dm-av" style="background:linear-gradient(135deg,#38bdf8,#22d3ee)">V<div class="dm-dot idle"></div></div>
+      <div class="dm-info"><div class="dm-name">Vikram</div><div class="dm-last">What's your stop-loss?</div></div>
+      <div class="dm-time">15m</div>
+    </div>
+    <div class="dm-item">
+      <div class="dm-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">S<div class="dm-dot off"></div></div>
+      <div class="dm-info"><div class="dm-name">Sneha</div><div class="dm-last">GG on the leaderboard</div></div>
+      <div class="dm-time">1h</div>
+    </div>
+    <div class="dm-item">
+      <div class="dm-av" style="background:linear-gradient(135deg,#f97316,#ef4444)">K<div class="dm-dot off"></div></div>
+      <div class="dm-info"><div class="dm-name">Karan</div><div class="dm-last">Tomorrow market open strategy?</div></div>
+      <div class="dm-time">3h</div>
+    </div>
+  </div>
+
+  <div class="chat-area">
+    <div class="chat-top">
+      <div class="ct-left">
+        <div class="ct-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A<div class="ct-dot"></div></div>
+        <div><div class="ct-name">Arjun</div><div class="ct-status">● Online</div></div>
+      </div>
+      <div class="ct-actions">
+        <div class="ct-btn">📞</div>
+        <div class="ct-btn">📹</div>
+        <div class="ct-btn">⋯</div>
+      </div>
+    </div>
+
+    <div class="msgs-wrap">
+      <div class="dm-banner">
+        <div class="banner-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="banner-name">Arjun</div>
+        <div class="banner-sub">This is the beginning of your DM history with Arjun</div>
+      </div>
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Arjun</span><span class="msg-time">10:12 AM</span></div>
+          <div class="msg-text">Yo, have you looked at <span class="chat-stock-sym">$RELIANCE</span> today?</div>
+        </div>
+      </div>
+      <div class="msg msg-own">
+        <div class="msg-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">P</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">You</span><span class="msg-time">10:14 AM</span></div>
+          <div class="msg-text">Not yet, what's happening?</div>
+        </div>
+      </div>
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Arjun</span><span class="msg-time">10:15 AM</span></div>
+          <div class="msg-text">Massive volume spike at 2,830 support. Looks like a breakout forming 🔥 RSI is at 65 and climbing</div>
+        </div>
+      </div>
+      <div class="msg msg-own">
+        <div class="msg-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">P</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">You</span><span class="msg-time">10:17 AM</span></div>
+          <div class="msg-text">Interesting... Let me pull up the chart. What's your target?</div>
+        </div>
+      </div>
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Arjun</span><span class="msg-time">10:18 AM</span></div>
+          <div class="msg-text">Target 2,900. Stop-loss at 2,810. Risk-reward is 3:1 💯</div>
+        </div>
+      </div>
+      <div class="msg msg-own">
+        <div class="msg-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">P</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">You</span><span class="msg-time">10:20 AM</span></div>
+          <div class="msg-text">Nice setup! Going in with 10 shares 🚀</div>
+        </div>
+      </div>
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Arjun</span><span class="msg-time">10:21 AM</span></div>
+          <div class="msg-text">Check <span class="chat-stock-sym">$RELIANCE</span>, breakout just happened! 📈</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <div class="tool-btn">📎</div>
+        <input class="msg-input" placeholder="Message Arjun" readonly>
+        <div class="tool-btn">😊</div>
+        <div class="send-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Quro Chat Mock</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#38a169;--primary-hover:#48bb78;--primary-dim:rgba(56,161,105,.12);
+  --bg:#09090b;--bg2:#111113;--bg3:#16161a;--bg4:#1c1c21;--bg5:#26262c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);--border-hover:rgba(255,255,255,.12);
+  --text:#f0f0f2;--text-secondary:rgba(255,255,255,.6);--muted:rgba(255,255,255,.34);--text-faint:rgba(255,255,255,.16);
+  --up:#3da87a;--up-dim:rgba(61,168,122,.12);--down:#e05050;--down-dim:rgba(224,80,80,.12);
+  --surface-0:rgba(255,255,255,.02);--surface-1:rgba(255,255,255,.035);--surface-hover:rgba(255,255,255,.045);
+  --font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:22px;overflow:hidden}
+
+.app{display:flex;height:100%;width:100%}
+
+/* Sidebar */
+.sidebar{width:90px;background:var(--bg);border-right:1px solid var(--border2);display:flex;flex-direction:column;align-items:center;padding:24px 0;gap:16px}
+.sb-icon{width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.sb-icon.active{border-color:var(--primary);background:var(--primary-dim)}
+.sb-icon:not(.active){background:var(--surface-1);color:var(--text-secondary)}
+.sb-sep{width:40px;height:2px;background:var(--border);border-radius:1px}
+
+/* Channel bar */
+.channel-bar{width:330px;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column}
+.cb-header{padding:24px 24px 16px;display:flex;align-items:center;justify-content:space-between}
+.cb-title{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.cb-add{width:36px;height:36px;border-radius:10px;background:var(--surface-1);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.ch-section{padding:8px 16px;font-size:16px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ch-item{display:flex;align-items:center;gap:14px;padding:12px 24px;cursor:pointer;border-radius:10px;margin:2px 10px;transition:background .15s}
+.ch-item:hover{background:var(--surface-hover)}
+.ch-item.active{background:var(--primary-dim)}
+.ch-hash{font-size:20px;color:var(--muted);font-weight:700;width:28px;text-align:center}
+.ch-item.active .ch-hash{color:var(--primary)}
+.ch-name{font-size:20px;font-weight:500;color:var(--text-secondary)}
+.ch-item.active .ch-name{color:var(--text);font-weight:600}
+.ch-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:14px;font-weight:700;padding:2px 10px;border-radius:99px;min-width:28px;text-align:center}
+.vc-item{display:flex;align-items:center;gap:14px;padding:12px 24px;margin:2px 10px;border-radius:10px;cursor:pointer}
+.vc-item:hover{background:var(--surface-hover)}
+.vc-icon{font-size:18px;color:var(--muted)}
+.vc-name{font-size:20px;font-weight:500;color:var(--text-secondary)}
+.vc-users{display:flex;gap:8px;margin-left:auto}
+.vc-dot{width:12px;height:12px;border-radius:50%;background:var(--up)}
+.dm-section{margin-top:auto;border-top:1px solid var(--border2);padding-top:16px}
+.dm-item{display:flex;align-items:center;gap:14px;padding:12px 24px;margin:2px 10px;border-radius:10px;cursor:pointer}
+.dm-item:hover{background:var(--surface-hover)}
+.dm-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;position:relative}
+.dm-dot{position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;border:3px solid var(--bg2)}
+.dm-dot.on{background:#3da87a}
+.dm-dot.idle{background:#d69e2e}
+.dm-dot.off{background:#555}
+.dm-info{flex:1;min-width:0}
+.dm-name{font-size:20px;font-weight:600;color:var(--text)}
+.dm-last{font-size:16px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Chat area */
+.chat-area{flex:1;display:flex;flex-direction:column;background:var(--bg);min-width:0}
+.chat-top{padding:20px 28px;background:var(--bg2);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.chat-title-area{display:flex;align-items:center;gap:16px}
+.chat-icon{width:48px;height:48px;border-radius:14px;background:var(--surface-1);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-secondary);font-weight:700}
+.chat-name{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.chat-desc{font-size:16px;color:var(--muted)}
+.top-actions{display:flex;gap:4px;background:var(--surface-0);border:1px solid var(--border);border-radius:14px;padding:4px}
+.top-btn{width:44px;height:44px;border-radius:10px;background:transparent;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px}
+
+/* Messages */
+.msgs-wrap{flex:1;overflow-y:auto;padding:20px 28px;display:flex;flex-direction:column;gap:4px}
+.msg{display:flex;gap:16px;padding:12px 16px;border-radius:12px}
+.msg-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex-shrink:0;border:2px solid var(--border)}
+.msg-body{flex:1;min-width:0}
+.msg-meta{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.msg-author{font-weight:600;font-size:20px;color:var(--text-secondary)}
+.msg-time{font-size:15px;color:var(--text-faint)}
+.msg-text{font-size:22px;line-height:1.55;color:var(--text);padding:6px 16px;border-left:3px solid var(--border2);border-radius:0 8px 8px 0}
+.msg-own .msg-text{border-left-color:var(--primary-dim)}
+.msg-reactions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.rxn{display:inline-flex;align-items:center;gap:4px;background:var(--surface-0);border:1px solid var(--border);border-radius:99px;padding:4px 12px;font-size:18px;color:var(--text-secondary)}
+.rxn.me{background:rgba(56,161,105,.06);border-color:rgba(56,161,105,.3)}
+
+/* Trade card in chat */
+.msg-trade{display:flex;align-items:center;gap:16px;padding:16px 20px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;margin-top:8px}
+.msg-trade.buy{border-left:4px solid var(--up)}
+.msg-trade.sell{border-left:4px solid var(--down)}
+.trade-badge{padding:6px 12px;border-radius:8px;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.trade-badge.buy{background:var(--up-dim);color:var(--up)}
+.trade-badge.sell{background:var(--down-dim);color:var(--down)}
+.trade-info{flex:1}
+.trade-sym{font-weight:700;font-size:20px;color:var(--text);letter-spacing:.03em}
+.trade-name{font-size:16px;color:var(--muted)}
+.trade-details{font-size:16px;color:var(--text-secondary);margin-top:2px}
+.trade-total{font-size:20px;font-weight:700;color:var(--text);text-align:right}
+
+/* Stock sym in chat */
+.chat-stock-sym{color:var(--primary);font-weight:600;background:var(--up-dim);padding:2px 8px;border-radius:6px;cursor:pointer}
+
+/* Input area */
+.input-area{padding:16px 28px 24px;background:var(--bg2);border-top:1px solid var(--border2)}
+.input-row{display:flex;gap:10px;align-items:flex-end}
+.msg-input{flex:1;padding:16px 24px;background:var(--surface-0);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:22px;font-family:var(--font);resize:none;outline:none;min-height:56px}
+.msg-input::placeholder{color:var(--text-faint)}
+.tool-btn{width:52px;height:52px;border-radius:14px;background:var(--surface-0);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;flex-shrink:0}
+.send-btn{width:56px;height:56px;border-radius:14px;background:var(--primary);border:none;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(56,161,105,.3)}
+
+/* Typing */
+.typing-bar{padding:4px 28px;font-size:16px;color:var(--muted);background:var(--bg2)}
+
+/* Members bar */
+.members-bar{width:280px;background:var(--bg2);border-left:1px solid var(--border2);padding:20px 16px;display:flex;flex-direction:column;gap:8px}
+.mb-title{font-size:16px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:8px 12px}
+.mb-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px}
+.mb-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.mb-name{font-size:18px;font-weight:500;color:var(--text-secondary)}
+.mb-role{font-size:14px;color:var(--muted)}
+.mb-status{margin-left:auto;width:10px;height:10px;border-radius:50%}
+.mb-status.on{background:#3da87a}
+.mb-status.idle{background:#d69e2e}
+.mb-status.off{background:#555}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Server sidebar -->
+  <div class="sidebar">
+    <div class="sb-icon active" style="background:linear-gradient(135deg,rgba(56,161,105,.25),rgba(56,161,105,.08))">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3da87a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-icon" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">T</div>
+    <div class="sb-icon" style="background:linear-gradient(135deg,#A855F7,#EC4899)">N</div>
+    <div class="sb-icon" style="background:linear-gradient(135deg,#FFD93D,#FF9130)">S</div>
+    <div class="sb-icon" style="background:var(--surface-1);color:var(--muted)">+</div>
+  </div>
+
+  <!-- Channel bar -->
+  <div class="channel-bar">
+    <div class="cb-header">
+      <div class="cb-title">Quro Trading</div>
+      <div class="cb-add">+</div>
+    </div>
+    <div class="ch-section">Text Channels</div>
+    <div class="ch-item active">
+      <div class="ch-hash">#</div>
+      <div class="ch-name">general</div>
+      <div class="ch-badge">3</div>
+    </div>
+    <div class="ch-item">
+      <div class="ch-hash">#</div>
+      <div class="ch-name">nifty-50</div>
+    </div>
+    <div class="ch-item">
+      <div class="ch-hash">#</div>
+      <div class="ch-name">options-talk</div>
+    </div>
+    <div class="ch-item">
+      <div class="ch-hash">#</div>
+      <div class="ch-name">market-news</div>
+    </div>
+    <div class="ch-section" style="margin-top:16px">Voice Channels</div>
+    <div class="vc-item">
+      <div class="vc-icon">🎙</div>
+      <div class="vc-name">Trading Floor</div>
+      <div class="vc-users"><div class="vc-dot"></div><div class="vc-dot"></div></div>
+    </div>
+    <div class="vc-item">
+      <div class="vc-icon">📹</div>
+      <div class="vc-name">Screen Share</div>
+    </div>
+    <div class="dm-section">
+      <div class="ch-section">Direct Messages</div>
+      <div class="dm-item">
+        <div class="dm-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">P
+          <div class="dm-dot on"></div>
+        </div>
+        <div class="dm-info">
+          <div class="dm-name">Priya</div>
+          <div class="dm-last">Check INFY charts 📈</div>
+        </div>
+      </div>
+      <div class="dm-item">
+        <div class="dm-av" style="background:linear-gradient(135deg,#FFD93D,#FF9130)">R
+          <div class="dm-dot idle"></div>
+        </div>
+        <div class="dm-info">
+          <div class="dm-name">Rahul</div>
+          <div class="dm-last">That trade was 🔥</div>
+        </div>
+      </div>
+      <div class="dm-item">
+        <div class="dm-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">S
+          <div class="dm-dot off"></div>
+        </div>
+        <div class="dm-info">
+          <div class="dm-name">Sneha</div>
+          <div class="dm-last">GG on the leaderboard</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chat-area">
+    <div class="chat-top">
+      <div class="chat-title-area">
+        <div class="chat-icon">#</div>
+        <div>
+          <div class="chat-name">general</div>
+          <div class="chat-desc">Chat about anything trading-related</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="top-btn">🔍</div>
+        <div class="top-btn">📌</div>
+        <div class="top-btn">👥</div>
+      </div>
+    </div>
+    <div class="msgs-wrap">
+      <!-- Message 1 -->
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Arjun</span><span class="msg-time">10:24 AM</span></div>
+          <div class="msg-text">Anyone watching <span class="chat-stock-sym">$INFY</span> today? Chart looks super clean after that breakout 👀</div>
+          <div class="msg-reactions">
+            <span class="rxn me">🚀 <span>3</span></span>
+            <span class="rxn">👀 <span>2</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Message 2 — trade card -->
+      <div class="msg msg-own">
+        <div class="msg-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">P</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Priya</span><span class="msg-time">10:26 AM</span></div>
+          <div class="msg-text">Just went long. Let's see 🤞</div>
+          <div class="msg-trade buy">
+            <div class="trade-badge buy">BUY</div>
+            <div class="trade-info">
+              <div class="trade-sym">INFY</div>
+              <div class="trade-name">Infosys Ltd</div>
+              <div class="trade-details">20 shares @ ₹1,468.75</div>
+            </div>
+            <div class="trade-total">₹29,375</div>
+          </div>
+        </div>
+      </div>
+      <!-- Message 3 -->
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#FFD93D,#FF9130)">R</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Rahul</span><span class="msg-time">10:28 AM</span></div>
+          <div class="msg-text">Bullish! I'm in too 🚀 Support at 1,450 looks solid</div>
+          <div class="msg-reactions">
+            <span class="rxn">💪 <span>4</span></span>
+            <span class="rxn me">📈 <span>2</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Message 4 — another trade -->
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#FFD93D,#FF9130)">R</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Rahul</span><span class="msg-time">10:29 AM</span></div>
+          <div class="msg-trade buy">
+            <div class="trade-badge buy">BUY</div>
+            <div class="trade-info">
+              <div class="trade-sym">INFY</div>
+              <div class="trade-name">Infosys Ltd</div>
+              <div class="trade-details">15 shares @ ₹1,470.20</div>
+            </div>
+            <div class="trade-total">₹22,053</div>
+          </div>
+        </div>
+      </div>
+      <!-- Message 5 -->
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Arjun</span><span class="msg-time">10:31 AM</span></div>
+          <div class="msg-text">Nice — chart looks clean. RSI just crossed 60, momentum building 📊</div>
+        </div>
+      </div>
+      <!-- Message 6 — sell trade -->
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#38bdf8,#22d3ee)">V</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Vikram</span><span class="msg-time">10:34 AM</span></div>
+          <div class="msg-text">Taking profits on <span class="chat-stock-sym">$RELIANCE</span> — hit my target 🎯</div>
+          <div class="msg-trade sell">
+            <div class="trade-badge sell">SELL</div>
+            <div class="trade-info">
+              <div class="trade-sym">RELIANCE</div>
+              <div class="trade-name">Reliance Industries</div>
+              <div class="trade-details">10 shares @ ₹2,840.50</div>
+            </div>
+            <div class="trade-total" style="color:var(--up)">+₹1,420</div>
+          </div>
+          <div class="msg-reactions">
+            <span class="rxn">🎉 <span>5</span></span>
+            <span class="rxn">💰 <span>3</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Message 7 -->
+      <div class="msg">
+        <div class="msg-av" style="background:linear-gradient(135deg,#f97316,#ef4444)">K</div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="msg-author">Karan</span><span class="msg-time">10:36 AM</span></div>
+          <div class="msg-text">GG Vikram 🔥 What's the next play?</div>
+        </div>
+      </div>
+    </div>
+    <div class="typing-bar">Arjun is typing<span style="animation:typDot 1.4s ease infinite">.</span><span style="animation:typDot 1.4s ease .2s infinite">.</span><span style="animation:typDot 1.4s ease .4s infinite">.</span></div>
+    <div class="input-area">
+      <div class="input-row">
+        <div class="tool-btn">📎</div>
+        <input class="msg-input" placeholder="Message #general" readonly>
+        <div class="tool-btn">😊</div>
+        <div class="send-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members sidebar -->
+  <div class="members-bar">
+    <div class="mb-title">Online — 4</div>
+    <div class="mb-item"><div class="mb-av" style="background:linear-gradient(135deg,#00F5A0,#4F8EF7)">A</div><div><div class="mb-name">Arjun</div><div class="mb-role">Admin</div></div><div class="mb-status on"></div></div>
+    <div class="mb-item"><div class="mb-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">P</div><div><div class="mb-name">Priya</div><div class="mb-role">Trader</div></div><div class="mb-status on"></div></div>
+    <div class="mb-item"><div class="mb-av" style="background:linear-gradient(135deg,#FFD93D,#FF9130)">R</div><div><div class="mb-name">Rahul</div><div class="mb-role">Trader</div></div><div class="mb-status on"></div></div>
+    <div class="mb-item"><div class="mb-av" style="background:linear-gradient(135deg,#38bdf8,#22d3ee)">V</div><div><div class="mb-name">Vikram</div><div class="mb-role">Trader</div></div><div class="mb-status on"></div></div>
+    <div class="mb-title" style="margin-top:16px">Offline — 2</div>
+    <div class="mb-item"><div class="mb-av" style="background:linear-gradient(135deg,#f97316,#ef4444);opacity:.5">K</div><div><div class="mb-name" style="opacity:.5">Karan</div><div class="mb-role">Member</div></div><div class="mb-status off"></div></div>
+    <div class="mb-item"><div class="mb-av" style="background:linear-gradient(135deg,#10b981,#14b8a6);opacity:.5">S</div><div><div class="mb-name" style="opacity:.5">Sneha</div><div class="mb-role">Member</div></div><div class="mb-status off"></div></div>
+  </div>
+</div>
+</body>
+</html>

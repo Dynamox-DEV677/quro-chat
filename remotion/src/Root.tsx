@@ -2,16 +2,28 @@ import React from 'react';
 import { Composition } from 'remotion';
 import { QuroPromo } from './QuroPromo';
 import { QuroReel } from './QuroReel';
+import { QuroChat } from './QuroChat';
 
-// 9:16 cinematic reel for Instagram Reels / YouTube Shorts / TikTok.
-// 40 seconds at 30fps = 1200 frames.
+// Vertical 9:16 videos for Instagram Reels / YouTube Shorts / TikTok.
 // Uses real Quro brand colors (#09090b / #38a169 / #3da87a) and real
-// screenshots from the Quro landing page via staticFile().
+// screenshots from the Quro app via staticFile().
 export const Root: React.FC = () => {
   return (
     <>
       {/* ──────────────────────────────────────────────────────── */}
-      {/* PRIMARY — vertical cinematic reel (use this one)         */}
+      {/* CHAT PROMO — chat-system focused reel                    */}
+      {/* ──────────────────────────────────────────────────────── */}
+      <Composition
+        id="QuroChat"
+        component={QuroChat}
+        durationInFrames={1350}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+
+      {/* ──────────────────────────────────────────────────────── */}
+      {/* MAIN REEL — landing-page focused reel                    */}
       {/* ──────────────────────────────────────────────────────── */}
       <Composition
         id="QuroReel"
