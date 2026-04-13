@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════
 // DM (Direct Messages) Module — performance-optimized
 // ═══════════════════════════════════════
-import { sb } from './config.js';
-import { ME, REAL_USERS, curDMUser, setCurDMUser, chatMode, setChatMode, curGroupChat, setCurGroupChat, membersOpen, setMembersOpen, _dmLastMsg, set_dmLastMsg, _usTimeout, set_usTimeout } from './state.js';
-import { subscribeAndRender } from './messaging.js';
-import { escH, getMsgKey, isMobile, decorRingHTML, notify } from './utils.js';
-import { closeDrawer, updateSidebarToggleIcon } from './navigation.js';
-import { closeMobileMembers } from './members.js';
+import { sb } from './config.js?v=48';
+import { ME, REAL_USERS, curDMUser, setCurDMUser, chatMode, setChatMode, curGroupChat, setCurGroupChat, membersOpen, setMembersOpen, _dmLastMsg, set_dmLastMsg, _usTimeout, set_usTimeout } from './state.js?v=48';
+import { subscribeAndRender } from './messaging.js?v=48';
+import { escH, getMsgKey, isMobile, decorRingHTML, notify } from './utils.js?v=48';
+import { closeDrawer, updateSidebarToggleIcon } from './navigation.js?v=48';
+import { closeMobileMembers } from './members.js?v=48';
 
 export async function fetchDMLastMessages(){
   if(!ME||!REAL_USERS.length)return;

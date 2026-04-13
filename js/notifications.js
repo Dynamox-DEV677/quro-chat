@@ -1,8 +1,8 @@
 // ═══ NOTIFICATIONS ═══
-import { sb } from './config.js';
-import { ME, chatMode, curDMUser, curGroupChat, curServer, curChannel, appMode, notifSound, notifDesktop } from './state.js';
-import { escH } from './utils.js';
-import { trd_pushTicker } from './trading.js';
+import { sb } from './config.js?v=48';
+import { ME, chatMode, curDMUser, curGroupChat, curServer, curChannel, appMode, notifSound, notifDesktop } from './state.js?v=48';
+import { escH } from './utils.js?v=48';
+import { trd_pushTicker } from './trading.js?v=48';
 
 export function notify(msg,type='info'){
   const box=document.getElementById('notifBox');

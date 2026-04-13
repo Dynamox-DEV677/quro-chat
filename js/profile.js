@@ -1,9 +1,9 @@
 // ═══ PROFILE / CUSTOMIZATION ═══
-import { sb } from './config.js';
-import { ME } from './state.js';
-import { escH, setAvatarEl, getDecorCls, applyUserBarDecor, notify, stk_fmtIN } from './utils.js';
-import { buildMembers } from './members.js';
-import { buildDMList, openDM } from './dm.js';
+import { sb } from './config.js?v=48';
+import { ME } from './state.js?v=48';
+import { escH, setAvatarEl, getDecorCls, applyUserBarDecor, notify, stk_fmtIN } from './utils.js?v=48';
+import { buildMembers } from './members.js?v=48';
+import { buildDMList, openDM } from './dm.js?v=48';
 
 export async function saveNameplate(){
   var val=document.getElementById('spNameplate').value.trim();

@@ -1,5 +1,5 @@
 // ═══ FILE DRAG & DROP ═══
-import { handleFileUpload } from './file-upload.js';
+import { handleFileUpload } from './file-upload.js?v=48';
 
 let _dropOverlay = null;
 

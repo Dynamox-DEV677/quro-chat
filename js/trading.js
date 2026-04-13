@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════
 // Paper Trading Terminal — Full Rewrite
 // ═══════════════════════════════════════
-import { sb } from './config.js';
-import { ME, chatMode, curChannel, curServer, curDMUser, curGroupChat } from './state.js';
-import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair, stk_startLiveRefresh, stk_stopLiveRefresh } from './stocks.js';
-import { escH, notify, getMsgKey } from './utils.js';
-import { qConfirm } from './modal.js';
+import { sb } from './config.js?v=48';
+import { ME, chatMode, curChannel, curServer, curDMUser, curGroupChat } from './state.js?v=48';
+import { STK_STOCKS, stk_simPts, stk_fmtIN, drawCandlestick, attachCrosshair, stk_startLiveRefresh, stk_stopLiveRefresh } from './stocks.js?v=48';
+import { escH, notify, getMsgKey } from './utils.js?v=48';
+import { qConfirm } from './modal.js?v=48';
 
 // ─── Module state ───
 export var trdPrices = {};

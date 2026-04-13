@@ -1,8 +1,8 @@
 // ═══ REPLIES, EDIT/DELETE, REACTIONS ═══
-import { sb } from './config.js';
-import { ME } from './state.js';
-import { notify } from './utils.js';
-import { qConfirm, qPrompt } from './modal.js';
+import { sb } from './config.js?v=48';
+import { ME } from './state.js?v=48';
+import { notify } from './utils.js?v=48';
+import { qConfirm, qPrompt } from './modal.js?v=48';
 
 // ─── Reply ───
 var replyTo=null;

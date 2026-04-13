@@ -1,6 +1,6 @@
 // ═══ TYPING INDICATORS ═══
-import { sb } from './config.js';
-import { ME } from './state.js';
+import { sb } from './config.js?v=48';
+import { ME } from './state.js?v=48';
 
 var _typingChannel=null;
 var _typingUsers={};

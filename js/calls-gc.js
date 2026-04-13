@@ -1,4 +1,4 @@
-import { sb } from './config.js';
+import { sb } from './config.js?v=48';
 import {
   ME,
   callActive,
@@ -14,8 +14,8 @@ import {
   _gcSignalChannel, set_gcSignalChannel,
   _rtcConfig,
   REAL_USERS
-} from './state.js';
-import { _callConnected } from './calls.js';
+} from './state.js?v=48';
+import { _callConnected } from './calls.js?v=48';
 
 // ═══════════════════════════════════════════════════════
 // GC CALL — Mesh WebRTC Functions

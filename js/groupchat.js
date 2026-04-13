@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════
 // GROUP CHATS Module
 // ═══════════════════════════════════════
-import { sb } from './config.js';
-import { ME, REAL_USERS, curGroupChat, setCurGroupChat, curDMUser, setCurDMUser, chatMode, setChatMode, membersOpen, setMembersOpen, _myGroupChats, set_myGroupChats, _gcSelectedUsers, set_gcSelectedUsers } from './state.js';
-import { subscribeAndRender } from './messaging.js';
-import { escH, isMobile, notify } from './utils.js';
-import { closeDrawer, updateSidebarToggleIcon } from './navigation.js';
-import { closeMobileMembers } from './members.js';
-import { qConfirm } from './modal.js';
+import { sb } from './config.js?v=48';
+import { ME, REAL_USERS, curGroupChat, setCurGroupChat, curDMUser, setCurDMUser, chatMode, setChatMode, membersOpen, setMembersOpen, _myGroupChats, set_myGroupChats, _gcSelectedUsers, set_gcSelectedUsers } from './state.js?v=48';
+import { subscribeAndRender } from './messaging.js?v=48';
+import { escH, isMobile, notify } from './utils.js?v=48';
+import { closeDrawer, updateSidebarToggleIcon } from './navigation.js?v=48';
+import { closeMobileMembers } from './members.js?v=48';
+import { qConfirm } from './modal.js?v=48';
 
 export async function loadGroupChats(){
   if(!ME)return;

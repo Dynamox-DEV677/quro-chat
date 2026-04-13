@@ -1,8 +1,8 @@
 // ═══ FRIENDS PAGE ═══
-import { REAL_USERS, appMode } from './state.js';
-import { escH } from './utils.js';
-import { goHome } from './navigation.js';
-import { openDM } from './dm.js';
+import { REAL_USERS, appMode } from './state.js?v=48';
+import { escH } from './utils.js?v=48';
+import { goHome } from './navigation.js?v=48';
+import { openDM } from './dm.js?v=48';
 
 var _fpTab='all';
 var _fpUserMap={};

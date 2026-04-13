@@ -1,9 +1,9 @@
 // ═══ SETTINGS PANEL ═══
-import { sb } from './config.js';
-import { ME, notifSound, setNotifSound, notifDesktop, setNotifDesktop } from './state.js';
-import { isMobile, setAvatarEl, notify } from './utils.js';
-import { closeDrawer } from './navigation.js';
-import { syncFontPicker, buildColorGrid, syncColorPicker, buildBannerGrid, buildDecorGrid, selectDecor, syncEmailSection, set_spSelectedFont, set_spSelectedColor, set_spSelectedBanner, set_spSelectedDecor, getBannerStyle } from './profile.js';
+import { sb } from './config.js?v=48';
+import { ME, notifSound, setNotifSound, notifDesktop, setNotifDesktop } from './state.js?v=48';
+import { isMobile, setAvatarEl, notify } from './utils.js?v=48';
+import { closeDrawer } from './navigation.js?v=48';
+import { syncFontPicker, buildColorGrid, syncColorPicker, buildBannerGrid, buildDecorGrid, selectDecor, syncEmailSection, set_spSelectedFont, set_spSelectedColor, set_spSelectedBanner, set_spSelectedDecor, getBannerStyle } from './profile.js?v=48';
 
 export function openSettings(){
   closeDrawer();
