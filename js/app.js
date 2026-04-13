@@ -1,38 +1,38 @@
 // ═══ Quro — App Entry Point ═══
 // Imports all modules and exposes functions to window for onclick handlers
 
-import { initErrorHandler } from './error-handler.js';
-import { sb, EMOJIS } from './config.js';
-import * as State from './state.js';
-import { escH, getMsgKey, showLoading, isMobile, setAvatarEl, stk_fmtIN, applyUserBarDecor, getDecorCls, notify } from './utils.js';
-import { authErr, authOk, clearAuth, updateRegLetter, doRegister, doLogin, loadAndEnterApp, initApp, doLogout } from './auth.js';
-import { openDrawer, closeDrawer, syncDrawer, handleSidebarToggle, updateSidebarToggleIcon, goHome, mobileNavTo, syncMobileNav, navigateBack, navPush, navPop, navClear, navStackPushRaw, getActiveOverlay, setActiveOverlay } from './navigation.js';
-import { loadServersIntoBar, openServerBrowser, closeServerBrowser, srvBrowserOverlayClick, loadAllServers, joinServer, createServer, pickServer, pickServerById, addServer, checkServerOwnership, openServerSettings, closeServerSettings, saveServerSettings, uploadServerIcon, copyInviteLink, leaveServer, checkInviteLink, showInviteModal, closeInviteModal } from './servers.js';
-import { loadServerChannels, openChannel, addChannel, closeAddChModal, selChType, confirmAddChannel, joinVoiceChannel, leaveVoiceChannel } from './channels.js';
-import { _stopPoll, subscribeAndRender, fetchAndRenderMessages, appendMessage, fetchMyMsgCount, sendMsg, inputKey, growInput, renderMsgContent, _plainText, searchMsgs, openSearch, closeSearch, scrollToMsg } from './messaging.js';
-import { fetchDMLastMessages, buildDMList, openDM, startNewDM, openUserSearch, closeUserSearch, userSearchOverlayClick, searchUsers, renderUSResults, selectUserForDM } from './dm.js';
-import { loadGroupChats, renderGCList, openGroupChat, openGCCreate, closeGCCreate, gcSearchMembers, gcToggleUser, gcRemoveUser, gcUpdateTags, createGroupChat, openGCSettings, closeGCSettings, gcsRenderMembers, gcsSaveName, gcsUploadIcon, gcsClearIcon, gcsRemoveMember } from './groupchat.js';
-import { fetchUsers, updatePresence, buildMembers, toggleMembers, mobileToggleMembers, openMobileMembers, closeMobileMembers } from './members.js';
-import { startCall, endCall, _cleanupCall, _setupCallUI } from './calls.js';
-import { _gcCleanup } from './calls-gc.js';
-import { _subscribeCallSignals, acceptIncoming, declineIncoming } from './calls-incoming.js';
-import { toggleMute, toggleCallVideo, toggleSpeaker, toggleScreenShare, stopScreenShare, minimizeCall, reopenCall } from './calls-controls.js';
-import { openSettings, closeSettings, spNavTo, spShowNav, toggleDarkMode, changePassword, toggleNotifSound, toggleNotifDesktop, requestNotifPermission } from './settings.js';
-import { saveNameplate, saveAbout, buildBannerGrid, saveBanner, getBannerStyle, uploadBannerImage, openProfilePopup, closeProfilePopup, syncFontPicker, pickFont, saveNameFont, buildColorGrid, syncColorPicker, pickColor, saveNameColor, buildDecorGrid, selectDecor, saveDecor, pickProfilePic, applyProfilePic, saveContactEmail, unlinkEmail, syncEmailSection, shareProfile, closeShareOverlay, downloadShareCard, nativeShareCard } from './profile.js';
-import { playNotifSound, showDesktopNotif, updateServerBadge, clearServerUnread, clearDMUnread, clearGCUnread, subscribeGlobalMessages } from './notifications.js';
-import { _clearTypingChannel, _setupTypingChannel, _renderTyping, _onInputTyping } from './typing.js';
-import { setReply, clearReply, editMsg, deleteMsg, showReactPicker, closeReactPicker, doReact, renderMsgReactions } from './reactions.js';
-import { openEmoji, closeEmoji, emojiOverlayClick, insertEmoji } from './emoji.js';
-import { handleFileUpload } from './file-upload.js';
-import { initDragDrop } from './drag-drop.js';
-import { openFriendsPage, closeFriendsPage, fpSwitchTab, fpRender, fpOpenDM } from './friends.js';
-import { openLeaderPage, closeLeaderPage, loadLeaderboard, lpSwitchPeriod } from './leaderboard.js';
-import { openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail, changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks, stk_startLiveRefresh } from './stocks.js';
-import { openTradingPage, closeTradingPage, openTradeFromChat, openTradeFromStocks, trd_execute, trd_select, trd_setTab, trd_setMax, trd_setQty, trd_showBottom, trd_filterWatch, trd_updateOrder, trd_resetPortfolio, closeTrdConfirm, confirmTrdExec } from './trading.js';
-import { initSplash } from './splash.js';
-import { startAuthBubbles, stopAuthBubbles } from './auth-bubbles.js';
-import { qConfirm, qPrompt, qAlert } from './modal.js';
-import { isAdmin, initAdmin, hideAdmin, adminSearchUsers, adminKickUser, adminUnbanUser, verifyAdminPasscode, adminGrantAccess, adminRevokeAccess, checkBanned, showBannedScreen } from './admin.js';
+import { initErrorHandler } from './error-handler.js?v=46';
+import { sb, EMOJIS } from './config.js?v=46';
+import * as State from './state.js?v=46';
+import { escH, getMsgKey, showLoading, isMobile, setAvatarEl, stk_fmtIN, applyUserBarDecor, getDecorCls, notify } from './utils.js?v=46';
+import { authErr, authOk, clearAuth, updateRegLetter, doRegister, doLogin, loadAndEnterApp, initApp, doLogout } from './auth.js?v=46';
+import { openDrawer, closeDrawer, syncDrawer, handleSidebarToggle, updateSidebarToggleIcon, goHome, mobileNavTo, syncMobileNav, navigateBack, navPush, navPop, navClear, navStackPushRaw, getActiveOverlay, setActiveOverlay } from './navigation.js?v=46';
+import { loadServersIntoBar, openServerBrowser, closeServerBrowser, srvBrowserOverlayClick, loadAllServers, joinServer, createServer, pickServer, pickServerById, addServer, checkServerOwnership, openServerSettings, closeServerSettings, saveServerSettings, uploadServerIcon, copyInviteLink, leaveServer, checkInviteLink, showInviteModal, closeInviteModal } from './servers.js?v=46';
+import { loadServerChannels, openChannel, addChannel, closeAddChModal, selChType, confirmAddChannel, joinVoiceChannel, leaveVoiceChannel } from './channels.js?v=46';
+import { _stopPoll, subscribeAndRender, fetchAndRenderMessages, appendMessage, fetchMyMsgCount, sendMsg, inputKey, growInput, renderMsgContent, _plainText, searchMsgs, openSearch, closeSearch, scrollToMsg } from './messaging.js?v=46';
+import { fetchDMLastMessages, buildDMList, openDM, startNewDM, openUserSearch, closeUserSearch, userSearchOverlayClick, searchUsers, renderUSResults, selectUserForDM } from './dm.js?v=46';
+import { loadGroupChats, renderGCList, openGroupChat, openGCCreate, closeGCCreate, gcSearchMembers, gcToggleUser, gcRemoveUser, gcUpdateTags, createGroupChat, openGCSettings, closeGCSettings, gcsRenderMembers, gcsSaveName, gcsUploadIcon, gcsClearIcon, gcsRemoveMember } from './groupchat.js?v=46';
+import { fetchUsers, updatePresence, buildMembers, toggleMembers, mobileToggleMembers, openMobileMembers, closeMobileMembers } from './members.js?v=46';
+import { startCall, endCall, _cleanupCall, _setupCallUI } from './calls.js?v=46';
+import { _gcCleanup } from './calls-gc.js?v=46';
+import { _subscribeCallSignals, acceptIncoming, declineIncoming } from './calls-incoming.js?v=46';
+import { toggleMute, toggleCallVideo, toggleSpeaker, toggleScreenShare, stopScreenShare, minimizeCall, reopenCall } from './calls-controls.js?v=46';
+import { openSettings, closeSettings, spNavTo, spShowNav, toggleDarkMode, changePassword, toggleNotifSound, toggleNotifDesktop, requestNotifPermission } from './settings.js?v=46';
+import { saveNameplate, saveAbout, buildBannerGrid, saveBanner, getBannerStyle, uploadBannerImage, openProfilePopup, closeProfilePopup, syncFontPicker, pickFont, saveNameFont, buildColorGrid, syncColorPicker, pickColor, saveNameColor, buildDecorGrid, selectDecor, saveDecor, pickProfilePic, applyProfilePic, saveContactEmail, unlinkEmail, syncEmailSection, shareProfile, closeShareOverlay, downloadShareCard, nativeShareCard } from './profile.js?v=46';
+import { playNotifSound, showDesktopNotif, updateServerBadge, clearServerUnread, clearDMUnread, clearGCUnread, subscribeGlobalMessages } from './notifications.js?v=46';
+import { _clearTypingChannel, _setupTypingChannel, _renderTyping, _onInputTyping } from './typing.js?v=46';
+import { setReply, clearReply, editMsg, deleteMsg, showReactPicker, closeReactPicker, doReact, renderMsgReactions } from './reactions.js?v=46';
+import { openEmoji, closeEmoji, emojiOverlayClick, insertEmoji } from './emoji.js?v=46';
+import { handleFileUpload } from './file-upload.js?v=46';
+import { initDragDrop } from './drag-drop.js?v=46';
+import { openFriendsPage, closeFriendsPage, fpSwitchTab, fpRender, fpOpenDM } from './friends.js?v=46';
+import { openLeaderPage, closeLeaderPage, loadLeaderboard, lpSwitchPeriod } from './leaderboard.js?v=46';
+import { openStocksPanel, closeStocksPanel, stk_showDetail, closeStkDetail, changeStkRange, changeStkInterval, stkFilter, stkToggleSearch, stkSearchFilter, mobileOpenStocks, stk_startLiveRefresh } from './stocks.js?v=46';
+import { openTradingPage, closeTradingPage, openTradeFromChat, openTradeFromStocks, trd_execute, trd_select, trd_setTab, trd_setMax, trd_setQty, trd_showBottom, trd_filterWatch, trd_updateOrder, trd_resetPortfolio, closeTrdConfirm, confirmTrdExec } from './trading.js?v=46';
+import { initSplash } from './splash.js?v=46';
+import { startAuthBubbles, stopAuthBubbles } from './auth-bubbles.js?v=46';
+import { qConfirm, qPrompt, qAlert } from './modal.js?v=46';
+import { isAdmin, initAdmin, hideAdmin, adminSearchUsers, adminKickUser, adminUnbanUser, verifyAdminPasscode, adminGrantAccess, adminRevokeAccess, checkBanned, showBannedScreen } from './admin.js?v=46';
 
 // ═══ Expose all onclick/onchange/oninput/onkeydown functions to window ═══
 // This is needed because HTML uses inline event handlers (onclick="fn()")
