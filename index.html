@@ -118,22 +118,22 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){var t=localStorage.getItem('quro-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');if(window.electronAPI&&window.electronAPI.isElectron)document.body?.classList.add('is-electron');})()</script>
 <script>document.addEventListener('DOMContentLoaded',function(){if(window.electronAPI&&window.electronAPI.isElectron)document.body.classList.add('is-electron');});</script>
-<link rel="stylesheet" href="css/variables.css?v=47">
-<link rel="stylesheet" href="css/light.css?v=47">
-<link rel="stylesheet" href="css/auth.css?v=47">
-<link rel="stylesheet" href="css/layout.css?v=47">
-<link rel="stylesheet" href="css/chat.css?v=47">
-<link rel="stylesheet" href="css/members.css?v=47">
-<link rel="stylesheet" href="css/mobile.css?v=47">
-<link rel="stylesheet" href="css/call.css?v=47">
-<link rel="stylesheet" href="css/settings.css?v=47">
-<link rel="stylesheet" href="css/profile.css?v=47">
-<link rel="stylesheet" href="css/components.css?v=47">
-<link rel="stylesheet" href="css/modal.css?v=47">
-<link rel="stylesheet" href="css/stocks.css?v=47">
-<link rel="stylesheet" href="css/trading.css?v=47">
-<link rel="stylesheet" href="css/splash.css?v=47">
-<link rel="stylesheet" href="css/titlebar.css?v=47">
+<link rel="stylesheet" href="css/variables.css?v=48">
+<link rel="stylesheet" href="css/light.css?v=48">
+<link rel="stylesheet" href="css/auth.css?v=48">
+<link rel="stylesheet" href="css/layout.css?v=48">
+<link rel="stylesheet" href="css/chat.css?v=48">
+<link rel="stylesheet" href="css/members.css?v=48">
+<link rel="stylesheet" href="css/mobile.css?v=48">
+<link rel="stylesheet" href="css/call.css?v=48">
+<link rel="stylesheet" href="css/settings.css?v=48">
+<link rel="stylesheet" href="css/profile.css?v=48">
+<link rel="stylesheet" href="css/components.css?v=48">
+<link rel="stylesheet" href="css/modal.css?v=48">
+<link rel="stylesheet" href="css/stocks.css?v=48">
+<link rel="stylesheet" href="css/trading.css?v=48">
+<link rel="stylesheet" href="css/splash.css?v=48">
+<link rel="stylesheet" href="css/titlebar.css?v=48">
 <!-- OLD INLINE STYLE REMOVED — CSS now in css/ folder -->
 </head>
 <body>
@@ -162,18 +162,18 @@
 
 <div id="loadingOverlay"><div class="spinner"></div><div class="loading-text">Connecting…</div></div>
 
-<!-- SPLASH INTRO -->
+<!-- SPLASH INTRO v2 — Cinematic -->
 <div id="splashScreen">
-  <div class="splash-scene">
-    <div class="splash-glow"></div>
-    <div class="splash-rings"><div class="splash-ring splash-ring-1"></div><div class="splash-ring splash-ring-2"></div><div class="splash-ring splash-ring-3"></div></div>
-    <div class="splash-logo-wrap">
-      <div class="splash-logo-icon"><img src="huddleicon.png" alt="Quro"></div>
-      <div class="splash-logo-text">QURO</div>
-      <div class="splash-tagline"><span id="splashTyper"></span><span class="splash-cursor">|</span></div>
-    </div>
-    <div class="splash-particles" id="splashParticles"></div>
+  <canvas id="splashCanvas"></canvas>
+  <div class="sp-scanlines"></div>
+  <div class="sp-glow"></div>
+  <div class="sp-center">
+    <div class="sp-icon"><img src="huddleicon.png" alt="Quro"></div>
+    <div class="sp-title">QURO</div>
+    <div class="sp-tagline">CHAT · TRADE · COMPETE</div>
   </div>
+  <div class="sp-ripple"></div>
+  <div class="sp-flash"></div>
 </div>
 
 <!-- AUTH -->
@@ -187,7 +187,7 @@
     <div id="loginView">
       <div class="form-group">
         <label class="form-label" for="authUser">Username</label>
-        <div class="form-input-wrap"><svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input type="text" id="authUser" class="form-input" placeholder="Enter your username" autocomplete="username" oninput="updateRegLetter()"></div>
+        <div class="form-input-wrap"><svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input type="text" id="authUser" class="form-input" placeholder="Enter your username" autocomplete="username" ></div>
       </div>
       <div class="form-group">
         <label class="form-label" for="authPass">Password</label>
@@ -545,8 +545,8 @@
 </div>
 
 <!-- Share Profile Preview Overlay -->
-<div class="pp-share-overlay" id="shareOverlay" onclick="if(event.target===this)closeShareOverlay()">
-  <button class="pp-share-close" onclick="closeShareOverlay()">&#x2715;</button>
+<div class="pp-share-overlay" id="shareOverlay" onclick="if(event.target===this)document.getElementById('shareOverlay').classList.remove('open')">
+  <button class="pp-share-close" onclick="document.getElementById('shareOverlay').classList.remove('open')">&#x2715;</button>
   <div class="pp-share-preview"><img id="sharePreviewImg" alt="Profile Card"></div>
   <div class="pp-share-actions">
     <button class="pp-share-action-btn primary" onclick="downloadShareCard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Save Image</button>
@@ -1274,6 +1274,6 @@
 
 
 
-<script type="module" src="js/app.js?v=47"></script>
+<script type="module" src="js/app.js?v=48"></script>
 </body>
 </html>
