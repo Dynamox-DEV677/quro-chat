@@ -1,9 +1,9 @@
 // ═══ FILE UPLOAD ═══
-import { sb } from './config.js?v=48';
-import { ME } from './state.js?v=48';
-import { getMsgKey } from './utils.js?v=48';
-import { _plainText } from './messaging.js?v=48';
-import { notify } from './notifications.js?v=48';
+import { sb } from './config.js?v=49';
+import { ME } from './state.js?v=49';
+import { getMsgKey } from './utils.js?v=49';
+import { _plainText } from './messaging.js?v=49';
+import { notify } from './notifications.js?v=49';
 
 export async function handleFileUpload(input){
   const file=input.files[0];

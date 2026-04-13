@@ -1,7 +1,7 @@
 // ═══ GLOBAL ERROR HANDLER ═══
 // Catches unhandled errors and promise rejections, shows user-friendly toasts
 
-import { notify } from './utils.js?v=48';
+import { notify } from './utils.js?v=49';
 
 let _errorCount = 0;
 const MAX_ERRORS_PER_MINUTE = 5;

@@ -1,7 +1,7 @@
 // channels.js -- Channel rendering, voice/video channels, add channel modal
 // Extracted from index.html — do not modify logic
 
-import { sb } from './config.js?v=48';
+import { sb } from './config.js?v=49';
 import {
   ME,
   curServer,
@@ -21,15 +21,15 @@ import {
   _gcCallMembers, set_gcCallMembers,
   _callTarget, set_callTarget,
   _gcSignalChannel
-} from './state.js?v=48';
-import { escH, isMobile, notify } from './utils.js?v=48';
-import { subscribeAndRender } from './messaging.js?v=48';
-import { closeMobileMembers } from './members.js?v=48';
-import { playNotifSound, showDesktopNotif } from './notifications.js?v=48';
-import { closeDrawer, updateSidebarToggleIcon } from './navigation.js?v=48';
-import { _setupCallUI, _cleanupCall } from './calls.js?v=48';
-import { _setupGCSignaling, _gcBuildGrid, _gcCleanup } from './calls-gc.js?v=48';
-import { _curServerData } from './servers.js?v=48';
+} from './state.js?v=49';
+import { escH, isMobile, notify } from './utils.js?v=49';
+import { subscribeAndRender } from './messaging.js?v=49';
+import { closeMobileMembers } from './members.js?v=49';
+import { playNotifSound, showDesktopNotif } from './notifications.js?v=49';
+import { closeDrawer, updateSidebarToggleIcon } from './navigation.js?v=49';
+import { _setupCallUI, _cleanupCall } from './calls.js?v=49';
+import { _setupGCSignaling, _gcBuildGrid, _gcCleanup } from './calls-gc.js?v=49';
+import { _curServerData } from './servers.js?v=49';
 
 // ─── VC state ───
 export var _vcPresenceChannels={};  // {channelName: supabaseChannel} for VC presence

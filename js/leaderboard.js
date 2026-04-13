@@ -1,8 +1,8 @@
 // ═══ TRADING LEADERBOARD — Competitive Ranking ═══
-import { sb } from './config.js?v=48';
-import { ME, appMode } from './state.js?v=48';
-import { escH, stk_fmtIN } from './utils.js?v=48';
-import { STK_STOCKS, stk_startLiveRefresh } from './stocks.js?v=48';
+import { sb } from './config.js?v=49';
+import { ME, appMode } from './state.js?v=49';
+import { escH, stk_fmtIN } from './utils.js?v=49';
+import { STK_STOCKS, stk_startLiveRefresh } from './stocks.js?v=49';
 
 var _lpPeriod = 'weekly'; // 'weekly' | 'alltime'
 var _lpPrevRanks = {}; // userId -> previous rank (for rank change indicators)

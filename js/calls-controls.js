@@ -9,9 +9,9 @@ import {
   _gcCall,
   _gcPeers,
   _rtcPeer
-} from './state.js?v=48';
-import { notify } from './notifications.js?v=48';
-import { _gcBuildGrid } from './calls-gc.js?v=48';
+} from './state.js?v=49';
+import { notify } from './notifications.js?v=49';
+import { _gcBuildGrid } from './calls-gc.js?v=49';
 
 // ─── SVG Constants ───
 export var _svgCamOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>';

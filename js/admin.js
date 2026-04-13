@@ -2,10 +2,10 @@
 // Uses a separate 'banned_users' table + admin_config for passcode & admin list.
 // Dynamox is permanent super-admin. Can grant admin access to others.
 // Passcode gate: 5 attempts per session, then locked out.
-import { sb } from './config.js?v=48';
-import { ME } from './state.js?v=48';
-import { escH, notify } from './utils.js?v=48';
-import { qConfirm } from './modal.js?v=48';
+import { sb } from './config.js?v=49';
+import { ME } from './state.js?v=49';
+import { escH, notify } from './utils.js?v=49';
+import { qConfirm } from './modal.js?v=49';
 
 const SUPER_ADMIN = 'dynamox';
 const MAX_ATTEMPTS = 5;

@@ -1,18 +1,18 @@
 // servers.js -- Server browsing, joining, creating, settings, invites
 // Extracted from index.html — do not modify logic
 
-import { sb } from './config.js?v=48';
+import { sb } from './config.js?v=49';
 import {
   ME,
   appMode, setAppMode,
   curServer, setCurServer,
   unreadCounts
-} from './state.js?v=48';
-import { escH, notify } from './utils.js?v=48';
-import { qConfirm, qPrompt } from './modal.js?v=48';
-import { updateServerBadge, clearServerUnread } from './notifications.js?v=48';
-import { loadServerChannels } from './channels.js?v=48';
-import { goHome, closeDrawer } from './navigation.js?v=48';
+} from './state.js?v=49';
+import { escH, notify } from './utils.js?v=49';
+import { qConfirm, qPrompt } from './modal.js?v=49';
+import { updateServerBadge, clearServerUnread } from './notifications.js?v=49';
+import { loadServerChannels } from './channels.js?v=49';
+import { goHome, closeDrawer } from './navigation.js?v=49';
 // TODO: import checkServerOwnership circular ref handled below
 
 // ─── Mode: Server ───

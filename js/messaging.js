@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════
 // MESSAGING Module — performance-optimized
 // ═══════════════════════════════════════
-import { sb } from './config.js?v=48';
-import { ME, REAL_USERS, chatMode, curChannel, curDMUser, curGroupChat, realtimeSub, setRealtimeSub, _pollTimer, set_pollTimer, _lastSeenId, set_lastSeenId, _rtConnected, set_rtConnected, myMsgCount, setMyMsgCount, MSG_DAILY_LIMIT, replyTo, _dmLastMsg, msgReactions } from './state.js?v=48';
-import { escH, getMsgKey, notify, decorRingHTML } from './utils.js?v=48';
-import { playNotifSound, showDesktopNotif } from './notifications.js?v=48';
-import { _setupTypingChannel } from './typing.js?v=48';
-import { clearReply, renderMsgReactions, setReply, editMsg, deleteMsg, showReactPicker } from './reactions.js?v=48';
-import { openProfilePopup } from './profile.js?v=48';
-import { buildDMList } from './dm.js?v=48';
-import { STK_STOCKS } from './stocks.js?v=48';
+import { sb } from './config.js?v=49';
+import { ME, REAL_USERS, chatMode, curChannel, curDMUser, curGroupChat, realtimeSub, setRealtimeSub, _pollTimer, set_pollTimer, _lastSeenId, set_lastSeenId, _rtConnected, set_rtConnected, myMsgCount, setMyMsgCount, MSG_DAILY_LIMIT, replyTo, _dmLastMsg, msgReactions } from './state.js?v=49';
+import { escH, getMsgKey, notify, decorRingHTML } from './utils.js?v=49';
+import { playNotifSound, showDesktopNotif } from './notifications.js?v=49';
+import { _setupTypingChannel } from './typing.js?v=49';
+import { clearReply, renderMsgReactions, setReply, editMsg, deleteMsg, showReactPicker } from './reactions.js?v=49';
+import { openProfilePopup } from './profile.js?v=49';
+import { buildDMList } from './dm.js?v=49';
+import { STK_STOCKS } from './stocks.js?v=49';
 
 // ── Stock symbol lookup for $TICKER detection ──
 var _stkSymMap=null;

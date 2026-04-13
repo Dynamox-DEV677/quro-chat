@@ -1,4 +1,4 @@
-import { sb } from './config.js?v=48';
+import { sb } from './config.js?v=49';
 import {
   ME,
   callActive,
@@ -22,10 +22,10 @@ import {
   _rtcConfig,
   REAL_USERS,
   _myGroupChats
-} from './state.js?v=48';
-import { notify } from './notifications.js?v=48';
-import { _setupCallUI, _setupSignaling, _createPeerAndOffer, _callConnected, _handleRemoteHangup, _cleanupCall } from './calls.js?v=48';
-import { _setupGCSignaling, _gcBuildGrid, _gcUpdateStatus, _gcCleanup } from './calls-gc.js?v=48';
+} from './state.js?v=49';
+import { notify } from './notifications.js?v=49';
+import { _setupCallUI, _setupSignaling, _createPeerAndOffer, _callConnected, _handleRemoteHangup, _cleanupCall } from './calls.js?v=49';
+import { _setupGCSignaling, _gcBuildGrid, _gcUpdateStatus, _gcCleanup } from './calls-gc.js?v=49';
 
 // ─── Ring tone (simple oscillating beep via Web Audio) ───
 export function _startRingTone(){

@@ -1,4 +1,4 @@
-import { SUPABASE_URL } from './config.js?v=48';
+import { SUPABASE_URL } from './config.js?v=49';
 
 // ── Core user / app state ──
 export let ME=null;

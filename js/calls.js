@@ -1,4 +1,4 @@
-import { sb } from './config.js?v=48';
+import { sb } from './config.js?v=49';
 import {
   ME, chatMode, curDMUser, curGroupChat,
   callActive, setCallActive,
@@ -22,11 +22,11 @@ import {
   REAL_USERS,
   _currentVC, set_currentVC,
   _vcPresenceChannels
-} from './state.js?v=48';
-import { notify, showDesktopNotif } from './notifications.js?v=48';
-import { _startRingTone, _stopRingTone } from './calls-incoming.js?v=48';
-import { _setupGCSignaling, _gcBuildGrid, _gcUpdateStatus, _gcCleanup } from './calls-gc.js?v=48';
-import { _svgCamOn } from './calls-controls.js?v=48';
+} from './state.js?v=49';
+import { notify, showDesktopNotif } from './notifications.js?v=49';
+import { _startRingTone, _stopRingTone } from './calls-incoming.js?v=49';
+import { _setupGCSignaling, _gcBuildGrid, _gcUpdateStatus, _gcCleanup } from './calls-gc.js?v=49';
+import { _svgCamOn } from './calls-controls.js?v=49';
 
 // ─── Send call system message in DM chat ───
 async function _sendCallMsg(tag, targetUser, type){
@@ -496,4 +496,4 @@ export function _cleanupCall(closeUI){
 }
 
 // ─── Lazy import for declineIncoming (avoid circular) ───
-import { declineIncoming } from './calls-incoming.js?v=48';
+import { declineIncoming } from './calls-incoming.js?v=49';

@@ -1,4 +1,4 @@
-import { ME, chatMode, curChannel, curServer, curDMUser, curGroupChat, DECOR_LIST } from './state.js?v=48';
+import { ME, chatMode, curChannel, curServer, curDMUser, curGroupChat, DECOR_LIST } from './state.js?v=49';
 
 export function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 

@@ -2,8 +2,8 @@
 // Stocks Module
 // Extracted from index.html <script> block (lines 5709-6279)
 // ═══════════════════════════════════════
-import { SUPABASE_URL, SUPABASE_ANON } from './config.js?v=48';
-import { isIndianMarketOpen, getMarketStatusInfo } from './utils.js?v=48';
+import { SUPABASE_URL, SUPABASE_ANON } from './config.js?v=49';
+import { isIndianMarketOpen, getMarketStatusInfo } from './utils.js?v=49';
 
 // ─── Data constants ───
 export var STK_STOCKS=[

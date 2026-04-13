@@ -2,7 +2,7 @@
 // Mobile-first: drawer is the primary view on phones
 // ═══ Navigation Stack — "back" always returns to previous screen ═══
 
-import { sb } from './config.js?v=48';
+import { sb } from './config.js?v=49';
 import {
   ME,
   appMode, setAppMode,
@@ -10,14 +10,14 @@ import {
   curChannel,
   curDMUser,
   realtimeSub, setRealtimeSub
-} from './state.js?v=48';
-import { isMobile, escH, setAvatarEl, notify } from './utils.js?v=48';
-import { _stopPoll } from './messaging.js?v=48';
-import { _clearTypingChannel } from './typing.js?v=48';
-import { clearReply } from './reactions.js?v=48';
-import { openChannel } from './channels.js?v=48';
-import { closeMobileMembers } from './members.js?v=48';
-import { openStocksPanel } from './stocks.js?v=48';
+} from './state.js?v=49';
+import { isMobile, escH, setAvatarEl, notify } from './utils.js?v=49';
+import { _stopPoll } from './messaging.js?v=49';
+import { _clearTypingChannel } from './typing.js?v=49';
+import { clearReply } from './reactions.js?v=49';
+import { openChannel } from './channels.js?v=49';
+import { closeMobileMembers } from './members.js?v=49';
+import { openStocksPanel } from './stocks.js?v=49';
 
 // ═══ Navigation Stack ═══
 // Tracks where the user "came from" so close operations return correctly.

@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════
 // MEMBERS Module — performance-optimized
 // ═══════════════════════════════════════
-import { sb } from './config.js?v=48';
-import { ME, REAL_USERS, setREAL_USERS, membersOpen, setMembersOpen } from './state.js?v=48';
-import { escH, decorRingHTML } from './utils.js?v=48';
-import { openProfilePopup } from './profile.js?v=48';
+import { sb } from './config.js?v=49';
+import { ME, REAL_USERS, setREAL_USERS, membersOpen, setMembersOpen } from './state.js?v=49';
+import { escH, decorRingHTML } from './utils.js?v=49';
+import { openProfilePopup } from './profile.js?v=49';
 
 var _failCount=0;
 

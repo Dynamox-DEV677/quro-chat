@@ -1,5 +1,5 @@
 // ═══ EMOJI PICKER ═══
-import { EMOJIS } from './config.js?v=48';
+import { EMOJIS } from './config.js?v=49';
 
 export function openEmoji(){document.getElementById('emojiGrid').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn" onclick="insertEmoji('${e}')">${e}</button>`).join('');document.getElementById('emojiModal').classList.add('open');}
 export function closeEmoji(){document.getElementById('emojiModal').classList.remove('open');}
