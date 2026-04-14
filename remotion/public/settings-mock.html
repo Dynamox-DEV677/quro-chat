@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Quro Settings Mock</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#38a169;--primary-dim:rgba(56,161,105,.12);
+  --bg:#09090b;--card:#111113;
+  --border:rgba(255,255,255,.06);
+  --text:#f0f0f2;--text-secondary:rgba(255,255,255,.55);--muted:rgba(255,255,255,.34);
+  --font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  --radius:12px;
+}
+html,body{width:1080px;height:1920px;margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;overflow:hidden}
+.app{display:flex;width:1080px;height:1920px}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:240px;flex-shrink:0;background:var(--card);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:40px 0;
+}
+.sidebar-title{
+  font-size:22px;font-weight:700;letter-spacing:-.03em;
+  padding:0 28px 32px;color:var(--text);
+}
+.nav-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 28px;font-size:17px;font-weight:500;
+  color:var(--text-secondary);cursor:pointer;
+  position:relative;transition:background .15s;
+}
+.nav-item:hover{background:rgba(255,255,255,.03)}
+.nav-item.active{
+  color:var(--text);background:var(--primary-dim);
+}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:8px;bottom:8px;
+  width:3px;border-radius:0 3px 3px 0;background:var(--primary);
+}
+.nav-icon{
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  opacity:.7;
+}
+.nav-item.active .nav-icon{opacity:1}
+
+/* ── Main Content ── */
+.main{
+  flex:1;overflow:hidden;
+  padding:40px 48px;
+  display:flex;flex-direction:column;gap:20px;
+}
+.page-title{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-bottom:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px 32px;
+}
+.card-title{
+  font-size:18px;font-weight:700;margin-bottom:20px;
+  letter-spacing:-.02em;
+}
+
+/* ── Profile Card ── */
+.profile-card{display:flex;align-items:center;gap:24px}
+.avatar{
+  width:80px;height:80px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#38a169 0%,#2f855a 100%);
+  border:3px solid transparent;
+  background-clip:padding-box;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;font-weight:700;color:#fff;
+}
+.avatar::before{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  background:linear-gradient(135deg,#38a169,#68d391);z-index:-1;
+}
+.profile-info{flex:1}
+.profile-name{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.profile-handle{font-size:16px;color:var(--muted);margin-top:2px}
+.btn-outline{
+  margin-top:12px;display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:15px;font-weight:600;
+  border:1.5px solid var(--primary);color:var(--primary);
+  background:transparent;cursor:pointer;font-family:var(--font);
+}
+
+/* ── Toggle Rows ── */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;
+}
+.toggle-row + .toggle-row{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.toggle-label{font-size:16px;font-weight:600;color:var(--text)}
+.toggle-desc{font-size:14px;color:var(--muted);margin-top:3px}
+.toggle{
+  width:52px;height:28px;border-radius:99px;
+  position:relative;cursor:pointer;flex-shrink:0;
+  transition:background .2s;
+}
+.toggle.on{background:var(--primary)}
+.toggle.off{background:rgba(255,255,255,.12)}
+.toggle::after{
+  content:'';position:absolute;
+  width:22px;height:22px;border-radius:50%;background:#fff;
+  top:3px;transition:left .2s;
+  box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.toggle.on::after{left:27px}
+.toggle.off::after{left:3px}
+
+.btn-small-outline{
+  display:inline-flex;align-items:center;
+  padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;
+  border:1.5px solid var(--border);color:var(--text-secondary);
+  background:transparent;cursor:pointer;font-family:var(--font);
+  margin-top:12px;
+}
+
+/* ── Input Fields ── */
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-group + .input-group{margin-top:16px}
+.input-label{font-size:14px;font-weight:600;color:var(--text-secondary)}
+.input-field{
+  width:100%;padding:14px 18px;border-radius:10px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--text);font-size:16px;font-family:var(--font);
+  outline:none;
+}
+.input-field::placeholder{color:var(--muted)}
+.btn-green{
+  margin-top:20px;display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 32px;border-radius:10px;font-size:16px;font-weight:700;
+  background:var(--primary);color:#fff;border:none;
+  cursor:pointer;font-family:var(--font);
+  box-shadow:0 2px 12px rgba(56,161,105,.25);
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-title">Settings</div>
+
+    <div class="nav-item active">
+      <div class="nav-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="6" r="4"/><path d="M2 18c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      Profile
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="4"/><path d="M10 2v2m0 12v2M2 10h2m12 0h2m-2.9-5.7-1.4 1.4M6.3 13.7l-1.4 1.4m0-10.2 1.4 1.4m7.4 7.4 1.4 1.4"/></svg>
+      </div>
+      Appearance
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17v-1a4 4 0 0 0-2-3.5"/><path d="M10 3a3 3 0 0 1 0 5.2"/><circle cx="7" cy="6" r="3"/><path d="M3 17v-1a4 4 0 0 1 4-4h.5"/></svg>
+      </div>
+      Notifications
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="12" height="10" rx="2"/><path d="M8 8V5a2 2 0 0 1 4 0v3"/></svg>
+      </div>
+      Password
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="16" height="12" rx="2"/><path d="m2 6 8 5 8-5"/></svg>
+      </div>
+      Email
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 2"/></svg>
+      </div>
+      About
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="page-title">Settings</div>
+
+    <!-- Profile -->
+    <div class="card">
+      <div class="card-title">Profile</div>
+      <div class="profile-card">
+        <div class="avatar">D</div>
+        <div class="profile-info">
+          <div class="profile-name">Dynamox</div>
+          <div class="profile-handle">@dynamox</div>
+          <button class="btn-outline">Edit Profile</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="card">
+      <div class="card-title">Appearance</div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Dark Mode</div>
+          <div class="toggle-desc">Switch between dark and light themes</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+      <div class="card-title">Notifications</div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Notification Sounds</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Desktop Notifications</div>
+        </div>
+        <div class="toggle off"></div>
+      </div>
+      <button class="btn-small-outline">Request Permission</button>
+    </div>
+
+    <!-- Password -->
+    <div class="card">
+      <div class="card-title">Password</div>
+      <div class="input-group">
+        <label class="input-label">Current Password</label>
+        <input class="input-field" type="password" value="mypassword123">
+      </div>
+      <div class="input-group">
+        <label class="input-label">New Password</label>
+        <input class="input-field" type="password" placeholder="Enter new password">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Confirm Password</label>
+        <input class="input-field" type="password" placeholder="Confirm new password">
+      </div>
+      <button class="btn-green">Change Password</button>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
